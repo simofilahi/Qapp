@@ -1,11 +1,12 @@
 import React, { Component } from "react";
-import { StyleSheet, Dimensions, View } from "react-native";
+import { StyleSheet, Dimensions, View, Button } from "react-native";
 import QRCodeScanner from "react-native-qrcode-scanner";
 
 export default class QRCodeScannerScreen extends Component {
   onSuccess = e => {
     this.props.navigation.navigate("SurveyScreen", {
-        data: e.data
+        data: e.data,
+        scanner: this.scanner
     });
   };
   render() {
@@ -19,6 +20,10 @@ export default class QRCodeScannerScreen extends Component {
             this.scanner = elem;
           }}
           cameraStyle={{ height: Dimensions.get("window").height }}
+        />
+          <Button
+          title={"Cancel"}
+          onPress={() => this.props.navigation.goBack()}
         />
       </View>
     );
