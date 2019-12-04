@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const FIVE_SECONDS = 5000;
+const TWO_SECONDS = 2000;
 
 export default class SplashScreen extends Component {
   componentDidMount() {
     setTimeout(() => {
       this.props.navigation.navigate('HomeScreen');
-    }, FIVE_SECONDS);
+    }, TWO_SECONDS);
   }
   render() {
     return (
       <View style={styles.baseText}>
-        <Text>Splash Screen</Text>
+        <Text style={styles.titleText}>Qapp</Text>
       </View>
     );
   }
@@ -23,10 +23,12 @@ const styles = StyleSheet.create({
         fontSize: 20,
         flex: 1, 
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        backgroundColor: '#2C3E50',
     },
     titleText: {
-      fontSize: 20,
+      fontSize: 60,
       fontWeight: 'bold',
+      color: '#F4D03F'
     },
 });

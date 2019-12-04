@@ -18,8 +18,8 @@ export default class HomeScreen extends Component {
       <View style={styles.baseText}>
         <Text>Hi Collector!</Text>
         <Button
-          title="GETSTARTED"
-          onPress={() => navigate('SurveyScreen')}
+          title="SCAN QR CODE"
+          onPress={() => navigate('QRCodeScreen')}
         />
       </View>
     );
