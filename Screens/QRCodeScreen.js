@@ -9,23 +9,29 @@ export default class QRCodeScannerScreen extends Component {
         scanner: this.scanner
     });
   };
+  static navigationOptions = {
+    header: null
+  };
   render() {
     return (
       <View style={styles.container}>
         <QRCodeScanner
           onRead={this.onSuccess}
           showMarker={true}
+          markerStyle={styles.marker}
           checkAndroid6Permissions={true}
           ref={elem => {
             this.scanner = elem;
           }}
-          cameraStyle={{ height: Dimensions.get("window").height }}
+          cameraStyle= {styles.cameraContainer}
         />
-          <Button
-          title={"Cancel"}
-          onPress={() => this.props.navigation.goBack()}
-        />
-      </View>
+        <View>
+            <Button
+                title={"Cancel"}
+                onPress={() => this.props.navigation.goBack()}
+            />
+        </View>
+       </View>
     );
   }
 }
@@ -36,5 +42,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#F5FCFF"
+  },
+  zeroContainer: {
+    height: 0,
+    flex: 0,
+  },
+  cameraContainer: {
+    height: Dimensions.get('window').height,
+  },
+  marker: {
+      color: 'white'
   }
 });

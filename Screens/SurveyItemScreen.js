@@ -11,9 +11,28 @@ import {
   } from 'react-native';
 
 class SurveyItemScreen extends Component{
+
     render(){
         return(
-            <View></View>
+            <SafeAreaView style={styles.container}>
+                <ScrollView>
+                    <View style={styles.inputContainer}>
+                    <FlatList
+                            data={DATA}
+                            renderItem={({ item }) => (
+                            <Item
+                                id={item.id}
+                                title={item.title}
+                                selected={!!selected.get(item.id)}
+                                onSelect={onSelect}
+                            />
+                            )}
+                            keyExtractor={item => item.id}
+                            extraData={selected}
+                        />
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
         )
     }
 }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 
 const TWO_SECONDS = 2000;
 
@@ -11,7 +11,11 @@ export default class SplashScreen extends Component {
   }
   render() {
     return (
-      <View style={styles.baseText}>
+      <View style={styles.Container}>
+        <Image
+          style={{width: 64, height: 64}}
+          source={require('../Assests/img/survey.png')} 
+        />
         <Text style={styles.titleText}>Qapp</Text>
       </View>
     );
@@ -19,16 +23,16 @@ export default class SplashScreen extends Component {
 }
 
 const styles = StyleSheet.create({
-    baseText: {
+    Container: {
         fontSize: 20,
         flex: 1, 
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: '#2C3E50',
+        backgroundColor: '#FBC02D',
     },
     titleText: {
       fontSize: 60,
       fontWeight: 'bold',
-      color: '#F4D03F'
+      color: '#2C3E50'
     },
 });
