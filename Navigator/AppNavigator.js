@@ -19,9 +19,9 @@ const RootNavigator = createSwitchNavigator(
     SplashScreen: SplashScreen
   }, 
   {
-    initialRouteName: 'SplashScreen'
+    initialRouteName: 'SplashScreen',
   }
 );
 
-const AppContainer = createAppContainer(RootNavigator);
-export default AppContainer;
+const AppNavigator = createAppContainer(RootNavigator);
+export default AppNavigator;
