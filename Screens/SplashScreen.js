@@ -10,11 +10,11 @@ export default class SplashScreen extends Component {
     }, TWO_SECONDS);
   }
   render() {
-    return (
+    return ( 
       <View style={styles.Container}>
         <Image
           style={{width: 64, height: 64}}
-          source={require('../Assests/img/survey.png')} 
+          source={require('../Assests/img/survey.png')}
         />
         <Text style={styles.titleText}>Qapp</Text>
       </View>
