@@ -1,24 +1,27 @@
 import React, { Component } from "react";
 import AppIntroSlider from 'react-native-app-intro-slider';
-import {StyleSheet, View, Text, Image} from 'react-native';
+import {StyleSheet, View, Text, Image, StatusBar} from 'react-native';
+import {Header} from 'native-base'
 
 export default class Sliders extends Component{
     static navigationOptions = {
         header: null
       };
     _renderItem = ({ item }) => {
+      // alert(item.backgroundColor)
         return (
             <View
-            style={{
-                flex: 1,
-                backgroundColor: item.backgroundColor,
-                alignItems: 'center',
-                justifyContent: 'space-around',
-                paddingBottom: 100
-            }}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Image style={styles.image} source={item.image} />
-            <Text style={styles.text}>{item.text}</Text>
+              style={{
+                  flex: 1,
+                  backgroundColor: item.backgroundColor,
+                  alignItems: 'center',
+                  justifyContent: 'space-around',
+                  paddingBottom: 100
+              }}>
+              <StatusBar hidden={true} />
+              <Text style={styles.title}>{item.title}</Text>
+              <Image style={styles.image} source={item.image} />
+              <Text style={styles.text}>{item.text}</Text>
             </View>
     );
     };

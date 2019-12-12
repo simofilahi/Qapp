@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
-
+import { View, StyleSheet, Image, Dimensions, StatusBar, Text } from 'react-native';
 const TWO_SECONDS = 2000;
-const {width, height} = Dimensions.get('screen')
+const {width, height} = Dimensions.get('window')
+
 export default class SplashScreen extends Component {
   static navigationOptions = {
     header: null
@@ -13,13 +13,14 @@ export default class SplashScreen extends Component {
     }, TWO_SECONDS);
   }
   render() {
-    return ( 
+    return (
       <View style={styles.Container}>
-        <Image
-          style={{width: 64, height: 64}}
-          source={require('../Assests/img/survey.png')}
-        />
-        <Text style={styles.titleText}>Qapp</Text>
+          <StatusBar hidden={true} />
+          <Image
+            style={{width: 64, height: 64}}
+            source={require('../Assests/img/survey.png')}
+          />
+          <Text style={styles.titleText}>Qapp</Text>
       </View>
     );
   }
@@ -29,14 +30,14 @@ const styles = StyleSheet.create({
     Container: {
         height: height,
         fontSize: 20,
-        flex: 1, 
+        flex: 0, 
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: '#FBC02D',
+        backgroundColor: 'white',
     },
     titleText: {
-      fontSize: 60,
+      fontSize: 40,
       fontWeight: 'bold',
-      color: '#2C3E50'
+      color: '#3F51B5'
     },
 });

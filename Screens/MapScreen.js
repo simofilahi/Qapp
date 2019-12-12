@@ -1,5 +1,5 @@
 import React, { Component, useState, useEffect } from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View, Dimensions, StatusBar} from 'react-native';
 import MapView, {PROVIDER_GOOGLE} from 'react-native-maps';
 import { Marker } from 'react-native-maps';
 import geolocation from '@react-native-community/geolocation';
@@ -10,8 +10,8 @@ const {width, height} = Dimensions.get('window')
 const SCREEN_WIDTH = width
 const SCREEN_HEIGHT = height
 const ASPECT_RATIO = SCREEN_WIDTH / SCREEN_HEIGHT
-const LATITUDEDELTA = 0.015
-const LONGITUDEDELTA = 0.0121
+const LATITUDEDELTA = 0.0900
+const LONGITUDEDELTA = LATITUDEDELTA * ASPECT_RATIO
 
 export default class MapScreen extends Component {
   static navigationOptions = {
@@ -65,13 +65,14 @@ export default class MapScreen extends Component {
     return (
     <Container>
         <View style={styles.MainContainer}>
+        <StatusBar hidden={true} />
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.mapStyle}
           showsUserLocation={true}
           zoomEnabled={true}
           zoomControlEnabled={true}
-          initialRegion={ this.state.initialRegion}
+          Region={ this.state.initialRegion}
           >
           {/* <Marker
             coordinate={this.state.initialRegion}
