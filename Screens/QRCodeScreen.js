@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, Dimensions, View, Button,TouchableOpacity, Text } from "react-native";
+import { StyleSheet, Dimensions, View, StatusBar,TouchableOpacity, Text } from "react-native";
 import QRCodeScanner from "react-native-qrcode-scanner";
 
 export default class QRCodeScannerScreen extends Component {
@@ -24,6 +24,7 @@ export default class QRCodeScannerScreen extends Component {
   render() {
     return (
       <View style={styles.container}>
+        <StatusBar hidden={true} />
         <QRCodeScanner
           onRead={this.onSuccess}
           fadeIn={true}
@@ -38,7 +39,7 @@ export default class QRCodeScannerScreen extends Component {
         <View style={{width: 200, marginBottom: 20}}>
               <TouchableOpacity
               style={styles.button}
-              // onPress={this.props.navigation.goBack()}
+              onPress={() => this.props.navigation.navigate("HomeScreen")}
             >
               <Text style={styles.Text}>Cancel</Text>
             </TouchableOpacity>
@@ -53,7 +54,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    // backgroundColor: "#F5FCFF"
   },
   zeroContainer: {
     height: 0,
@@ -61,9 +61,10 @@ const styles = StyleSheet.create({
   },
   cameraContainer: {
     height: Dimensions.get('window').height,
+    backfaceVisibility: 'hidden'
   },
   marker: {
-      color: 'green'
+      borderColor:'white',
   },
   button: {
     alignItems: 'center',
