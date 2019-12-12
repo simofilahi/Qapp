@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
-import { Title, Container, Header, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base';
-import { Image } from 'react-native';
+import {Content, Card, CardItem, Text, Button, Body } from 'native-base';
+import {Image} from 'react-native'
+
 export default class App extends Component {
 render() {
+    const {navigate} = this.props
     return (
         <Content >
-            <Card style={{marginLeft: 15, marginRight: 15, marginTop: "10%"}}>
+            <Card style={{marginLeft: 15, marginRight: 15, marginTop: "2%", marginBottom: "2%"}}>
             <CardItem header bordered >
               <Text>Tips</Text>
             </CardItem>
-            <CardItem cardBody>
-              <Image source={{uri: 'Image URL'}} style={{height: 200, width: null, flex: 1}}/>
+            <CardItem cardBody style={{justifyContent: 'center'}}>
+              <Image style={{width: 200, height: 275}}
+                source={require('../Assests/img/homeimg.png')}/>
             </CardItem>
             <CardItem bordered>
               <Body>
@@ -24,22 +27,9 @@ render() {
               </Body>
             </CardItem>
             <CardItem footer bordered style={{flexDirection: "row", justifyContent: "center"}}>
-            <Button primary style={{alignContent: "center"}}onPress={() => navigate('QRCodeScreen')}><Text>Get Started</Text></Button>
+            <Button primary style={{alignContent: "center"}}onPress={() => navigate('Sliders')}><Text>Get Started</Text></Button>
             </CardItem>
           </Card>
-          {/* <Card>
-            <CardItem>
-                <Body>
-                  <Text>Tips</Text>
-                </Body>
-            </CardItem>
-            <CardItem cardBody>
-              <Image source={{uri: 'Image URL'}} style={{height: 200, width: null, flex: 1}}/>
-            </CardItem>
-                <CardItem footer bordered style={{flexDirection: "row", justifyContent: "center"}}>
-                <Button primary style={{alignContent: "center"}}onPress={() => navigate('QRCodeScreen')}><Text>Get Started</Text></Button>
-                </CardItem>
-          </Card> */}
           </Content>
     );
   }

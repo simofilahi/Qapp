@@ -38,7 +38,7 @@ export default class QRCodeScannerScreen extends Component {
         <View style={{width: 200, marginBottom: 20}}>
               <TouchableOpacity
               style={styles.button}
-              onPress={this.onPress}
+              // onPress={this.props.navigation.goBack()}
             >
               <Text style={styles.Text}>Cancel</Text>
             </TouchableOpacity>

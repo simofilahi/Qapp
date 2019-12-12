@@ -1,25 +1,29 @@
 import React, { Component } from 'react';
 import { Container, Header, Left, Body, Right, Button, Icon, Title, Transparent } from 'native-base';
 import {StyleSheet, View} from 'react-native';
+import { withNavigation } from 'react-navigation';
 
-export default class MyHeader extends Component {
+class MyHeader extends Component {
   render() {
-    const {title, backarrow} = this.props;
-    console.log(backarrow)
-    console.log(title)
+    const {title, backarrow, navigate} = this.props;
+    let marginValue;
+    if (backarrow)
+      marginValue = 0;
+    else
+      marginValue = 10;
     return (
-        <Header>
+         <Header>
           {backarrow ? <Left>
-              <Button transparent >
+              <Button transparent onPress={() => this.props.navigation.navigate('HomeScreen')}>
                 <Icon name='arrow-back' />
               </Button>
           </Left>: null }
           <Body>
-            <Title>{title}</Title>
+            <Title style={{marginLeft: marginValue}}>{title}</Title>
           </Body>
           <Right>
-            <Button transparent>
-              <Icon name='menu' />
+          <Button transparent onPress={() => alert("hello")}>
+              <Icon name='more' />
             </Button>
           </Right>
         </Header>
@@ -27,8 +31,4 @@ export default class MyHeader extends Component {
   }
 }
 
-const styles = StyleSheet.create({
-    TextStyle: {
-        marginLeft: 20,
-    }
-});
+export default withNavigation(MyHeader);

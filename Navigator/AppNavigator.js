@@ -6,6 +6,8 @@ import SplashScreen from '../Screens/SplashScreen';
 import QRCodeScreen from '../Screens/QRCodeScreen';
 import AboutUs from '../Screens/AboutUs';
 import MapScreen from '../Screens/MapScreen';
+import Sliders from '../Screens/Sliders';
+import MyFooter from '../Screens/Footer'
 
 const RootStack = createStackNavigator(
   {
@@ -14,6 +16,8 @@ const RootStack = createStackNavigator(
     QRCodeScreen: QRCodeScreen,
     AboutUs: AboutUs,
     MapScreen: MapScreen,
+    Sliders: Sliders,
+    MyFooter: MyFooter,
   }
 );
 

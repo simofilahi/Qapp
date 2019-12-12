@@ -15,7 +15,7 @@ import Reinput from 'reinput'
 
 export default class SurveyScreen extends Component {
   static navigationOptions = {
-    header: () => <MyHeader title={"Survey"} backarrow={true} />,
+    header: null
   };
   constructor(props) {
     super(props);
@@ -34,27 +34,15 @@ export default class SurveyScreen extends Component {
     const scanner = this.props.navigation.getParam("scanner", () => false);
     this.setState({ qrCodeData: qrCodeData, scanner: scanner });
     const data = this.state.qrCodeData;
-    console.log(data)
+     console.log(data)
   }
   render() {
     const data = this.state.qrCodeData;
+    const {navigate} = this.props.navigation;
+
     return (
-      // <View>
-      //   <FlatList
-      //     data={this.state.qrCodeData}
-      //     renderItem={({item})=> (
-      //       <View style={styles.listItem}>
-      //         <Text>{item}</Text>
-      //         <Reinput 
-      //           placeholder='Typing ...' 
-      //           height={30}
-      //         />
-      //       </View>
-      //     )}
-      //   />
-      // <Container>
-      // <Content >
       <Container>
+        <MyHeader title={"Survey"} backarrow={true} navigate={navigate}/>
         <Content>
           <List
             dataArray={data}

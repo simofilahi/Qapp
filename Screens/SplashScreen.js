@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 
 const TWO_SECONDS = 2000;
-
+const {width, height} = Dimensions.get('screen')
 export default class SplashScreen extends Component {
+  static navigationOptions = {
+    header: null
+  };
   componentDidMount() {
     setTimeout(() => {
       this.props.navigation.navigate('HomeScreen');
@@ -24,6 +27,7 @@ export default class SplashScreen extends Component {
 
 const styles = StyleSheet.create({
     Container: {
+        height: height,
         fontSize: 20,
         flex: 1, 
         justifyContent: "center",
