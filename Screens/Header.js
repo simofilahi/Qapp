@@ -14,7 +14,7 @@ class MyHeader extends Component {
     return (
          <Header>
           {backarrow ? <Left>
-              <Button transparent onPress={() => this.props.navigation.navigate('HomeScreen')}>
+              <Button transparent onPress={() => this.props.navigation.goBack()}>
                 <Icon name='arrow-back' />
               </Button>
           </Left>: null }

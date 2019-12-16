@@ -13,7 +13,7 @@ export default class MyFooter extends Component {
                 <Text>Maps</Text>
               </Button>
               <Button vertical onPress={() => {
-                navigate('QRCodeScreen')}}>
+                navigate('SurveyScreen')}}>
                 <Icon name="camera" />
                 <Text>QR Scanner</Text>
               </Button>

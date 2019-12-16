@@ -1,17 +1,11 @@
 import React, { Component } from 'react';
 import {
-    StyleSheet,
-    // Button,
-    // View,
-    // SafeAreaView,
-    // Text,
-    // Alert,
-    // FlatList,
+    StyleSheet
   } from 'react-native';
-  import { Form, Textarea, List,ListItem,items, Title, Container, Header, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base';
-  import MyHeader from './Header';
-import { TextInput } from 'react-native-gesture-handler';
-import Reinput from 'reinput'
+import { Form, Textarea, List,ListItem,items, Title, Container, Header, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base';
+import MyHeader from './Header';
+import SurveyItemScreen from './SurveyItemScreen'
+import Data from './data'
 
 export default class SurveyScreen extends Component {
   static navigationOptions = {
@@ -36,13 +30,23 @@ export default class SurveyScreen extends Component {
   //   const data = this.state.qrCodeData;
   //    console.log(data)
   // }
-  
+  constructor(props){
+    super(props)
+    this.state = {
+      data: [],
+    }
+    
+}
+  componentDidMount(){
+    this.setState({data: Data})
+  }
   render() {
-    const data = this.state.qrCodeData;
+    // const data = this.state.qrCodeData;
     const {navigate} = this.props.navigation;
 
+    const {data} = this.state
     return (
-      <Container>
+      <Container style={{flex: 1, justifyContent: 'center'}}>
         <MyHeader title={"Survey"} backarrow={true} navigate={navigate}/>
         <Content>
           <List
@@ -50,50 +54,29 @@ export default class SurveyScreen extends Component {
             renderRow={(item, index) => {
                 return (
                   <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
-                    <CardItem header bordered >
-                          <Text>{item}</Text>
-                          </CardItem>
-                          <CardItem body bordered>
-                            <Body>
-                              <Form style={{width: '100%'}}>
-                                <Textarea style={{width: '100%'}}rowSpan={5} bordered placeholder="Textarea" />
-                              </Form>
-                            </Body>
+                    <CardItem header bordered>
+                          <Text>{item.title}</Text>
+                        <Right>
+                          <Icon name="arrow-forward" 
+                                style={{color: 'black', marginRight: '-25%'}}
+                                onPress = {
+                                  () => navigate('SurveyItemScreen', 
+                                    {item}
+                                  )
+                               }
+                          />
+                        </Right>
                     </CardItem>
                   </Card>
                 )
             }}
           >
-          <ListItem>
-          <Button primary style={{alignContent: "center"}}onPress={() => navigate('QRCodeScreen')}><Text>Next</Text></Button>
-          </ListItem>
           </List>
+          <Button disabled>
+              <Text>Submit</Text>
+          </Button>
         </Content>
       </Container>
-          // {this.state.qrCodeData.map((item, index) => {
-          //   return (
-          //       <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "10%"}}>
-          //         <CardItem header bordered >
-          //           <Text>{item}</Text>
-          //         </CardItem>
-          //         <CardItem body bordered>
-          //           <Body>
-          //             <Text>
-          //               NativeBase is a free and open source framework that enable
-          //               developers to build
-          //               high-quality mobile apps using React Native iOS and Android
-          //               apps
-          //               with a fusion of ES6.
-          //             </Text>
-          //           </Body>
-          //         </CardItem>
-          //         <CardItem footer bordered style={{flexDirection: "row", justifyContent: "center"}}>
-          //         <Button primary style={{alignContent: "center"}}onPress={() => navigate('QRCodeScreen')}><Text>Get Started</Text></Button>
-          //         </CardItem>
-          //       </Card>
-          //   )})}
-      //  </Content>
-      // </Container>
     );
   }
 }

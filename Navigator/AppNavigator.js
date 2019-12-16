@@ -8,12 +8,14 @@ import AboutUs from '../Screens/AboutUs';
 import MapScreen from '../Screens/MapScreen';
 import Sliders from '../Screens/Sliders';
 import MyFooter from '../Screens/Footer'
+import SurveyItemScreen from '../Screens/SurveyItemScreen'
 
 const RootStack = createStackNavigator(
   {
     HomeScreen: HomeScreen,
     SurveyScreen: SurveyScreen,
     QRCodeScreen: QRCodeScreen,
+    SurveyItemScreen: SurveyItemScreen,
     AboutUs: AboutUs,
     MapScreen: MapScreen,
     Sliders: Sliders,
