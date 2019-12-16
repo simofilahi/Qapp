@@ -17,25 +17,26 @@ export default class SurveyScreen extends Component {
   static navigationOptions = {
     header: null
   };
-  constructor(props) {
-    super(props);
-    this.state = { 
-      qrCodeData: " ", 
-      scanner: undefined 
-    };
-  }
-  componentWillUnmount(){
-    // this.scanner.reactivate();
-    this.setState({ qrCodeData: "", scanner: undefined });
-    this.props.navigation.popToTop()
-  }
-  componentDidMount() {
-    const qrCodeData = this.props.navigation.getParam("data", "No data read");
-    const scanner = this.props.navigation.getParam("scanner", () => false);
-    this.setState({ qrCodeData: qrCodeData, scanner: scanner });
-    const data = this.state.qrCodeData;
-     console.log(data)
-  }
+  // constructor(props) {
+  //   super(props);
+  //   this.state = { 
+  //     qrCodeData: " ", 
+  //     scanner: undefined 
+  //   };
+  // }
+  // componentWillUnmount(){
+  //   // this.scanner.reactivate();
+  //   this.setState({ qrCodeData: "", scanner: undefined });
+  //   this.props.navigation.popToTop()
+  // }
+  // componentDidMount() {
+  //   const qrCodeData = this.props.navigation.getParam("data", "No data read");
+  //   const scanner = this.props.navigation.getParam("scanner", () => false);
+  //   this.setState({ qrCodeData: qrCodeData, scanner: scanner });
+  //   const data = this.state.qrCodeData;
+  //    console.log(data)
+  // }
+  
   render() {
     const data = this.state.qrCodeData;
     const {navigate} = this.props.navigation;

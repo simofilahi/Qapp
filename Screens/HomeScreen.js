@@ -1,9 +1,4 @@
 import React, { Component } from 'react';
-import {
-    StyleSheet,
-    View,
-    Header,
-} from 'react-native';
 import MyHeader from './Header';
 import MyFooter from './Footer';
 import HomeBody from './HomeBody';
