@@ -4,6 +4,7 @@ import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-
 import { TextInput } from 'react-native-gesture-handler';
 import TimePicker from "react-native-24h-timepicker";
 import { Slider, Block } from 'galio-framework';
+// import PickerCheckBox from 'react-native-picker-checkbox';
 import { 
     Form,
     Textarea,
@@ -30,6 +31,8 @@ import {
     View,
     Switch
   } from 'native-base';
+import SectionedMultiSelect  from 'react-native-sectioned-multi-select'
+import NumericInput from 'react-native-numeric-input'
 
 const STRING_INPUT = 0
 const TEXTAREA_INPUT = 1
@@ -46,26 +49,64 @@ const RADIO_INPUT = 11
 const SLIDER_FROMZERO_INPUT = 12
 const SLIDER_RANGE_INPUT = 13
 
-SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, state}) => {
+SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, onSelectedItemsChange,onchangeNumericInput, state}) => {
     
     const {type} = item
-    const {selected2} = state
 
+    // console.log(type)
     switch(type){
         case STRING_INPUT:
           return (
-            <Item regular>
-              <Input placeholder="Typing..." onChange={_onChange}/>
-            </Item>
+            <View>
+                <Item regular>
+                <Input placeholder="Typing..." onChange={_onChange}/>
+                </Item>
+            </View>
           )
+        case TEXTAREA_INPUT:
+            return (
+                <View>
+                    <TextInput style={{width: '100%'}} rowSpan={30} bordered placeholder="Typing..." />
+                </View>
+            )
         case INTEGER_INPUT:
           return (
-            <Item regular>
-              <Input  keyboardType={'numeric'} placeholder="Typing..." />
-            </Item>
+            <View>
+                <NumericInput 
+                    value={state.value}
+                    onChange={onchangeNumericInput}
+                    totalWidth={200} 
+                    totalHeight={50} 
+                    iconSize={25}
+                    step={1}
+                    valueType='real'
+                    rounded 
+                    textColor='#B0228C' 
+                    iconStyle={{ color: 'white' }} 
+                    rightButtonBackgroundColor='#EA3788' 
+                    leftButtonBackgroundColor='#E56B70'
+                />
+            </View>
           )
         case FLOAT_INPUT:
-          return <Text>Nothing</Text>
+          return (
+            <View>
+                <NumericInput 
+                    value={state.value}
+                    onChange={onchangeNumericInput}
+                    totalWidth={200} 
+                    totalHeight={50} 
+                    iconSize={25}
+                    step={0.5}
+                    valueType='real'
+                    rounded 
+                    textColor='#B0228C' 
+                    iconStyle={{ color: 'white' }} 
+                    rightButtonBackgroundColor='#EA3788' 
+                    leftButtonBackgroundColor='#E56B70'
+                />
+            </View>
+          )
         case BOOLEAN_INPUT:
           return (
             <View>
@@ -97,19 +138,19 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, state}) => {
         case TIME_INPUT:
           return (
             <View>
-               <TouchableOpacity
-                //   onPress={() => this.TimePicker.open()}
+               {/* <TouchableOpacity
+                  onPress={() => TimePicker.open()}
                   placeHolderText="Select date"
                 >
                 </TouchableOpacity>
-                {/* <Text style={styles.text}>{this.state.time}</Text> */}
+                <Text style={styles.text}>{state.time}</Text>
                 <TimePicker
-                //   ref={ref => {
-                //     this.TimePicker = ref;
-                //   }}
-                //   onCancel={() => this.onCancel()}
-                //   onConfirm={(hour, minute) => this.onConfirm(hour, minute)}
-                />
+                  ref={ref => {
+                    TimePicker = ref;
+                  }}
+                  onCancel={() => onCancel}
+                  onConfirm={(hour, minute) => onConfirm(hour, minute)}
+                /> */}
             </View>
           )
         case DROPDROWN_SINGLECHOISE_INPUT:
@@ -121,7 +162,7 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, state}) => {
                 placeholder="Select your SIM"
                 placeholderStyle={{ color: "#bfc6ea" }}
                 placeholderIconColor="#007aff"
-                selectedValue={selected2}
+                selectedValue={state.selected2}
                 onValueChange={onValueChange2}
               >
                 <Picker.Item label="none" value="key0" />
@@ -133,15 +174,52 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, state}) => {
               </Picker>
           )
         case DROPDROWN_MULTIPLECHOISES_INPUT:
-          return <Text>Nothing</Text>
+          return (
+            <View>
+                <SectionedMultiSelect
+                    items={item.options}
+                    showRemoveAll={true}
+                    showCancelButton = {true}
+                    modalSupportedOrientations = {['landscape', 'portrait']}
+                    uniqueKey={item.options.id}
+                    subKey="children"
+                    selectText="Choose some things..."
+                    showDropDowns={true}
+                    readOnlyHeadings={true}
+                    onSelectedItemsChange={() => alert("clicked")}
+                    onConfirm = {() => alert("clicked2")}
+                    selectedItems={state.selectedItems}
+                />
+            </View>
+          )
         case CHECKBOX_INPUT:
-          return ( <RadioForm
-                  radio_props={item}
-                  initial={0}
-                  onPress={(value) => alert('still nothing yet here')}
-                />)
+            return (
+                <View>
+                  <Text>Hello</Text>
+                    {/* <PickerCheckBox
+                        data={item.options}
+                        headerComponent={<Text style={{fontSize:25}} >items</Text>}
+                        // OnConfirm={(pItems) => this.handleConfirm(pItems)}
+                        ConfirmButtonTitle='OK'
+                        DescriptionField='itemDescription'
+                        KeyField='itemKey'
+                        placeholder='select some items'
+                        arrowColor='#FFD740'
+                        arrowSize={10}
+                        placeholderSelectedItems ='$count selected item(s)'
+                    /> */}
+                </View>
+            )
         case RADIO_INPUT:
-          return <Text>Nothing</Text>
+            return ( 
+                <View>
+                  <RadioForm
+                    radio_props={item.options}
+                    initial={0}
+                    onPress={(value) => alert('still nothing yet here')}
+                  />
+                </View>
+         )
         case SLIDER_FROMZERO_INPUT:
           return (
             <View>
@@ -158,8 +236,6 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, state}) => {
           )
         case SLIDER_RANGE_INPUT:
           return <Text>Nothing</Text>
-        case TEXTAREA_INPUT:
-          return <TextInput style={{width: '100%'}} rowSpan={10} bordered placeholder="Typing..." />
       }
 }
 
