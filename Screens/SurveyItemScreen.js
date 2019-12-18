@@ -91,7 +91,11 @@ class SurveyItemScreen extends Component{
       this.setState({answer : [...this.state.answer, obj]})
     }
     _onChange = () => {
-        console.log("hello");
+      const obj = {
+        id: '10',
+        value: 'hello'
+      }
+      this.setState({answer : [...this.state.answer, obj]})
     }
     _onSubmit = () => 
     {
