@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {
-    StyleSheet
+    StyleSheet,
+    TouchableOpacity
   } from 'react-native';
 import { Form, Textarea, List,ListItem,items, Title, Container, Header, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base';
 import MyHeader from './Header';
@@ -34,17 +35,29 @@ export default class SurveyScreen extends Component {
     super(props)
     this.state = {
       data: [],
+      answer: []
     }
     
 }
   componentDidMount(){
     this.setState({data: Data})
   }
+  get_value = (obj) => {
+    console.log(obj)
+    this.setState({answer : [...this.state.answer, obj]})
+  }
+  componentDidUpdate(){
+    const {answer} = this.state
+
+    console.log(JSON.stringify(answer))
+    console.log("updated")
+  }
   render() {
     // const data = this.state.qrCodeData;
     const {navigate} = this.props.navigation;
 
-    const {data} = this.state
+    const data = this.state.data.parts
+    // alert(JSON.stringify(data))
     return (
       <Container style={{flex: 1, justifyContent: 'center'}}>
         <MyHeader title={"Survey"} backarrow={true} navigate={navigate}/>
@@ -53,28 +66,37 @@ export default class SurveyScreen extends Component {
             dataArray={data}
             renderRow={(item, index) => {
                 return (
-                  <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
-                    <CardItem header bordered>
+                  <TouchableOpacity  onPress = {
+                    () => navigate('SurveyItemScreen', 
+                    {item: item, get_value: this.get_value}
+                    )
+                 }> 
+                  <Card pointerEvents='none' key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
+                    
+                    <CardItem header bordered >
                           <Text>{item.title}</Text>
                         <Right>
                           <Icon name="arrow-forward" 
                                 style={{color: 'black', marginRight: '-25%'}}
                                 onPress = {
                                   () => navigate('SurveyItemScreen', 
-                                    {item}
+                                  {item: item, get_value: this.get_value}
                                   )
                                }
                           />
                         </Right>
                     </CardItem>
                   </Card>
+                </TouchableOpacity>
                 )
             }}
           >
           </List>
-          <Button disabled>
+          {true == 1 ? <Button disabled>
               <Text>Submit</Text>
-          </Button>
+          </Button> : <Button >
+              <Text>Submit</Text>
+          </Button>}
         </Content>
       </Container>
     );
