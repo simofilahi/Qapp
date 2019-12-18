@@ -28,26 +28,9 @@ import {
   View,
   Switch
 } from 'native-base';
-import { Slider, Block } from 'galio-framework';
 import MyHeader from './Header';
-import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button'
-import { TextInput } from 'react-native-gesture-handler';
-import TimePicker from "react-native-24h-timepicker";
+import SurveyAnswerInput from './SurveyAnswerInput'
 
-const STRING_INPUT = 0
-const TEXTAREA_INPUT = 1
-const INTEGER_INPUT = 2
-const FLOAT_INPUT = 3
-const BOOLEAN_INPUT = 4
-const DATETIME_INPUT = 5
-const DATE_INPUT = 6
-const TIME_INPUT = 7
-const DROPDROWN_SINGLECHOISE_INPUT = 8
-const DROPDROWN_MULTIPLECHOISES_INPUT = 9
-const CHECKBOX_INPUT = 10
-const RADIO_INPUT = 11
-const SLIDER_FROMZERO_INPUT = 12
-const SLIDER_RANGE_INPUT = 13
 
 class SurveyItemScreen extends Component{
     constructor(props){
@@ -91,11 +74,12 @@ class SurveyItemScreen extends Component{
       this.setState({answer : [...this.state.answer, obj]})
     }
     _onChange = () => {
-      const obj = {
-        id: '10',
-        value: 'hello'
-      }
-      this.setState({answer : [...this.state.answer, obj]})
+      console.log("yoyoyoyo")
+      // const obj = {
+      //   id: '10',
+      //   value: 'hello'
+      // }
+      // this.setState({answer : [...this.state.answer, obj]})
     }
     _onSubmit = () => 
     {
@@ -105,123 +89,9 @@ class SurveyItemScreen extends Component{
       const {params} = this.props.navigation.state
       const {answer} = this.state
 
-      params.get_value(answer)
-    }
-    typeinputrender = (type, item) => {
-      // const { params} = this.props.navigation.state
-      // params.get_value(value, item)
-    //  alert(JSON.stringify(params))
-      switch(type){
-        case STRING_INPUT:
-          return (
-            <Item regular>
-              <Input placeholder="Typing..." onChange={this._onChange}/>
-            </Item>
-          )
-        case INTEGER_INPUT:
-          return (
-            <Item regular>
-              <Input  keyboardType={'numeric'} placeholder="Typing..." />
-            </Item>
-          )
-        case FLOAT_INPUT:
-          return <Text>Nothing</Text>
-        case BOOLEAN_INPUT:
-          return (
-            <View>
-              <Left>
-              <Switch value={false} />
-              </Left>
-             
-            </View>
-          )
-        case DATETIME_INPUT:
-          return <Text>Nothing</Text>
-        case DATE_INPUT:
-          return (
-            <DatePicker
-              defaultDate={new Date(2018, 4, 4)}
-              minimumDate={new Date(2018, 1, 1)}
-              maximumDate={new Date(2018, 12, 31)}
-              locale={"en"}
-              timeZoneOffsetInMinutes={undefined}
-              modalTransparent={false}
-              animationType={"fade"}
-              androidMode={"default"}
-              placeHolderText="Select date"
-              textStyle={{ color: "green" }}
-              placeHolderTextStyle={{ color: "#d3d3d3" }}
-              onDateChange={this.setDate}
-              disabled={false}
-            />
-          )
-        case TIME_INPUT:
-          return (
-            <View>
-               <TouchableOpacity
-                  onPress={() => this.TimePicker.open()}
-                  placeHolderText="Select date"
-                >
-                </TouchableOpacity>
-                <Text style={styles.text}>{this.state.time}</Text>
-                <TimePicker
-                  ref={ref => {
-                    this.TimePicker = ref;
-                  }}
-                  onCancel={() => this.onCancel()}
-                  onConfirm={(hour, minute) => this.onConfirm(hour, minute)}
-                />
-            </View>
-          )
-        case DROPDROWN_SINGLECHOISE_INPUT:
-          return (
-            <Picker
-                mode="dropdown"
-                iosIcon={<Icon name="arrow-down" />}
-                style={{ width: undefined }}
-                placeholder="Select your SIM"
-                placeholderStyle={{ color: "#bfc6ea" }}
-                placeholderIconColor="#007aff"
-                selectedValue={this.state.selected2}
-                onValueChange={this.onValueChange2}
-              >
-                <Picker.Item label="none" value="key0" />
-                <Picker.Item label="Wallet" value="key1" />
-                <Picker.Item label="ATM Card" value="key2" />
-                <Picker.Item label="Debit Card" value="key3" />
-                <Picker.Item label="Credit Card" value="key4" />
-                <Picker.Item label="Net Banking" value="key5" />
-              </Picker>
-          )
-        case DROPDROWN_MULTIPLECHOISES_INPUT:
-          return <Text>Nothing</Text>
-        case CHECKBOX_INPUT:
-          return ( <RadioForm
-                  radio_props={item}
-                  initial={0}
-                  onPress={(value) => alert('still nothing yet here')}
-                />)
-        case RADIO_INPUT:
-          return <Text>Nothing</Text>
-        case SLIDER_FROMZERO_INPUT:
-          return (
-            <View>
-              <Block flex>
-                <Slider
-                  activeColor='blue'
-                  maximumValue={10}
-                  value={0}
-                  step ={1}
-                  onValueChange={() => <View><Text>1</Text></View>}
-                />
-            </Block>
-            </View>
-          )
-        case SLIDER_RANGE_INPUT:
-          return <Text>Nothing</Text>
-        case TEXTAREA_INPUT:
-          return <TextInput style={{width: '100%'}} rowSpan={10} bordered placeholder="Typing..." />
-      }
+      answer.forEach(element => {
+        params.get_value(element)
+      });
     }
     loaddata = (loaded, navigate, questions) => {
         if (loaded) {
@@ -239,7 +109,15 @@ class SurveyItemScreen extends Component{
                                 <CardItem body bordered>
                                   <Body>
                                     <Form style={{width: '100%'}}>
-                                      {this.typeinputrender(item.type, item)}
+                                      <SurveyAnswerInput 
+                                        item={item}
+                                        _onChange={this._onChange}
+                                        onCancel={this.onCancel}
+                                        setDate={this.setDate}
+                                        onValueChange2={this.onValueChange2}
+                                        onConfirm={this.onConfirm}
+                                        state={this.state}
+                                      />
                                     </Form>
                                   </Body>
                           </CardItem>

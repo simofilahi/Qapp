@@ -43,14 +43,14 @@ export default class SurveyScreen extends Component {
     this.setState({data: Data})
   }
   get_value = (obj) => {
-    console.log(obj)
+    // console.log(obj)
     this.setState({answer : [...this.state.answer, obj]})
   }
   componentDidUpdate(){
     const {answer} = this.state
 
     console.log(JSON.stringify(answer))
-    console.log("updated")
+    // console.log("updated")
   }
   render() {
     // const data = this.state.qrCodeData;
@@ -68,7 +68,7 @@ export default class SurveyScreen extends Component {
                 return (
                   <TouchableOpacity  onPress = {
                     () => navigate('SurveyItemScreen', 
-                    {item: item, get_value: this.get_value}
+                      {item: item, get_value: this.get_value}
                     )
                  }> 
                   <Card pointerEvents='none' key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
