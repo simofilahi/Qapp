@@ -43,6 +43,7 @@ class SurveyItemScreen extends Component{
         selected2: 'none',
         date: new Date(),
         time: "",
+        value: "",
       }
     }
     static navigationOptions = {
@@ -73,19 +74,20 @@ class SurveyItemScreen extends Component{
       }
       this.setState({answer : [...this.state.answer, obj]})
     }
-    _onChange = () => {
-      console.log("yoyoyoyo")
-      // const obj = {
-      //   id: '10',
-      //   value: 'hello'
-      // }
-      // this.setState({answer : [...this.state.answer, obj]})
+    _onChange = (id, value) => {
+      console.log(id)
+      console.log(value)
+      const obj = {
+        id: id,
+        value: value
+      }
+      this.setState({answer : [...this.state.answer, obj]})
     }
     _onSubmit = () => 
     {
       // const {answer} = this.state.answer
       // console.log(answer)
-      console.log("hi")
+      // console.log("hi")
       const {params} = this.props.navigation.state
       const {answer} = this.state
 
@@ -96,38 +98,42 @@ class SurveyItemScreen extends Component{
     loaddata = (loaded, navigate, questions) => {
         if (loaded) {
           return (
+            <Container style={{backgroundColor: '#2196F3'}}>
             <Content>
               <MyHeader title={"SurveyAnswers"} backarrow={true} navigate={navigate}/>
                 <List
                   dataArray={questions}
                   renderRow={(item, index) => {
                       return (
-                        <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
-                          <CardItem header bordered >
-                                <Text>{item.question}</Text>
-                                </CardItem>
-                                <CardItem body bordered>
-                                  <Body>
-                                    <Form style={{width: '100%'}}>
-                                      <SurveyAnswerInput 
-                                        item={item}
-                                        _onChange={this._onChange}
-                                        onCancel={this.onCancel}
-                                        setDate={this.setDate}
-                                        onValueChange2={this.onValueChange2}
-                                        onConfirm={this.onConfirm}
-                                        state={this.state}
-                                      />
-                                    </Form>
-                                  </Body>
-                          </CardItem>
-                        </Card>
+                        <View>
+                          <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
+                            <CardItem header bordered >
+                                  <Text>{item.question}</Text>
+                                  </CardItem>
+                                  <CardItem body bordered>
+                                    <Body>
+                                      <Form style={{width: '100%'}}>
+                                        <SurveyAnswerInput 
+                                          item={item}
+                                          _onChange={this._onChange}
+                                          onCancel={this.onCancel}
+                                          setDate={this.setDate}
+                                          onValueChange2={this.onValueChange2}
+                                          onConfirm={this.onConfirm}
+                                          state={this.state}
+                                        />
+                                      </Form>
+                                    </Body>
+                            </CardItem>
+                          </Card>
+                        </View>
                         )
                   }}
               >
               </List>
               <Button primary style={{alignContent: "center"}}onPress={this._onSubmit}><Text>Done</Text></Button>
             </Content>
+            </Container>
           )
         }
       else{

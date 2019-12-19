@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import {TouchableOpacity,StyleSheet} from 'react-native';
+import {TouchableOpacity,StyleSheet, ScrollView} from 'react-native';
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
 import { TextInput } from 'react-native-gesture-handler';
 import TimePicker from "react-native-24h-timepicker";
 import { Slider, Block } from 'galio-framework';
-// import PickerCheckBox from 'react-native-picker-checkbox';
+import MutiSlider from '@ptomasroos/react-native-multi-slider';
 import { 
     Form,
     Textarea,
@@ -52,21 +52,41 @@ const SLIDER_RANGE_INPUT = 13
 SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, onSelectedItemsChange,onchangeNumericInput, state}) => {
     
     const {type} = item
+    const id = item.name
 
-    // console.log(type)
+    // console.log('id ==> ')
+    // alert(id)
     switch(type){
         case STRING_INPUT:
           return (
             <View>
                 <Item regular>
-                <Input placeholder="Typing..." onChange={_onChange}/>
+                  <Input 
+                    placeholder="Typing..."
+                    // value={state.value}
+                    // onChange={ () =>
+                    //   {
+                    //     console.log(id)
+                    //     // _onChange()
+                    //   }
+                    onChangeText={(text) => {
+                      _onChange(id, text)
+                    }} 
+                  />
                 </Item>
             </View>
           )
         case TEXTAREA_INPUT:
             return (
                 <View>
-                    <TextInput style={{width: '100%'}} rowSpan={30} bordered placeholder="Typing..." />
+                    <TextInput 
+                      style={{width: '100%'}} 
+                      rowSpan={30} 
+                      placeholder="Typing..." 
+                      onChange = {() => 
+                        console.log(id)
+                      }
+                    />
                 </View>
             )
         case INTEGER_INPUT:
@@ -74,7 +94,8 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, onSelectedItemsC
             <View>
                 <NumericInput 
                     value={state.value}
-                    onChange={onchangeNumericInput}
+                    // onChange={onchangeNumericInput}
+                    onChangeText={(text) => onchangeNumericInput(text)}
                     totalWidth={200} 
                     totalHeight={50} 
                     iconSize={25}
@@ -235,7 +256,12 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, onSelectedItemsC
             </View>
           )
         case SLIDER_RANGE_INPUT:
-          return <Text>Nothing</Text>
+          return (
+            <ScrollView scrollEnabled={true}>
+              <MutiSlider
+              />
+            </ScrollView>
+          )
       }
 }
 

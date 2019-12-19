@@ -1,9 +1,30 @@
 import React, { Component } from 'react';
 import {
     StyleSheet,
-    TouchableOpacity
+    TouchableOpacity,
+    FlatList,
+    ScrollView,
+    View
   } from 'react-native';
-import { Form, Textarea, List,ListItem,items, Title, Container, Header, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base';
+import {Form,
+    Textarea,
+    List,
+    ListItem,
+    items,
+    Title,
+    Container,
+    Header,
+    Content,
+    Card,
+    CardItem,
+    Thumbnail,
+    Text,
+    Button,
+    Icon,
+    Left,
+    Body,
+    Right
+ } from 'native-base';
 import MyHeader from './Header';
 import SurveyItemScreen from './SurveyItemScreen'
 import Data from './data'
@@ -52,6 +73,14 @@ export default class SurveyScreen extends Component {
     console.log(JSON.stringify(answer))
     // console.log("updated")
   }
+  renderRow ({ item }) {
+    return (
+      <ListItem
+        renderRow={this._rendercard}
+        onPress={() => alert(item.title)}
+      />
+    )
+  }
   render() {
     // const data = this.state.qrCodeData;
     const {navigate} = this.props.navigation;
@@ -59,11 +88,19 @@ export default class SurveyScreen extends Component {
     const data = this.state.data.parts
     // alert(JSON.stringify(data))
     return (
-      <Container style={{flex: 1, justifyContent: 'center'}}>
+      <Container style={{flex: 1, justifyContent: 'center', backgroundColor: '#2196F3'}}>
         <MyHeader title={"Survey"} backarrow={true} navigate={navigate}/>
         <Content>
+        {/* <List>
+          <FlatList
+            data={data}
+            renderItem={this.renderRow}
+            keyExtractor={item => item.id}
+          />
+        </List> */}
           <List
             dataArray={data}
+            keyExtractor = {(item, index) => index.toString()}
             renderRow={(item, index) => {
                 return (
                   <TouchableOpacity  onPress = {
@@ -72,7 +109,6 @@ export default class SurveyScreen extends Component {
                     )
                  }> 
                   <Card pointerEvents='none' key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
-                    
                     <CardItem header bordered >
                           <Text>{item.title}</Text>
                         <Right>
@@ -92,11 +128,13 @@ export default class SurveyScreen extends Component {
             }}
           >
           </List>
-          {true == 1 ? <Button disabled>
-              <Text>Submit</Text>
-          </Button> : <Button >
-              <Text>Submit</Text>
-          </Button>}
+          <View style={{alignSelf: 'center'}}>
+            {true == 1 ? <Button disabled>
+                <Text>Submit</Text>
+            </Button> : <Button >
+                <Text>Submit</Text>
+            </Button>}
+          </View>
         </Content>
       </Container>
     );
