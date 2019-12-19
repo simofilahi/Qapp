@@ -63,12 +63,6 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, onSelectedItemsC
                 <Item regular>
                   <Input 
                     placeholder="Typing..."
-                    // value={state.value}
-                    // onChange={ () =>
-                    //   {
-                    //     console.log(id)
-                    //     // _onChange()
-                    //   }
                     onChangeText={(text) => {
                       _onChange(id, text)
                     }} 
@@ -78,14 +72,14 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, onSelectedItemsC
           )
         case TEXTAREA_INPUT:
             return (
-                <View>
+                <View >
                     <TextInput 
                       style={{width: '100%'}} 
                       rowSpan={30} 
                       placeholder="Typing..." 
-                      onChange = {() => 
-                        console.log(id)
-                      }
+                      onChangeText={(text) => {
+                        _onChange(id, text)
+                      }} 
                     />
                 </View>
             )
@@ -94,8 +88,9 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, onSelectedItemsC
             <View>
                 <NumericInput 
                     value={state.value}
-                    // onChange={onchangeNumericInput}
-                    onChangeText={(text) => onchangeNumericInput(text)}
+                    onChangeText={(text) => {
+                      _onChange(id, text)
+                    }}
                     totalWidth={200} 
                     totalHeight={50} 
                     iconSize={25}

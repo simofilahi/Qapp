@@ -161,7 +161,8 @@ export default  Data = {
                "name":"2",
                "question":"Votre nom ?",
                "type":1,
-               "options":[ 
+               "options":[
+                  
                ]
             },
             { 

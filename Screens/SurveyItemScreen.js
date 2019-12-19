@@ -75,13 +75,89 @@ class SurveyItemScreen extends Component{
       this.setState({answer : [...this.state.answer, obj]})
     }
     _onChange = (id, value) => {
-      console.log(id)
-      console.log(value)
+      const {answer} = this.state
+      console.log(answer)
+      console.log(id, value)
       const obj = {
         id: id,
         value: value
       }
-      this.setState({answer : [...this.state.answer, obj]})
+      // if (answer.length === 0){
+      //   this.setState({answer : [...this.state.answer, obj]})
+      // }else {
+      //   const answer = this.state.answer;
+      //   answer.forEach(element => {
+      //     if (element.id === id)
+      //     {
+      //       this.setState({answer : [...this.state.answer, answer.map(
+      //         element => {
+      //           if (element.id === id)
+      //           {
+      //             return {
+      //               id: element.id,
+      //               value: value
+      //             }
+      //           }
+      //           else
+      //             return element
+      //         }
+      //       )]})
+      //     }
+      //   })
+      //   // this.setState({answer : [...this.state.answer, obj]})
+      // }
+      // {answer.length == 0 ?
+      //   obj = {
+      //     id: id,
+      //     value: value
+      //   }
+      //   this.setState({answer : [...this.state.answer, obj]})
+      //   : fdsf 
+      // }
+      if (answer.length === 0)
+      {
+        console.log("here length 0")
+        this.setState({answer : [...this.state.answer, obj]})
+      }
+      else
+      {
+        // this.setState({answer: (() => answer.forEach(element =>
+        //   {
+        //     if (element.id == id)
+        //       return true
+        //   })) ?  
+        // })
+        // this.setState({answer : (answer.forEach(element => 
+        //   if (element.id == id){
+        //     return true
+        //   }))
+        //   ? 
+        //   : [...this.state.answer, obj]})
+        this.setState({answer : [...this.state.answer.filter(element => element.id !== id), obj]})
+      }
+      // this.setState({answer: [...this.state.answer]})
+      // if (answer.length == 0) 
+      //   this.setState({answer : [...this.state.answer, obj]})
+      // else
+      // {
+      //   answer.forEach(element => {
+      //     // console.log(answer)
+      //     if (element.id === id){
+      //       this.setState({answer : this.state.answer.map(element => {
+      //         if (element.id === id) {
+      //           return {
+      //             id: element.id,
+      //             value: value
+      //           }
+      //         } else{
+      //           return element
+      //         }
+      //       })}
+      //       )
+      //   }})
+      //     // else
+      //     //   this.setState({answer : [...this.state.answer, obj]})
+      // }
     }
     _onSubmit = () => 
     {
