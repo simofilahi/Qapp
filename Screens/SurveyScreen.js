@@ -6,7 +6,8 @@ import {
     ScrollView,
     View
   } from 'react-native';
-import {Form,
+import {
+    Form,
     Textarea,
     List,
     ListItem,
@@ -56,76 +57,60 @@ export default class SurveyScreen extends Component {
     super(props)
     this.state = {
       data: [],
-      answer: []
+      answers: []
     }
     
 }
   componentDidMount(){
     this.setState({data: Data})
   }
-  get_value = (obj) => {
-    // console.log(obj)
-    this.setState({answer : [...this.state.answer, obj]})
+  getAnswers = (AnswersOfPart) => {
+    return this.setState({answers : [...this.state.answers, AnswersOfPart]})
   }
   componentDidUpdate(){
-    const {answer} = this.state
+    const {answers} = this.state
 
-    console.log(JSON.stringify(answer))
+    console.log(answers)
     // console.log("updated")
   }
-  renderRow ({ item }) {
+  _renderRow = (item, index, navigate) => {
     return (
-      <ListItem
-        renderRow={this._rendercard}
-        onPress={() => alert(item.title)}
-      />
+      <TouchableOpacity  onPress = {
+        () => navigate('SurveyItemScreen', 
+          {item: item, getAnswers: this.getAnswers}
+        )
+      }> 
+      <Card pointerEvents='none' key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
+        <CardItem header bordered >
+            <Text>{item.title}</Text>
+            <Right>
+              <Icon name="arrow-forward" 
+                    style={{color: 'black', marginRight: '-25%'}}
+                    onPress = {
+                      () => navigate('SurveyItemScreen', 
+                      {item: item, getAnswers: this.getAnswers}
+                      )
+                  }
+              />
+            </Right>
+        </CardItem>
+      </Card>
+      </TouchableOpacity>
     )
   }
   render() {
     // const data = this.state.qrCodeData;
     const {navigate} = this.props.navigation;
-
+    
     const data = this.state.data.parts
-    // alert(JSON.stringify(data))
     return (
       <Container style={{flex: 1, justifyContent: 'center', backgroundColor: '#2196F3'}}>
+         <Content>
         <MyHeader title={"Survey"} backarrow={true} navigate={navigate}/>
-        <Content>
-        {/* <List>
-          <FlatList
-            data={data}
-            renderItem={this.renderRow}
-            keyExtractor={item => item.id}
-          />
-        </List> */}
           <List
             dataArray={data}
             keyExtractor = {(item, index) => index.toString()}
-            renderRow={(item, index) => {
-                return (
-                  <TouchableOpacity  onPress = {
-                    () => navigate('SurveyItemScreen', 
-                      {item: item, get_value: this.get_value}
-                    )
-                 }> 
-                  <Card pointerEvents='none' key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
-                    <CardItem header bordered >
-                          <Text>{item.title}</Text>
-                        <Right>
-                          <Icon name="arrow-forward" 
-                                style={{color: 'black', marginRight: '-25%'}}
-                                onPress = {
-                                  () => navigate('SurveyItemScreen', 
-                                  {item: item, get_value: this.get_value}
-                                  )
-                               }
-                          />
-                        </Right>
-                    </CardItem>
-                  </Card>
-                </TouchableOpacity>
-                )
-            }}
+            renderRow={(item, index) => this._renderRow(item, index, navigate)}
           >
           </List>
           <View style={{alignSelf: 'center'}}>

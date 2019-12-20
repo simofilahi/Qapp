@@ -53,162 +53,79 @@ class SurveyItemScreen extends Component{
         const item = this.props.navigation.getParam("item", "No data read");
         this.setState({ item: item, loaded: {item} ? true : false})
     }
-    setDate =  (newDate) => {
+    setDate = (newDate) => {
       this.setState({chosenDate: newDate})
     }
-    onValueChange2  = (value) => {
+    onValueChange2 = (value) => {
       this.setState({selected2: value})
     }
-    onConfirm(hour, minute) {
+    onConfirm = (hour, minute) => {
       this.setState({ time: `${hour}:${minute}` });
       this.TimePicker.close();
     }
     onCancel() {
       this.TimePicker.close();
     }
-    Store_values = () => {
-      // var answer = this.state.answer
-      const obj = {
-        id: '10',
-        value: 'hello'
-      }
-      this.setState({answer : [...this.state.answer, obj]})
-    }
     _onChange = (id, value) => {
       const {answer} = this.state
-      console.log(answer)
-      console.log(id, value)
       const obj = {
         id: id,
         value: value
       }
-      // if (answer.length === 0){
-      //   this.setState({answer : [...this.state.answer, obj]})
-      // }else {
-      //   const answer = this.state.answer;
-      //   answer.forEach(element => {
-      //     if (element.id === id)
-      //     {
-      //       this.setState({answer : [...this.state.answer, answer.map(
-      //         element => {
-      //           if (element.id === id)
-      //           {
-      //             return {
-      //               id: element.id,
-      //               value: value
-      //             }
-      //           }
-      //           else
-      //             return element
-      //         }
-      //       )]})
-      //     }
-      //   })
-      //   // this.setState({answer : [...this.state.answer, obj]})
-      // }
-      // {answer.length == 0 ?
-      //   obj = {
-      //     id: id,
-      //     value: value
-      //   }
-      //   this.setState({answer : [...this.state.answer, obj]})
-      //   : fdsf 
-      // }
-      if (answer.length === 0)
-      {
-        console.log("here length 0")
-        this.setState({answer : [...this.state.answer, obj]})
-      }
-      else
-      {
-        // this.setState({answer: (() => answer.forEach(element =>
-        //   {
-        //     if (element.id == id)
-        //       return true
-        //   })) ?  
-        // })
-        // this.setState({answer : (answer.forEach(element => 
-        //   if (element.id == id){
-        //     return true
-        //   }))
-        //   ? 
-        //   : [...this.state.answer, obj]})
-        this.setState({answer : [...this.state.answer.filter(element => element.id !== id), obj]})
-      }
-      // this.setState({answer: [...this.state.answer]})
-      // if (answer.length == 0) 
-      //   this.setState({answer : [...this.state.answer, obj]})
-      // else
-      // {
-      //   answer.forEach(element => {
-      //     // console.log(answer)
-      //     if (element.id === id){
-      //       this.setState({answer : this.state.answer.map(element => {
-      //         if (element.id === id) {
-      //           return {
-      //             id: element.id,
-      //             value: value
-      //           }
-      //         } else{
-      //           return element
-      //         }
-      //       })}
-      //       )
-      //   }})
-      //     // else
-      //     //   this.setState({answer : [...this.state.answer, obj]})
-      // }
+      this.setState({answer : [...this.state.answer.filter(element => element.id !== id), obj]})
     }
     _onSubmit = () => 
     {
-      // const {answer} = this.state.answer
-      // console.log(answer)
-      // console.log("hi")
-      const {params} = this.props.navigation.state
+      const {getAnswers} = this.props.navigation.state.params
+      const { goBack } = this.props.navigation
       const {answer} = this.state
 
-      answer.forEach(element => {
-        params.get_value(element)
-      });
+      getAnswers(answer)
+      goBack()
+    }
+    _renderRow = (item, index) => {
+      return (
+        <View>
+        <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
+          <CardItem header bordered >
+                <Text>{item.question}</Text>
+                </CardItem>
+                <CardItem body bordered>
+                  <Body>
+                    <Form style={{width: '100%'}}>
+                      <SurveyAnswerInput 
+                        item={item}
+                        _onChange={this._onChange}
+                        onCancel={this.onCancel}
+                        setDate={this.setDate}
+                        onValueChange2={this.onValueChange2}
+                        onConfirm={this.onConfirm}
+                        state={this.state}
+                      />
+                    </Form>
+                  </Body>
+          </CardItem>
+          </Card>
+        </View>
+      )
     }
     loaddata = (loaded, navigate, questions) => {
         if (loaded) {
           return (
             <Container style={{backgroundColor: '#2196F3'}}>
-            <Content>
-              <MyHeader title={"SurveyAnswers"} backarrow={true} navigate={navigate}/>
+              <Content>
+                <MyHeader title={"SurveyAnswers"} backarrow={true} navigate={navigate}/>
                 <List
                   dataArray={questions}
-                  renderRow={(item, index) => {
-                      return (
-                        <View>
-                          <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
-                            <CardItem header bordered >
-                                  <Text>{item.question}</Text>
-                                  </CardItem>
-                                  <CardItem body bordered>
-                                    <Body>
-                                      <Form style={{width: '100%'}}>
-                                        <SurveyAnswerInput 
-                                          item={item}
-                                          _onChange={this._onChange}
-                                          onCancel={this.onCancel}
-                                          setDate={this.setDate}
-                                          onValueChange2={this.onValueChange2}
-                                          onConfirm={this.onConfirm}
-                                          state={this.state}
-                                        />
-                                      </Form>
-                                    </Body>
-                            </CardItem>
-                          </Card>
-                        </View>
-                        )
-                  }}
-              >
-              </List>
-              <Button primary style={{alignContent: "center"}}onPress={this._onSubmit}><Text>Done</Text></Button>
-            </Content>
+                  renderRow={(item, index) => this._renderRow(item, index)}
+                >
+                </List>
+                <View style={{alignSelf: 'center'}}>
+                  <Button onPress={this._onSubmit}>
+                    <Text>Submit</Text>
+                  </Button>
+                </View>
+              </Content>
             </Container>
           )
         }

@@ -85,7 +85,7 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, onSelectedItemsC
             )
         case INTEGER_INPUT:
           return (
-            <View>
+            <View style={{alignSelf: 'center'}}>
                 <NumericInput 
                     value={state.value}
                     onChangeText={(text) => {
@@ -106,7 +106,7 @@ SurveyAnswerInput = ({item, _onChange, setDate, onValueChange2, onSelectedItemsC
           )
         case FLOAT_INPUT:
           return (
-            <View>
+            <View style={{alignSelf: 'center'}}>
                 <NumericInput 
                     value={state.value}
                     onChange={onchangeNumericInput}
