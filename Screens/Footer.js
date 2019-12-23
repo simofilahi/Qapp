@@ -5,7 +5,7 @@ export default class MyFooter extends Component {
   render() {
       const {navigate} = this.props;
       return (
-      <Footer>
+      <Footer >
           <FooterTab>
               <Button vertical onPress={() => {
                 navigate('MapScreen')}}>

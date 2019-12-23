@@ -28,6 +28,7 @@ import {
  } from 'native-base';
 import MyHeader from './Header';
 import SurveyItemScreen from './SurveyItemScreen'
+import SubmitFooter from './SubmitFooter'
 import Data from './data'
 
 export default class SurveyScreen extends Component {
@@ -80,7 +81,7 @@ export default class SurveyScreen extends Component {
           {item: item, getAnswers: this.getAnswers}
         )
       }> 
-      <Card pointerEvents='none' key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
+      <Card  key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
         <CardItem header bordered >
             <Text>{item.title}</Text>
             <Right>
@@ -113,14 +114,8 @@ export default class SurveyScreen extends Component {
             renderRow={(item, index) => this._renderRow(item, index, navigate)}
           >
           </List>
-          <View style={{alignSelf: 'center'}}>
-            {true == 1 ? <Button disabled>
-                <Text>Submit</Text>
-            </Button> : <Button >
-                <Text>Submit</Text>
-            </Button>}
-          </View>
         </Content>
+          <SubmitFooter />
       </Container>
     );
   }
