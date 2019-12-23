@@ -30,13 +30,16 @@ import {
 } from 'native-base';
 import MyHeader from './Header';
 import SurveyAnswerInput from './SurveyAnswerInput'
-
+import SubmitFooter from './SubmitFooter'
 
 class SurveyItemScreen extends Component{
     constructor(props){
       super(props)
       this.state = {
-        answer: [],
+        part: {
+            PartId: null,
+            answers: []
+        },
         item: [],
         loaded: false,
         chosenDate: new Date(),
@@ -51,7 +54,9 @@ class SurveyItemScreen extends Component{
     };
     componentDidMount() {
         const item = this.props.navigation.getParam("item", "No data read");
-        this.setState({ item: item, loaded: {item} ? true : false})
+        this.setState({item: item,
+        part: {...this.state.part, PartId: item.id},
+        loaded: {item} ? true : false})
     }
     setDate = (newDate) => {
       this.setState({chosenDate: newDate})
@@ -67,20 +72,26 @@ class SurveyItemScreen extends Component{
       this.TimePicker.close();
     }
     _onChange = (id, value) => {
-      const {answer} = this.state
+      var answers = this.state.part.answers
       const obj = {
         id: id,
         value: value
       }
-      this.setState({answer : [...this.state.answer.filter(element => element.id !== id), obj]})
+      answers = answers.filter(element => {
+        if (element.id !== id)
+            return element
+      })
+      answers.push(obj)
+      this.setState({part : {...this.state.part, answers: answers}})
     }
     _onSubmit = () => 
     {
       const {getAnswers} = this.props.navigation.state.params
       const { goBack } = this.props.navigation
-      const {answer} = this.state
+      const {part} = this.state
 
-      getAnswers(answer)
+      console.log(part)
+      getAnswers(part)
       goBack()
     }
     _renderRow = (item, index) => {
@@ -112,21 +123,15 @@ class SurveyItemScreen extends Component{
     loaddata = (loaded, navigate, questions) => {
         if (loaded) {
           return (
-            <Container style={{backgroundColor: '#2196F3'}}>
               <Content>
                 <MyHeader title={"SurveyAnswers"} backarrow={true} navigate={navigate}/>
-                <List
-                  dataArray={questions}
-                  renderRow={(item, index) => this._renderRow(item, index)}
-                >
-                </List>
-                <View style={{alignSelf: 'center'}}>
-                  <Button onPress={this._onSubmit}>
-                    <Text>Submit</Text>
-                  </Button>
-                </View>
+                  <List
+                    dataArray={questions}
+                    keyExtractor = {(item, index) => index.toString()}
+                    renderRow={(item, index) => this._renderRow(item, index)}
+                  >
+                  </List>
               </Content>
-            </Container>
           )
         }
       else{
@@ -143,8 +148,9 @@ class SurveyItemScreen extends Component{
       const {navigate} = this.props.navigation;
       const {loaded} = this.state
         return (
-          <Container style={{backgroundColor: "#87cefa"}}>
+          <Container>
             {this.loaddata(loaded, navigate, variables)}
+            <SubmitFooter _onSubmit={this._onSubmit}/>
           </Container>
         )
   }

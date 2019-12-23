@@ -57,22 +57,35 @@ export default class SurveyScreen extends Component {
   constructor(props){
     super(props)
     this.state = {
+      response: {
+        uuid: '',
+        AnswersOfparts: []
+      },
       data: [],
-      answers: []
     }
     
 }
   componentDidMount(){
-    this.setState({data: Data})
+    this.setState({data: Data, response: {...this.state.response, uuid: Data.uuid}})
   }
-  getAnswers = (AnswersOfPart) => {
-    return this.setState({answers : [...this.state.answers, AnswersOfPart]})
+
+  getAnswers = (PartObj) => {
+    var AnswersOfparts = this.state.response.AnswersOfparts
+    AnswersOfparts = AnswersOfparts.filter(element => {
+      if (element.PartId !== PartObj.PartId)
+          return element
+    })
+    AnswersOfparts.push(PartObj)
+    return this.setState({response : {...this.state.response, AnswersOfparts: AnswersOfparts}})
+  }
+  _senddata = () => {
+
   }
   componentDidUpdate(){
-    const {answers} = this.state
+    const {response} = this.state
 
-    console.log(answers)
-    // console.log("updated")
+    console.log(response)
+    console.log("updated")
   }
   _renderRow = (item, index, navigate) => {
     return (
@@ -105,7 +118,7 @@ export default class SurveyScreen extends Component {
     
     const data = this.state.data.parts
     return (
-      <Container style={{flex: 1, justifyContent: 'center', backgroundColor: '#2196F3'}}>
+      <Container style={{flex: 1, justifyContent: 'center'}}>
          <Content>
         <MyHeader title={"Survey"} backarrow={true} navigate={navigate}/>
           <List
@@ -115,7 +128,7 @@ export default class SurveyScreen extends Component {
           >
           </List>
         </Content>
-          <SubmitFooter />
+          <SubmitFooter _senddata={this._senddata}/>
       </Container>
     );
   }

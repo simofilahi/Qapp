@@ -13,7 +13,9 @@ class SubmitFooter extends Component {
   render() {
     return (
         <Footer style={{backgroundColor: 'white'}}>
-            <Button style={{backgroundColor: 'white'}}>
+            <Button onPress={this.props._onSubmit}
+                    style={{backgroundColor: 'white'} 
+            }>
                 <Text>Submit</Text>
             </Button>
         </Footer>
