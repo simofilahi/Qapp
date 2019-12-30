@@ -55,13 +55,6 @@ export default  Data = {
                 ]
              },
              { 
-                "name":"5",
-                "question":"Votre nom ?",
-                "type":4,
-                "options":[ 
-                ]
-             },
-             { 
                 "name":"6",
                 "question":"Votre nom ?",
                 "type":4,
@@ -100,7 +93,31 @@ export default  Data = {
                 "name":"11",
                 "question":"Votre nom ?",
                 "type":9,
-                "options":[ 
+                "options":[
+                  {
+                     name: 'Apple',
+                     id: 10,
+                   },
+                   {
+                     name: 'Strawberry',
+                     id: 17,
+                   },
+                   {
+                     name: 'Pineapple',
+                     id: 13,
+                   },
+                   {
+                     name: 'Banana',
+                     id: 14,
+                   },
+                   {
+                     name: 'Watermelon',
+                     id: 15,
+                   },
+                   {
+                     name: 'Kiwi fruit',
+                     id: 16,
+                   },
                 ]
              },
              { 
@@ -115,6 +132,14 @@ export default  Data = {
                 "question":"Votre nom ?",
                 "type":11,
                 "options":[ 
+                  {label: 'param1', value: 0 },
+                  {label: 'param2', value: 1 },
+                  {label: 'param1', value: 2 },
+                  {label: 'param2', value: 3 },
+                  {label: 'param1', value: 4 },
+                  {label: 'param2', value: 5 },
+                  {label: 'param1', value: 6 },
+                  {label: 'param2', value: 7 }
                 ]
              },
              { 

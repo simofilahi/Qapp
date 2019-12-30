@@ -81,12 +81,12 @@ export default class SurveyScreen extends Component {
   _senddata = () => {
 
   }
-  componentDidUpdate(){
-    const {response} = this.state
+  // componentDidUpdate(){
+  //   const {response} = this.state
 
-    console.log(response)
-    console.log("updated")
-  }
+  //   console.log(JSON.stringify(response))
+  //   console.log("updated")
+  // }
   _renderRow = (item, index, navigate) => {
     return (
       <TouchableOpacity  onPress = {
@@ -119,7 +119,6 @@ export default class SurveyScreen extends Component {
     const data = this.state.data.parts
     return (
       <Container style={{flex: 1, justifyContent: 'center'}}>
-         <Content>
         <MyHeader title={"Survey"} backarrow={true} navigate={navigate}/>
           <List
             dataArray={data}
@@ -127,7 +126,6 @@ export default class SurveyScreen extends Component {
             renderRow={(item, index) => this._renderRow(item, index, navigate)}
           >
           </List>
-        </Content>
           <SubmitFooter _senddata={this._senddata}/>
       </Container>
     );

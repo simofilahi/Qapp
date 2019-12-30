@@ -1,32 +1,18 @@
 import React, { Component } from 'react';
 import {
-    StyleSheet, Alert, TouchableOpacity,
+    StyleSheet
 } from 'react-native';
 import { 
   Form,
-  Textarea,
   List,
-  ListItem,
-  items,
-  Title,
   Container,
-  Header,
-  Content,
   Card,
   CardItem,
-  Thumbnail,
   Text,
-  Button, 
-  Icon, 
-  Left, 
   Body,
-  Item,
   Spinner,
-  DatePicker,
-  Picker,
-  Input,
   View,
-  Switch
+  Content,
 } from 'native-base';
 import MyHeader from './Header';
 import SurveyAnswerInput from './SurveyAnswerInput'
@@ -46,7 +32,8 @@ class SurveyItemScreen extends Component{
         selected2: 'none',
         date: new Date(),
         time: "",
-        value: "",
+        number: 0,
+        string: null
       }
     }
     static navigationOptions = {
@@ -87,7 +74,7 @@ class SurveyItemScreen extends Component{
     _onSubmit = () => 
     {
       const {getAnswers} = this.props.navigation.state.params
-      const { goBack } = this.props.navigation
+      const {goBack} = this.props.navigation
       const {part} = this.state
 
       console.log(part)
@@ -97,62 +84,55 @@ class SurveyItemScreen extends Component{
     _renderRow = (item, index) => {
       return (
         <View>
-        <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
-          <CardItem header bordered >
-                <Text>{item.question}</Text>
-                </CardItem>
-                <CardItem body bordered>
-                  <Body>
-                    <Form style={{width: '100%'}}>
-                      <SurveyAnswerInput 
-                        item={item}
-                        _onChange={this._onChange}
-                        onCancel={this.onCancel}
-                        setDate={this.setDate}
-                        onValueChange2={this.onValueChange2}
-                        onConfirm={this.onConfirm}
-                        state={this.state}
-                      />
-                    </Form>
-                  </Body>
-          </CardItem>
-          </Card>
-        </View>
+          <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
+            <CardItem header bordered >
+                  <Text>{item.question}</Text>
+                  </CardItem>
+                  <CardItem body bordered>
+                    <Body>
+                      <Form style={{width: '100%'}}>
+                        <SurveyAnswerInput 
+                          item={item}
+                          _onChange={this._onChange}
+                          onCancel={this.onCancel}
+                          setDate={this.setDate}
+                          onValueChange2={this.onValueChange2}
+                          onConfirm={this.onConfirm}
+                          state={this.state}
+                        />
+                      </Form>
+                    </Body>
+            </CardItem>
+            </Card>
+          </View>
       )
     }
-    loaddata = (loaded, navigate, questions) => {
-        if (loaded) {
-          return (
-              <Content>
-                <MyHeader title={"SurveyAnswers"} backarrow={true} navigate={navigate}/>
-                  <List
-                    dataArray={questions}
-                    keyExtractor = {(item, index) => index.toString()}
-                    renderRow={(item, index) => this._renderRow(item, index)}
-                  >
-                  </List>
-              </Content>
-          )
-        }
-      else{
-        return (
-          <Content>
-            <MyHeader title={"Survey"} backarrow={true} navigate={navigate}/>
-            <Spinner color='blue' />
-          </Content>
-        )
-      }
-    }
+
     render(){
       const {variables} = this.state.item
       const {navigate} = this.props.navigation;
       const {loaded} = this.state
-        return (
-          <Container>
-            {this.loaddata(loaded, navigate, variables)}
-            <SubmitFooter _onSubmit={this._onSubmit}/>
-          </Container>
-        )
+
+      return (
+        <Container>
+            <MyHeader title={"SurveyAnswers"} backarrow={true} navigate={navigate}/>
+            {loaded ?
+            <Container>
+                <List
+                  dataArray={variables}
+                  keyExtractor = {(item, index) => index.toString()}
+                  renderRow={(item, index) => this._renderRow(item, index)}
+                >
+              </List>
+                <SubmitFooter _onSubmit={this._onSubmit}/>
+                </Container>
+            :
+              <View>
+                <Spinner color='blue' />
+              </View>
+            }
+        </Container>
+      )
   }
 }
 
