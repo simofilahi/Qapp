@@ -28,12 +28,6 @@ class SurveyItemScreen extends Component{
         },
         item: [],
         loaded: false,
-        chosenDate: new Date(),
-        selected2: 'none',
-        date: new Date(),
-        time: "",
-        number: 0,
-        string: null
       }
     }
     static navigationOptions = {
@@ -44,13 +38,6 @@ class SurveyItemScreen extends Component{
         this.setState({item: item,
         part: {...this.state.part, PartId: item.id},
         loaded: {item} ? true : false})
-    }
-    onConfirm = (hour, minute) => {
-      this.setState({ time: `${hour}:${minute}` });
-      this.TimePicker.close();
-    }
-    onCancel() {
-      this.TimePicker.close();
     }
     _onChange = (id, value) => {
       var answers = this.state.part.answers

@@ -1,29 +1,14 @@
 import React, { Component } from 'react';
 import {TouchableOpacity,StyleSheet, ScrollView} from 'react-native';
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
-import TimePicker from "react-native-24h-timepicker";
-import { Slider, Block } from 'galio-framework';
 import MutiSlider from '@ptomasroos/react-native-multi-slider';
-import { 
-    Form,
+import {
     Textarea,
-    List,
-    ListItem,
-    items,
-    Title,
-    Container,
-    Header,
-    Content,
-    Card,
-    CardItem,
-    Thumbnail,
     Text,
     Button, 
     Icon, 
     Left, 
-    Body,
     Item,
-    Spinner,
     Picker,
     Input,
     View,
@@ -31,9 +16,8 @@ import {
   } from 'native-base';
 
 import DateTimePicker from '@react-native-community/datetimepicker'
-// import SectionedMultiSelect  from 'react-native-sectioned-multi-select'
 import NumericInput from 'react-native-numeric-input'
-
+import RangeSlider from 'rn-range-slider';
 
 const STRING_INPUT = 0
 const TEXTAREA_INPUT = 1
@@ -89,7 +73,7 @@ export default class SurveyAnswerInput extends Component{
         this.show('time')
       }
 
-      DDOnChangeValue = (value, id, _onChange) => {
+      DDOnChangeValue = (value, id) => {
         this.setState({DDselected: value})
       }
 
@@ -98,19 +82,11 @@ export default class SurveyAnswerInput extends Component{
         this.setState({MDDselectedItems: selectedItems });
       };
 
-    __render = (
-      item,
-      _onChange,
-      setDate,
-      onValueChange2,
-      onSelectedItemsChange,
-      onchangeNumericInput,
-      state
-    ) => {
+    __render = (item, _onChange) => {
+      const {stringDate, show, date, mode, DDselected} = this.state
       const type = item.type
       const id = item.name
 
-      const {stringDate, show, date, mode, DDselected} = this.state
       switch(type){
         case STRING_INPUT:
           return (
@@ -141,8 +117,6 @@ export default class SurveyAnswerInput extends Component{
           return (
             <View style={{alignSelf: 'center'}}>
                 <NumericInput
-                    onChange={() => {_onChange(id, state.value)}}
-                    value={state.value}
                     onChange={(text) => {
                       _onChange(id, text)
                     }}
@@ -152,7 +126,7 @@ export default class SurveyAnswerInput extends Component{
                     step={1}
                     valueType='real'
                     rounded 
-                    textColor='#B0228C' 
+                    textColor='#000000' 
                     iconStyle={{ color: '#3F51B5' }}
                     rightButtonBackgroundColor='white'
                     leftButtonBackgroundColor='white'
@@ -163,7 +137,6 @@ export default class SurveyAnswerInput extends Component{
           return (
             <View style={{alignSelf: 'center'}}>
                 <NumericInput
-                    value={state.value}
                     onChange={(text) => {
                       _onChange(id, text)
                     }}
@@ -173,7 +146,7 @@ export default class SurveyAnswerInput extends Component{
                     step={0.5}
                     valueType='real'
                     rounded 
-                    textColor='#B0228C' 
+                    textColor='#000000' 
                     iconStyle={{ color: '#3F51B5' }}
                     rightButtonBackgroundColor='white'
                     leftButtonBackgroundColor='white'
@@ -193,7 +166,7 @@ export default class SurveyAnswerInput extends Component{
           )
         case DATETIME_INPUT:
           return (
-            <View>
+            <View style={{alignItems: 'center'}}>
               {stringDate ? <Text>{stringDate}</Text> : null}
               {show ? <DateTimePicker 
                 value={date}
@@ -207,7 +180,7 @@ export default class SurveyAnswerInput extends Component{
           )
         case DATE_INPUT:
           return (
-            <View>
+            <View style={{alignItems: 'center'}}>
               {stringDate ? <Text>{stringDate}</Text> : null}
               {show ? <DateTimePicker 
                 value={date}
@@ -221,7 +194,7 @@ export default class SurveyAnswerInput extends Component{
           )
         case TIME_INPUT:
           return (
-            <View>
+            <View style={{alignItems: 'center'}}>
               {stringDate ? <Text>{stringDate}</Text> : null}
               {show ? <DateTimePicker 
                 value={date}
@@ -230,7 +203,7 @@ export default class SurveyAnswerInput extends Component{
                 display="default"
                 onChange={this.setDate} 
               />: null}
-              <Button onPress={this.timepicker}><Text>Select Time</Text></Button>
+              <Button onPress={this.timepicker}><Text style={{textAlign: 'justify'}}>Select Time</Text></Button>
             </View>
           )
         case DROPDROWN_SINGLECHOISE_INPUT:
@@ -293,7 +266,7 @@ export default class SurveyAnswerInput extends Component{
         // case CHECKBOX_INPUT:
         //     return (
         //       <View>
-        //           {/* <PickerCheckBox
+        //           <PickerCheckBox
         //               data={item.options}
         //               headerComponent={<Text style={{fontSize:25}} >items</Text>}
         //               // OnConfirm={(pItems) => this.handleConfirm(pItems)}
@@ -304,64 +277,72 @@ export default class SurveyAnswerInput extends Component{
         //               arrowColor='#FFD740'
         //               arrowSize={10}
         //               placeholderSelectedItems ='$count selected item(s)'
-        //           /> */}
+        //           />
         //       </View>
         //     )
-        // case RADIO_INPUT:
-        //     return ( 
-        //         <View>
-        //           <RadioForm
-        //             radio_props={item.options}
-        //             initial={0}
-        //             formHorizontal={false}
-        //             labelHorizontal={true}
-        //             buttonColor={'#2196f3'}
-        //             animation={true}
-        //             onPress={(value) => console.log(value)}
-        //           />
-        //         </View>
-        //  )
-        // case SLIDER_FROMZERO_INPUT:
-        //   return (
-        //     <View>
-        //       <Block flex>
-        //         <Slider
-        //           activeColor='blue'
-        //           maximumValue={10}
-        //           value={0}
-        //           step ={1}
-        //           onValueChange={() => <View><Text>1</Text></View>}
-        //         />
-        //     </Block>
-        //     </View>
-        //   )
-        // case SLIDER_RANGE_INPUT:
-        //   return (
-        //     <View>
-        //       <MutiSlider
-        //       />
-        //     </View>
-        //   )
+        case RADIO_INPUT:
+            return ( 
+                <View>
+                  <RadioForm
+                    radio_props={item.options}
+                    initial={0}
+                    formHorizontal={false}
+                    labelHorizontal={true}
+                    buttonColor={'#C0C0C0'}
+                    selectedButtonColor={'#3F51B5'}
+                    animation={true}
+                    onPress={(value) => _onChange(id, value)}
+                  />
+                </View>
+         )
+        case SLIDER_FROMZERO_INPUT:
+          return (
+            <View>
+              <RangeSlider
+                    style={{width: 300, height: 80}}
+                    rangeEnabled={false}
+                    min={200}
+                    max={1000}
+                    step={1}
+                    selectionColor="#3F51B5"
+                    blankColor="#C0C0C0"
+                    labelBackgroundColor="#3F51B5"
+                    labelBorderColor="#3F51B5"
+                    onValueChanged={(low, high, fromUser) => {
+                      console.log(`Low ${low} rangeHigh ${high}`)
+                  }}
+                />
+            </View>
+          )
+        case SLIDER_RANGE_INPUT:
+          return (
+            <View>
+                <RangeSlider
+                    style={{width: 300, height: 80}}
+                    gravity={'center'}
+                    min={200}
+                    max={1000}
+                    step={20}
+                    selectionColor="#3F51B5"
+                    blankColor="#C0C0C0"
+                    labelBackgroundColor="#3F51B5"
+                    labelBorderColor="#3F51B5"
+                    onValueChanged={(low, high, fromUser) => {
+                      console.log(`Low ${low} rangeHigh ${high}`)
+                  }}
+                />
+            </View>
+          )
       }
     }
+    
     render(){
-      const {item,
-            _onChange,
-            setDate,
-            onValueChange2,
-            onSelectedItemsChange,
-            onchangeNumericInput,
-            state} = this.props;
+      const {item, _onChange} = this.props;
         return (
           <View>
             {this.__render(
               item,
               _onChange,
-              setDate,
-              onValueChange2,
-              onSelectedItemsChange,
-              onchangeNumericInput,
-              state
             )}
           </View>
         )
