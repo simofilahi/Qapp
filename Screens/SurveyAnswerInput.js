@@ -24,14 +24,16 @@ import {
     Body,
     Item,
     Spinner,
-    DatePicker,
     Picker,
     Input,
     View,
     Switch
   } from 'native-base';
-import SectionedMultiSelect  from 'react-native-sectioned-multi-select'
+
+import DateTimePicker from '@react-native-community/datetimepicker'
+// import SectionedMultiSelect  from 'react-native-sectioned-multi-select'
 import NumericInput from 'react-native-numeric-input'
+
 
 const STRING_INPUT = 0
 const TEXTAREA_INPUT = 1
@@ -52,9 +54,50 @@ export default class SurveyAnswerInput extends Component{
      constructor(props){
        super(props)
        this.state = {
-         bool: false,
+        bool: false,
+        date: new Date(),
+        mode: null,
+        show: false,
+        stringDate: null,
+        DDselected: 'none',
+        MDDselectedItems: [],
        }
      }
+     
+     setDate = (event, date) => {
+      date = date || this.state.date;
+      
+      this.setState({
+        show: false,
+        date: date,
+        stringDate: (this.state.mode === 'date') ? date.toDateString() : date.toLocaleTimeString()
+      });
+      }
+
+      show = mode => {
+        this.setState({
+          show: true,
+          mode: mode,
+        });
+      }
+
+      datepicker = () => {
+        this.show('date')
+      }
+
+      timepicker = () => {
+        this.show('time')
+      }
+
+      DDOnChangeValue = (value, id, _onChange) => {
+        this.setState({DDselected: value})
+      }
+
+      onSelectedItemsChange = (selectedItems) => {
+        console.log(selectedItems)
+        this.setState({MDDselectedItems: selectedItems });
+      };
+
     __render = (
       item,
       _onChange,
@@ -67,6 +110,7 @@ export default class SurveyAnswerInput extends Component{
       const type = item.type
       const id = item.name
 
+      const {stringDate, show, date, mode, DDselected} = this.state
       switch(type){
         case STRING_INPUT:
           return (
@@ -147,85 +191,105 @@ export default class SurveyAnswerInput extends Component{
               </Left>
             </View>
           )
-        // case DATETIME_INPUT:
-        //   return <Text>Nothing</Text>
+        case DATETIME_INPUT:
+          return (
+            <View>
+              {stringDate ? <Text>{stringDate}</Text> : null}
+              {show ? <DateTimePicker 
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                display="default"
+                onChange={this.setDate} 
+              />: null}
+              <Button onPress={this.datepicker}><Text>Select Date and Time</Text></Button>
+            </View>
+          )
         case DATE_INPUT:
           return (
-            <DatePicker
-              defaultDate={new Date(2018, 4, 4)}
-              minimumDate={new Date(2018, 1, 1)}
-              maximumDate={new Date(2018, 12, 31)}
-              locale={"en"}
-              timeZoneOffsetInMinutes={undefined}
-              modalTransparent={false}
-              animationType={"fade"}
-              androidMode={"default"}
-              placeHolderText="Select date"
-              textStyle={{ color: "green" }}
-              placeHolderTextStyle={{ color: "#d3d3d3" }}
-              onDateChange={() => console.log("hello")}
-              disabled={false}
-            />
+            <View>
+              {stringDate ? <Text>{stringDate}</Text> : null}
+              {show ? <DateTimePicker 
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                display="default"
+                onChange={this.setDate}
+              />: null}
+              <Button onPress={this.datepicker}><Text>Select Date</Text></Button>
+            </View>
           )
-        // case TIME_INPUT:
-        //   return (
-        //     <View>
-        //        {/* <TouchableOpacity
-        //           onPress={() => TimePicker.open()}
-        //           placeHolderText="Select date"
-        //         >
-        //         </TouchableOpacity>
-        //         <Text style={styles.text}>{state.time}</Text>
-        //         <TimePicker
-        //           ref={ref => {
-        //             TimePicker = ref;
-        //           }}
-        //           onCancel={() => onCancel}
-        //           onConfirm={(hour, minute) => onConfirm(hour, minute)}
-        //         /> */}
-        //     </View>
-        //   )
-        // case DROPDROWN_SINGLECHOISE_INPUT:
-        //   return (
-        //     <View>
-        //       <Picker
-        //         mode="dropdown"
-        //         iosIcon={<Icon name="arrow-down" />}
-        //         style={{ width: undefined }}
-        //         placeholder="Select your SIM"
-        //         placeholderStyle={{ color: "#bfc6ea" }}
-        //         placeholderIconColor="#007aff"
-        //         selectedValue={state.selected2}
-        //         onValueChange={onValueChange2}
-        //       >
-        //         <Picker.Item label="none" value="key0" />
-        //         <Picker.Item label="Wallet" value="key1" />
-        //         <Picker.Item label="ATM Card" value="key2" />
-        //         <Picker.Item label="Debit Card" value="key3" />
-        //         <Picker.Item label="Credit Card" value="key4" />
-        //         <Picker.Item label="Net Banking" value="key5" />
-        //       </Picker>
-        //     </View>
-        //   )
-        // case DROPDROWN_MULTIPLECHOISES_INPUT:
-        //   return (
-        //     <View>
-        //         <SectionedMultiSelect
-        //             items={item.options}
-        //             showRemoveAll={true}
-        //             showCancelButton = {true}
-        //             modalSupportedOrientations = {['landscape', 'portrait']}
-        //             uniqueKey={item.options.id}
-        //             subKey="children"
-        //             selectText="Choose some things..."
-        //             showDropDowns={true}
-        //             readOnlyHeadings={true}
-        //             onSelectedItemsChange={() => alert("clicked")}
-        //             onConfirm = {() => alert("clicked2")}
-        //             selectedItems={() => console.log("still nothing")}
-        //         />
-        //     </View>
-        //   )
+        case TIME_INPUT:
+          return (
+            <View>
+              {stringDate ? <Text>{stringDate}</Text> : null}
+              {show ? <DateTimePicker 
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                display="default"
+                onChange={this.setDate} 
+              />: null}
+              <Button onPress={this.timepicker}><Text>Select Time</Text></Button>
+            </View>
+          )
+        case DROPDROWN_SINGLECHOISE_INPUT:
+          return (
+            <View>
+              <Picker
+                mode="dropdown"
+                iosIcon={<Icon name="arrow-down" />}
+                style={{ width: undefined }}
+                placeholder="Select your SIM"
+                placeholderStyle={{ color: "#bfc6ea" }}
+                placeholderIconColor="#007aff"
+                selectedValue={DDselected}
+                onValueChange={(value) => {
+                  this.DDOnChangeValue(value, id)
+                  _onChange(id, value)
+                }
+                }
+              >
+                {item.options.map((el, index) => {
+                  return (
+                    <Picker.Item key={index} label={el.value} value={el.key} />
+                  )
+                })}
+              </Picker>
+            </View>
+          )
+        case DROPDROWN_MULTIPLECHOISES_INPUT:
+          return (
+            <View>
+              {/* <Multiselect
+                options={item.options} // Options to display in the dropdown
+                // selectedvalues={} // Preselected value to persist in dropdown
+                onSelect={() => {console.log("hello")}} // Function will trigger on select event
+                onRemove={() => {console.log("holla")}} // Function will trigger on remove event
+                displayValue="name" // Property name to display in the dropdown options
+                /> */}
+                {/* <SectionedMultiSelect
+                    items={item.options}
+                    uniqueKey={id}
+                    subKey={item.options.map(el => {
+                      return el.id
+                    })}
+                    selectText="Choose some things..."
+                    showDropDowns={true}
+                    readOnlyHeadings={true}
+                    onSelectedItemsChange={() => {
+                      console.log("hello")
+                      // this.onSelectedItemsChange
+                    }}
+                    showCancelButton={true}
+                    onCancel={() => {console.log("cancel")}}
+                    onConfirm={() => {console.log("confirm")}}
+                    // selectedItems={() => {
+                    //   console.log("here")
+                    // }}
+                /> */}
+            </View>
+          )
         // case CHECKBOX_INPUT:
         //     return (
         //       <View>

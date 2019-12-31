@@ -87,6 +87,11 @@ export default  Data = {
                 "question":"Votre nom ?",
                 "type":8,
                 "options":[ 
+                  {key: '1', value: 'element'},
+                  {key: '2', value: 'element1'},
+                  {key: '3', value: 'element2'},
+                  {key: '4', value: 'element3'},
+                  {key: '5', value: 'element4'}
                 ]
              },
              { 

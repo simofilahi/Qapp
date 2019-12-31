@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@ptomasroos/react-native-multi-slider": "^1.0.0",
+    "@react-native-community/datetimepicker": "^2.1.0",
     "@react-native-community/geolocation": "^2.0.2",
     "galio-framework": "^0.6.3",
     "loadsh": "0.0.4",
+    "multiselect-react-dropdown": "^1.2.8",
     "native-base": "^2.13.8",
     "react": "16.9.0",
     "react-datetime-picker": "^2.8.0",

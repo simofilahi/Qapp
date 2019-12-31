@@ -45,12 +45,6 @@ class SurveyItemScreen extends Component{
         part: {...this.state.part, PartId: item.id},
         loaded: {item} ? true : false})
     }
-    setDate = (newDate) => {
-      this.setState({chosenDate: newDate})
-    }
-    onValueChange2 = (value) => {
-      this.setState({selected2: value})
-    }
     onConfirm = (hour, minute) => {
       this.setState({ time: `${hour}:${minute}` });
       this.TimePicker.close();
