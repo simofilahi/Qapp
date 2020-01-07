@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import MyHeader from './Header';
+import MyHeader from '../header/Header';
 import AboutUsBody from './AboutUsBody';
 import { Container, View, Button, Icon, Fab, Text } from 'native-base';
 

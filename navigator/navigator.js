@@ -1,14 +1,14 @@
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 import { createStackNavigator} from 'react-navigation-stack';
-import HomeScreen from '../Screens/HomeScreen';
-import SurveyScreen from '../Screens/SurveyScreen';
-import SplashScreen from '../Screens/SplashScreen';
-import QRCodeScreen from '../Screens/QRCodeScreen';
-import AboutUs from '../Screens/AboutUs';
-import MapScreen from '../Screens/MapScreen';
-import Sliders from '../Screens/Sliders';
-import MyFooter from '../Screens/Footer'
-import SurveyItemScreen from '../Screens/SurveyItemScreen'
+import HomeScreen from '../screens/home/Home';
+import SurveyScreen from '../screens/survey/Survey';
+import SplashScreen from '../screens/slider_and_splach/SplashScreen';
+import QRCodeScreen from '../screens/qrcode/QRCode';
+import AboutUs from '../screens/aboutUs/AboutUs';
+import MapScreen from '../screens/map/Map';
+import Sliders from '../screens/slider_and_splach/Sliders';
+import MyFooter from '../screens/footer/Footer'
+import SurveyItemScreen from '../screens/survey/SurveyItem'
 
 const RootStack = createStackNavigator(
   {

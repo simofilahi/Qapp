@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import MyHeader from './Header';
-import MyFooter from './Footer';
-import HomeBody from './HomeBody';
-import MapScreen from './MapScreen';
+import MyHeader from '../header/Header';
+import MyFooter from '../footer/Footer';
+import HomeBody from '../home/HomeBody';
 import { Container } from 'native-base';
 
 export default class HomeScreen extends Component {

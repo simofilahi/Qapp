@@ -1,10 +1,8 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, {Component} from 'react';
 import { StyleSheet, View, Dimensions, StatusBar} from 'react-native';
 import MapView, {PROVIDER_GOOGLE} from 'react-native-maps';
-import { Heatmap, Marker } from 'react-native-maps';
 import geolocation from '@react-native-community/geolocation';
 import { Container } from 'native-base';
-import MyHeader from './Header';
 
 const {width, height} = Dimensions.get('window')
 const SCREEN_WIDTH = width
@@ -42,7 +40,7 @@ export default class MapScreen extends Component {
                 this.setState({initialRegion: initialRegion})
             },
                 error => alert("Please Turn on your GPS"),
-                {timeout: 2000, maximumAge: 1000}
+                {timeout: 6000, maximumAge: 6000}
             )
         this.WatchId = geolocation.watchPosition(position => {
             const {latitude, longitude} = position.coords;
@@ -72,14 +70,8 @@ export default class MapScreen extends Component {
           showsUserLocation={true}
           zoomEnabled={true}
           zoomControlEnabled={true}
-          Region={ this.state.initialRegion.latitude != 0 ? this.state.initialRegion: null }
-         initialRegion= {this.state.initialRegion.latitude != 0 ? this.state.initialRegion: null}
+          Region={(this.state.initialRegion.latitude) ? this.state.initialRegion : null}
           >
-          {/* <Marker
-            coordinate={this.state.initialRegion}
-            title={"Marker Title"}
-            description={"Marker Description Text"}
-          /> */}
          </MapView>
         </View>
     </Container>

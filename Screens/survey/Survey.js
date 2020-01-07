@@ -26,10 +26,9 @@ import {
     Body,
     Right
  } from 'native-base';
-import MyHeader from './Header';
-import SurveyItemScreen from './SurveyItemScreen'
-import SubmitFooter from './SubmitFooter'
-import Data from './data'
+import MyHeader from '../header/Header';
+import SubmitFooter from '../footer/SubmitFooter'
+import Data from '../data'
 
 export default class SurveyScreen extends Component {
   static navigationOptions = {

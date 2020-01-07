@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { View, TouchableOpacity} from 'react-native';
 import {Footer, FooterTab, Text} from 'native-base'
 import { Button } from 'galio-framework';
 
@@ -14,7 +13,7 @@ class SubmitFooter extends Component {
     return (
         <Footer style={{backgroundColor: 'white'}}>
             <Button onPress={this.props._onSubmit}
-                    style={{backgroundColor: 'white'} 
+                    style={{backgroundColor: 'white'}
             }>
                 <Text>Submit</Text>
             </Button>

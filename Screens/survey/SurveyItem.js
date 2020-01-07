@@ -12,11 +12,10 @@ import {
   Body,
   Spinner,
   View,
-  Content,
 } from 'native-base';
-import MyHeader from './Header';
+import MyHeader from '../header/Header';
 import SurveyAnswerInput from './SurveyAnswerInput'
-import SubmitFooter from './SubmitFooter'
+import SubmitFooter from '../footer/SubmitFooter'
 
 class SurveyItemScreen extends Component{
     constructor(props){
@@ -131,10 +130,6 @@ const styles = StyleSheet.create({
     padding: 20,
     fontSize: 20,
     fontWeight: '700'
-  },
-  avatar: {
-    width: "100%",
-    height: 200
   },
   inputContainer: {
     paddingTop: 15
