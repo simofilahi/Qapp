@@ -9,6 +9,7 @@ import MapScreen from '../screens/map/Map';
 import Sliders from '../screens/slider_and_splach/Sliders';
 import MyFooter from '../screens/footer/Footer'
 import SurveyItemScreen from '../screens/survey/SurveyItem'
+import QrCodeReaderMethodes from '../screens/qrcode/QrCodeReaderMethodes'
 
 const RootStack = createStackNavigator(
   {
@@ -20,6 +21,7 @@ const RootStack = createStackNavigator(
     MapScreen: MapScreen,
     Sliders: Sliders,
     MyFooter: MyFooter,
+    QrCodeReaderMethodes: QrCodeReaderMethodes,
   }
 );
 

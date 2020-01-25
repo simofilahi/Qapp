@@ -2,15 +2,17 @@ import React, { Component } from 'react';
 import { Header, Left, Body, Right, Button, Icon, Title} from 'native-base';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { withNavigation } from 'react-navigation';
+import Orientation from 'react-native-orientation';
 
 class MyHeader extends Component {
+
   render() {
     const {title, backarrow} = this.props;
     let marginValue;
     if (backarrow)
-      marginValue = wp('4');
+      marginValue = wp('2%');
     else
-      marginValue = wp('1');
+      marginValue = wp('1%');
     return (
          <Header>
           {backarrow ? <Left>

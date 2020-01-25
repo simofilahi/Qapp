@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import {Footer, FooterTab, Text} from 'native-base'
+import {Footer, Text} from 'native-base'
+import {StyleSheet} from 'react-native';
 import { Button } from 'galio-framework';
+import {Alert} from 'react-native'
 
 class SubmitFooter extends Component {
   constructor(props) {
@@ -10,16 +12,53 @@ class SubmitFooter extends Component {
   }
 
   render() {
+    const {_onSubmit} = this.props
+
     return (
-        <Footer style={{backgroundColor: 'white'}}>
-            <Button onPress={this.props._onSubmit}
-                    style={{backgroundColor: 'white'}
-            }>
-                <Text>Submit</Text>
+        <Footer style={styles.footerStyle}>
+              <Button 
+                  onPress={() => {
+                    Alert.alert(
+                      'Confirmation',
+                      'Are sure you want to confirm',
+                      [
+                        {
+                          text: 'No',
+                          onPress: () => null,
+                        },
+                        {
+                          text: 'Yes',
+                          // 
+                          onPress: () => _onSubmit()
+                        },
+                      ],
+                      {cancelable: false},
+                    );
+                    
+                  }}
+                  style={styles.buttonStyle}
+              >
+              <Text 
+                style={styles.textStyle}
+              >
+                {this.props.title}
+              </Text>
             </Button>
         </Footer>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  footerStyle : {
+    backgroundColor: '#ffffff'
+  },
+  buttonStyle: {
+    backgroundColor: '#3F51B5',
+  },
+  textStyle : {
+    color: 'white'
+  }
+});
 
 export default SubmitFooter;

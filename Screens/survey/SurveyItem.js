@@ -64,13 +64,13 @@ class SurveyItemScreen extends Component{
     _renderRow = (item, index) => {
       return (
         <View>
-          <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
+          <Card key={index} style={styles.cardStyle}>
             <CardItem header bordered >
                   <Text>{item.question}</Text>
                   </CardItem>
                   <CardItem body bordered>
                     <Body>
-                      <Form style={{width: '100%'}}>
+                      <Form style={styles.formStyle}>
                         <SurveyAnswerInput 
                           item={item}
                           _onChange={this._onChange}
@@ -95,7 +95,11 @@ class SurveyItemScreen extends Component{
 
       return (
         <Container>
-            <MyHeader title={"SurveyAnswers"} backarrow={true} navigate={navigate}/>
+            <MyHeader 
+              title={"SurveyAnswers"} 
+              backarrow={true} 
+              navigate={navigate}
+            />
             {loaded ?
             <Container>
                 <List
@@ -104,7 +108,10 @@ class SurveyItemScreen extends Component{
                   renderRow={(item, index) => this._renderRow(item, index)}
                 >
               </List>
-                <SubmitFooter _onSubmit={this._onSubmit}/>
+                <SubmitFooter
+                  _onSubmit={this._onSubmit}
+                  title={'Submit'}
+                />
                 </Container>
             :
               <View>
@@ -117,6 +124,14 @@ class SurveyItemScreen extends Component{
 }
 
 const styles = StyleSheet.create({
+  cardStyle: {
+    marginLeft: 15,
+    marginRight: 15,
+    marginTop: "1%"
+  },
+  formStyle: {
+    width: '100%'
+  },
   container: {
     backgroundColor: '#F5FCFF',
   },

@@ -4,7 +4,6 @@ import QRCodeScanner from "react-native-qrcode-scanner";
 import {QRreader} from 'react-native-qr-scanner';
 import ImagePicker from 'react-native-image-picker';
 import { Overlay } from 'react-native-elements';
-import {Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { SafeAreaView } from "react-navigation";
 import { Button } from "native-base";
@@ -45,7 +44,8 @@ export default class QRCodeScannerScreen extends Component {
               path = response.uri;
           }
           QRreader(path).then((data)=>{
-            Alert.alert(data)
+            // verfieToken(dat)
+            alert(data)
             this.setState({reader: {
               message: 'succes',
               data: data
@@ -69,7 +69,7 @@ export default class QRCodeScannerScreen extends Component {
   onSuccess = async e => {
     try
     {
-      console.log(e.data);
+      alert(e.data);
       await this.props.navigation.navigate("SurveyScreen", {
         data: e.data,
         scanner: this.scanner

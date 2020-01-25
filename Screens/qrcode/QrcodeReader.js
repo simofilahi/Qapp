@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {QRreader} from 'react-native-qr-scanner';
 import ImagePicker from 'react-native-image-picker';
+import { Overlay } from 'react-native-elements';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
  
 export default class QrcodeReader extends Component {
@@ -17,7 +18,7 @@ export default class QrcodeReader extends Component {
   render() {
     return (
       <View style={styles.container}>
-          <Text>Hello</Text>
+          <Text></Text>
       </View>
     );
   }

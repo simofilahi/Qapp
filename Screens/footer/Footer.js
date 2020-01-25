@@ -4,7 +4,7 @@ import {Alert} from 'react-native'
 import { Footer, FooterTab, Button, Icon, Text} from 'native-base'
 
 export default class MyFooter extends Component {
-  _onPress = (navigate, screen) => {
+  _onPress = (navigate, screen, OverlayOnCall) => {
     if (Platform.OS === "android") {
       NetInfo.fetch().then(state => {
         if (state.isConnected){
@@ -13,18 +13,18 @@ export default class MyFooter extends Component {
     })}
   }
   render() {
-      const {navigate} = this.props;
+      const {navigate, OverlayOnCall} = this.props;
       return (
       <Footer >
           <FooterTab>
               <Button vertical 
-              onPress={() => this._onPress(navigate, 'MapScreen')}>
+              onPress={() => this._onPress(navigate, 'MapScreen', OverlayOnCall)}>
                 <Icon name="map" />
                 <Text>Maps</Text>
               </Button>
               <Button 
                 vertical 
-                onPress={() => navigate('QRCodeScreen')}
+                onPress={() => this._onPress(navigate, 'SurveyScreen', OverlayOnCall)}
                 >
                 <Icon name="camera" />
                 <Text>QR Scanner</Text>

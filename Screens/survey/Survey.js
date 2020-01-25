@@ -2,28 +2,14 @@ import React, { Component } from 'react';
 import {
     StyleSheet,
     TouchableOpacity,
-    FlatList,
-    ScrollView,
-    View
   } from 'react-native';
 import {
-    Form,
-    Textarea,
     List,
-    ListItem,
-    items,
-    Title,
     Container,
-    Header,
-    Content,
     Card,
     CardItem,
-    Thumbnail,
     Text,
-    Button,
     Icon,
-    Left,
-    Body,
     Right
  } from 'native-base';
 import MyHeader from '../header/Header';
@@ -117,15 +103,22 @@ export default class SurveyScreen extends Component {
     
     const data = this.state.data.parts
     return (
-      <Container style={{flex: 1, justifyContent: 'center'}}>
-        <MyHeader title={"Survey"} backarrow={true} navigate={navigate}/>
+      <Container style={styles.container}>
+        <MyHeader 
+          title={"Survey"}
+          backarrow={true}
+          navigate={navigate}
+        />
           <List
             dataArray={data}
             keyExtractor = {(item, index) => index.toString()}
             renderRow={(item, index) => this._renderRow(item, index, navigate)}
           >
           </List>
-          <SubmitFooter _senddata={this._senddata}/>
+          <SubmitFooter 
+            _senddata={this._senddata}
+            title={'All Done'}
+          />
       </Container>
     );
   }
@@ -133,7 +126,9 @@ export default class SurveyScreen extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#F5FCFF',
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'white',
   },
   listItem: {
     padding: 20,

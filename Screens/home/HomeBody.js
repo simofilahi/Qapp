@@ -11,7 +11,6 @@ render() {
             <ScrollView>
               <Card>
                 <CardItem header bordered style={styles.header}>
-                  <Text>Tips</Text>
                 </CardItem>
                 <CardItem bordered>
                   <Body>

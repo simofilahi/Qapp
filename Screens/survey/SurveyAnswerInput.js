@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 import {TouchableOpacity,StyleSheet, ScrollView} from 'react-native';
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
 import MutiSlider from '@ptomasroos/react-native-multi-slider';
+import SectionedMultiSelect from 'react-native-sectioned-multi-select';
+import DateTimePicker from '@react-native-community/datetimepicker'
+import NumericInput from 'react-native-numeric-input'
+import RangeSlider from 'rn-range-slider';
+import MultiSelect from 'react-native-multiple-select';
 import {
     Textarea,
     Text,
@@ -14,25 +19,51 @@ import {
     View,
     Switch
   } from 'native-base';
+import {
+  STRING_INPUT,
+  TEXTAREA_INPUT,
+  INTEGER_INPUT,
+  FLOAT_INPUT,
+  BOOLEAN_INPUT,
+  DATETIME_INPUT,
+  DATE_INPUT,
+  TIME_INPUT,
+  DROPDROWN_SINGLECHOISE_INPUT,
+  DROPDROWN_MULTIPLECHOISES_INPUT,
+  CHECKBOX_INPUT,
+  RADIO_INPUT,
+  SLIDER_FROMZERO_INPUT,
+  SLIDER_RANGE_INPUT
+} from './InputTypes'
 
-import DateTimePicker from '@react-native-community/datetimepicker'
-import NumericInput from 'react-native-numeric-input'
-import RangeSlider from 'rn-range-slider';
-
-const STRING_INPUT = 0
-const TEXTAREA_INPUT = 1
-const INTEGER_INPUT = 2
-const FLOAT_INPUT = 3
-const BOOLEAN_INPUT = 4
-const DATETIME_INPUT = 5
-const DATE_INPUT = 6
-const TIME_INPUT = 7
-const DROPDROWN_SINGLECHOISE_INPUT = 8
-const DROPDROWN_MULTIPLECHOISES_INPUT = 9
-const CHECKBOX_INPUT = 10
-const RADIO_INPUT = 11
-const SLIDER_FROMZERO_INPUT = 12
-const SLIDER_RANGE_INPUT = 13
+const items = [{
+  id: 0,
+  name: 'Ondo',
+}, {
+  id: 1,
+  name: 'Ogun',
+}, {
+  id: 2,
+  name: 'Calabar',
+}, {
+  id: 3,
+  name: 'Lagos',
+}, {
+  id: 4,
+  name: 'Maiduguri',
+}, {
+  id: 5,
+  name: 'Anambra',
+}, {
+  id: 6,
+  name: 'Benue',
+}, {
+  id: 8,
+  name: 'Kaduna',
+}, {
+  id: 9,
+  name: 'Abuja',
+}];
 
 export default class SurveyAnswerInput extends Component{
      constructor(props){
@@ -42,52 +73,156 @@ export default class SurveyAnswerInput extends Component{
         date: new Date(),
         mode: null,
         show: false,
-        stringDate: null,
+        DateString: false,
+        TimeString: false,
+        flag: 1,
         DDselected: 'none',
         MDDselectedItems: [],
+        selectedItems: [],
+        DateTimeShow: false
        }
      }
-     
-     setDate = (event, date) => {
-      date = date || this.state.date;
-      
-      this.setState({
-        show: false,
-        date: date,
-        stringDate: (this.state.mode === 'date') ? date.toDateString() : date.toLocaleTimeString()
-      });
-      }
+    
+    onSelectedItemsChange = selectedItems => {
+      this.setState({ selectedItems });
+    };
+     setTime = (event, date) => {
+       if (!(date == undefined)){
+          date = date || this.state.date;
 
-      show = mode => {
+          this.setState({
+            show: false,
+            date: date,
+            DisplayTime: (this.state.mode === 'time') ? date.toLocaleTimeString() : false,
+          });
+       }
+     }
+     setDate = (event, date) => {
+      if (!(date == undefined)){
+          date = date || this.state.date;
+          this.setState({
+            show: false,
+            date: date,
+            DisplayDate: (this.state.mode === 'date') ? date.toDateString() : false,
+          });
+        }
+      }
+      setDate_2 = (event, date, type) => {
+        if (date !== undefined && type === 'date'){
+            date = date || this.state.date;
+            this.setState({
+              show: false,
+              DateTimeShow: true,
+              date: date,
+              DisplayDate: (this.state.mode === 'date') ? date.toDateString() : false
+            }, () => {
+              this.pickerType('time')
+            });
+          }
+          else if (date !== undefined && type === 'time'){
+            date = date || this.state.date;
+            this.setState({
+              show: false,
+              DateTimeShow: false,
+              date: date,
+              DisplayTime: (this.state.mode === 'time') ? date.toLocaleTimeString() : false,
+            });
+          }
+          else if (date === undefined && type === 'date'){
+            this.setState({
+              show: false,
+              DateTimeShow: true
+            }, () => {
+                this.pickerType('time')
+            })
+          }
+          else if (date === undefined && type === 'time'){
+            this.setState({
+              show: false,
+              DateTimeShow: false
+            });
+          }
+        }
+      show = (mode) => {
         this.setState({
           show: true,
-          mode: mode,
+          mode: mode
         });
       }
-
-      datepicker = () => {
-        this.show('date')
+      pickerType = (type) => {
+        this.show(type)
       }
-
-      timepicker = () => {
-        this.show('time')
-      }
-
       DDOnChangeValue = (value, id) => {
         this.setState({DDselected: value})
       }
-
-      onSelectedItemsChange = (selectedItems) => {
-        console.log(selectedItems)
-        this.setState({MDDselectedItems: selectedItems });
-      };
-
     __render = (item, _onChange) => {
-      const {stringDate, show, date, mode, DDselected} = this.state
+      const {DisplayDate,
+        DisplayTime,
+        show,
+        date,
+        mode,
+        DDselected,
+        selectedItems,
+        DateTimeShow
+      } = this.state
+
       const type = item.type
       const id = item.name
 
       switch(type){
+        case DATETIME_INPUT:
+          return (
+            <View style={{alignItems: 'center'}}>
+              {DisplayDate ? <Text>Date: {DisplayDate}</Text> : null}
+              {DisplayTime ? <Text>Time: {DisplayTime}</Text> : null}
+              {show ? <DateTimePicker 
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                display="default"
+                onChange={(event, date) => {
+                  this.setDate_2(event, date, !DateTimeShow ? 'date' : 'time')}
+                }
+              />: null}
+              <Button onPress={() => {
+                  this.pickerType('date')
+              }}>
+                <Text>{!DisplayTime && !DisplayDate ? 'Select Time And Date' : 'Edit Time And Date'}</Text>
+              </Button>
+            </View>
+          )
+        case DATE_INPUT:
+          return (
+            <View style={{alignItems: 'center'}}>
+              {DisplayDate ? <Text>{DisplayDate}</Text> : null}
+              {show ? <DateTimePicker 
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                display="default"
+                onChange={this.setDate}
+              />: null}
+              <Button onPress={() => this.pickerType('date')}>
+                <Text>{!DisplayDate ? 'Select Date' : 'Edit Date'}</Text>
+              </Button>
+            </View>
+          )
+        case TIME_INPUT:
+          return (
+            <View style={{alignItems: 'center'}}>
+              {DisplayTime ? <Text>{DisplayTime}</Text> : null}
+              {show ? <DateTimePicker 
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                display="default"
+                onChange={this.setTime}
+              />: null}
+              <Button onPress={() => this.pickerType('time')}>
+                <Text style={{textAlign: 'justify'}}>{!DisplayTime ? 'Select Time' : 'Edit Time'}</Text>
+              </Button>
+            </View>
+          )
         case STRING_INPUT:
           return (
             <View>
@@ -164,48 +299,7 @@ export default class SurveyAnswerInput extends Component{
               </Left>
             </View>
           )
-        case DATETIME_INPUT:
-          return (
-            <View style={{alignItems: 'center'}}>
-              {stringDate ? <Text>{stringDate}</Text> : null}
-              {show ? <DateTimePicker 
-                value={date}
-                mode={mode}
-                is24Hour={true}
-                display="default"
-                onChange={this.setDate} 
-              />: null}
-              <Button onPress={this.datepicker}><Text>Select Date and Time</Text></Button>
-            </View>
-          )
-        case DATE_INPUT:
-          return (
-            <View style={{alignItems: 'center'}}>
-              {stringDate ? <Text>{stringDate}</Text> : null}
-              {show ? <DateTimePicker 
-                value={date}
-                mode={mode}
-                is24Hour={true}
-                display="default"
-                onChange={this.setDate}
-              />: null}
-              <Button onPress={this.datepicker}><Text>Select Date</Text></Button>
-            </View>
-          )
-        case TIME_INPUT:
-          return (
-            <View style={{alignItems: 'center'}}>
-              {stringDate ? <Text>{stringDate}</Text> : null}
-              {show ? <DateTimePicker 
-                value={date}
-                mode={mode}
-                is24Hour={true}
-                display="default"
-                onChange={this.setDate} 
-              />: null}
-              <Button onPress={this.timepicker}><Text style={{textAlign: 'justify'}}>Select Time</Text></Button>
-            </View>
-          )
+
         case DROPDROWN_SINGLECHOISE_INPUT:
           return (
             <View>
@@ -233,35 +327,30 @@ export default class SurveyAnswerInput extends Component{
           )
         case DROPDROWN_MULTIPLECHOISES_INPUT:
           return (
-            <View>
-              {/* <Multiselect
-                options={item.options} // Options to display in the dropdown
-                // selectedvalues={} // Preselected value to persist in dropdown
-                onSelect={() => {console.log("hello")}} // Function will trigger on select event
-                onRemove={() => {console.log("holla")}} // Function will trigger on remove event
-                displayValue="name" // Property name to display in the dropdown options
-                /> */}
-                {/* <SectionedMultiSelect
-                    items={item.options}
-                    uniqueKey={id}
-                    subKey={item.options.map(el => {
-                      return el.id
-                    })}
-                    selectText="Choose some things..."
-                    showDropDowns={true}
-                    readOnlyHeadings={true}
-                    onSelectedItemsChange={() => {
-                      console.log("hello")
-                      // this.onSelectedItemsChange
-                    }}
-                    showCancelButton={true}
-                    onCancel={() => {console.log("cancel")}}
-                    onConfirm={() => {console.log("confirm")}}
-                    // selectedItems={() => {
-                    //   console.log("here")
-                    // }}
-                /> */}
-            </View>
+        <View style={{ flex: 1 }}>
+          <MultiSelect
+            hideTags
+            items={items}
+            uniqueKey="id"
+            ref={(component) => { this.multiSelect = component }}
+            onSelectedItemsChange={this.onSelectedItemsChange}
+            selectedItems={selectedItems}
+            selectText="Pick Items"
+            searchInputPlaceholderText="Search Items..."
+            onChangeInput={ (text)=> console.log(text)}
+            altFontFamily="ProximaNova-Light"
+            tagRemoveIconColor="#CCC"
+            tagBorderColor="#CCC"
+            tagTextColor="#CCC"
+            selectedItemTextColor="#CCC"
+            selectedItemIconColor="#CCC"
+            itemTextColor="#000"
+            displayKey="name"
+            searchInputStyle={{ color: '#CCC' }}
+            submitButtonColor="#CCC"
+            submitButtonText="Submit"
+          />
+        </View>
           )
         // case CHECKBOX_INPUT:
         //     return (
@@ -290,7 +379,6 @@ export default class SurveyAnswerInput extends Component{
                     labelHorizontal={true}
                     buttonColor={'#C0C0C0'}
                     selectedButtonColor={'#3F51B5'}
-                    animation={true}
                     onPress={(value) => _onChange(id, value)}
                   />
                 </View>
