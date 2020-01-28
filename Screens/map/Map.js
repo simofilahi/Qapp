@@ -3,6 +3,7 @@ import { StyleSheet, View, Dimensions, StatusBar} from 'react-native';
 import MapView, {PROVIDER_GOOGLE} from 'react-native-maps';
 import geolocation from '@react-native-community/geolocation';
 import { Container } from 'native-base';
+import { PermissionsAndroid } from 'react-native';
 
 const {width, height} = Dimensions.get('window')
 const SCREEN_WIDTH = width
@@ -26,34 +27,52 @@ export default class MapScreen extends Component {
             }
         }
     }
-    componentDidMount(){
-      geolocation.getCurrentPosition(position => {
-                const {latitude, longitude} = position.coords;
-                const lat = latitude
-                const long = longitude
-                var initialRegion = {
-                    latitude: lat,
-                    longitude: long,
-                    latitudeDelta: LATITUDEDELTA,
-                    longitudeDelta: LONGITUDEDELTA
-                }
-                this.setState({initialRegion: initialRegion})
-            },
-                error => alert("Please Turn on your GPS"),
-                {timeout: 6000, maximumAge: 6000}
-            )
+    async  requestLocationPermission(){
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            'title': 'Example App',
+            'message': 'Example App access to your location '
+          }
+        )
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        } else {
+          alert("Location permission denied");
+        }
+      } catch (err) {
+      }
+    }
+    async  componentDidMount(){
+      await this.requestLocationPermission().then(
+        geolocation.getCurrentPosition(position => {
+          const {latitude, longitude} = position.coords;
+          const lat = latitude
+          const long = longitude
+          var initialRegion = {
+              latitude: lat,
+              longitude: long,
+              latitudeDelta: LATITUDEDELTA,
+              longitudeDelta: LONGITUDEDELTA
+          }
+          this.setState({initialRegion: initialRegion})
+      },
+          error => alert("Please Turn on your GPS"),
+          {timeout: 6000, maximumAge: 6000}
+      ),
         this.WatchId = geolocation.watchPosition(position => {
-            const {latitude, longitude} = position.coords;
-            const lat = latitude
-            const long = longitude
-            var lastRegion = {
-                latitude: lat,
-                longitude: long,
-                latitudeDelta: LATITUDEDELTA,
-                longitudeDelta: LONGITUDEDELTA
-            }
-            this.setState({initialRegion: lastRegion})
-        })
+        const {latitude, longitude} = position.coords;
+        const lat = latitude
+        const long = longitude
+        var lastRegion = {
+            latitude: lat,
+            longitude: long,
+            latitudeDelta: LATITUDEDELTA,
+            longitudeDelta: LONGITUDEDELTA
+        }
+        this.setState({initialRegion: lastRegion})
+    })
+        )
     }
     componentWillUnmount(){
         geolocation.clearWatch(this.WatchId)
@@ -63,14 +82,13 @@ export default class MapScreen extends Component {
     return (
     <Container>
         <View style={styles.MainContainer}>
-        <StatusBar hidden={true} />
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.mapStyle}
           showsUserLocation={true}
           zoomEnabled={true}
           zoomControlEnabled={true}
-          Region={(this.state.initialRegion.latitude) ? this.state.initialRegion : null}
+          initialRegion={(this.state.initialRegion.latitude) ? this.state.initialRegion : null}
           >
          </MapView>
         </View>
@@ -81,6 +99,7 @@ export default class MapScreen extends Component {
 
 const styles = StyleSheet.create({
   MainContainer: {
+    flex: 1,
     position: 'absolute',
     top: 0,
     left: 0,

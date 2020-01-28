@@ -14,96 +14,109 @@ import {
  } from 'native-base';
 import MyHeader from '../header/Header';
 import SubmitFooter from '../footer/SubmitFooter'
-import Data from '../data'
 
 export default class SurveyScreen extends Component {
+
   static navigationOptions = {
     header: null
   };
-  // constructor(props) {
-  //   super(props);
-  //   this.state = { 
-  //     qrCodeData: " ", 
-  //     scanner: undefined 
-  //   };
-  // }
-  // componentWillUnmount(){
-  //   // this.scanner.reactivate();
-  //   this.setState({ qrCodeData: "", scanner: undefined });
-  //   this.props.navigation.popToTop()
-  // }
-  // componentDidMount() {
-  //   const qrCodeData = this.props.navigation.getParam("data", "No data read");
-  //   const scanner = this.props.navigation.getParam("scanner", () => false);
-  //   this.setState({ qrCodeData: qrCodeData, scanner: scanner });
-  //   const data = this.state.qrCodeData;
-  //    console.log(data)
-  // }
+
   constructor(props){
     super(props)
     this.state = {
-      response: {
-        uuid: '',
-        AnswersOfparts: []
-      },
+      qrcodeData: null,
       data: [],
+      response: null,
+      uuid: '',
+      row: null,
+    } 
+  }
+
+  componentWillUnmount(){
+    // 
+    if (this.scanner !== undefined && this.scanner !== null && this.scanner !== false){
+      this.scanner.reactivate();
+      this.setState({ data: "", scanner: undefined });
+      // this.props.navigation.popToTop()
     }
-    
-}
-  componentDidMount(){
-    this.setState({data: Data, response: {...this.state.response, uuid: Data.uuid}})
+   }
+
+  componentDidMount() {
+    const data = this.props.navigation.getParam("data", () => false);
+    const qrcodeData = this.props.navigation.getParam("qrcodeData", () => false)
+    const scanner = this.props.navigation.getParam("scanner", () => false);
+
+    console.log(scanner)
+    this.setState(
+      { 
+        qrcodeData: qrcodeData,
+        data: data,
+        uuid: data.uuid,
+        scanner: scanner,
+      }
+    );
   }
 
-  getAnswers = (PartObj) => {
-    var AnswersOfparts = this.state.response.AnswersOfparts
-    AnswersOfparts = AnswersOfparts.filter(element => {
-      if (element.PartId !== PartObj.PartId)
-          return element
-    })
-    AnswersOfparts.push(PartObj)
-    return this.setState({response : {...this.state.response, AnswersOfparts: AnswersOfparts}})
+  updateRow = (row) => {
+    if (row !== null && row !== undefined){
+      this.setState(
+        {
+          row: row,
+        }
+      )
+    }
   }
-  _senddata = () => {
 
-  }
-  // componentDidUpdate(){
-  //   const {response} = this.state
-
-  //   console.log(JSON.stringify(response))
-  //   console.log("updated")
-  // }
-  _renderRow = (item, index, navigate) => {
+  _renderRow = (item, index, navigate, uuid, row, qrcodeData) => {
     return (
       <TouchableOpacity  onPress = {
         () => navigate('SurveyItemScreen', 
-          {item: item, getAnswers: this.getAnswers}
+          {
+            updateRow: this.updateRow,
+            qrcodeData: qrcodeData,
+            uuid: uuid,
+            row: row,
+            item: item,
+          }
         )
-      }> 
-      <Card  key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
+        
+      }
+      activeOpacity={0.5}
+      style={{pointerEvents: 'none'}}
+      > 
+      <Card key={index} style={{marginLeft: 15, marginRight: 15, marginTop: "1%"}}>
         <CardItem header bordered >
             <Text>{item.title}</Text>
             <Right>
-              <Icon name="arrow-forward" 
-                    style={{color: 'black', marginRight: '-25%'}}
+              <Icon name="check-circle"
+                    type="FontAwesome"
+                    style={styles.iconStyle}
                     onPress = {
                       () => navigate('SurveyItemScreen', 
-                      {item: item, getAnswers: this.getAnswers}
+                        {
+                          updateRow: this.updateRow,
+                          qrcodeData: qrcodeData,
+                          uuid: uuid,
+                          row: row,
+                          item: item,
+                        }
                       )
                   }
               />
             </Right>
         </CardItem>
       </Card>
-      </TouchableOpacity>
+     </TouchableOpacity>
     )
   }
   render() {
     // const data = this.state.qrCodeData;
     const {navigate} = this.props.navigation;
-    
+    const {uuid, row, qrcodeData} = this.state
     const data = this.state.data.parts
+
     return (
-      <Container style={styles.container}>
+      <Container style={styles.container} >
         <MyHeader 
           title={"Survey"}
           backarrow={true}
@@ -112,7 +125,7 @@ export default class SurveyScreen extends Component {
           <List
             dataArray={data}
             keyExtractor = {(item, index) => index.toString()}
-            renderRow={(item, index) => this._renderRow(item, index, navigate)}
+            renderRow={(item, index) => this._renderRow(item, index, navigate, uuid, row, qrcodeData)}
           >
           </List>
           <SubmitFooter 
@@ -128,7 +141,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: 'white'
+  },
+  iconStyle: {
+    color: 'green',
+    marginRight: '-25%'
   },
   listItem: {
     padding: 20,
@@ -156,3 +173,18 @@ const styles = StyleSheet.create({
     fontSize: 25,
   }
 });
+
+
+// {
+// 	"row": null,
+// 	"variables": [
+// 		{
+// 		    "id": 112,
+// 		    "value": "lol"
+// 		},
+// 		{
+// 		    "id": 113,
+// 		    "value": "ssas"
+// 		}
+// 	]
+// }

@@ -24,7 +24,7 @@ export default class MyFooter extends Component {
               </Button>
               <Button 
                 vertical 
-                onPress={() => this._onPress(navigate, 'SurveyScreen', OverlayOnCall)}
+                onPress={() => this._onPress(navigate, 'QRCodeScreen', OverlayOnCall)}
                 >
                 <Icon name="camera" />
                 <Text>QR Scanner</Text>
