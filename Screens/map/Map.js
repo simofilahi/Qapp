@@ -24,27 +24,17 @@ export default class MapScreen extends Component {
                 longitude: 0,
                 latitudeDelta: LATITUDEDELTA,
                 longitudeDelta: LONGITUDEDELTA
-            }
+            },
         }
     }
-    async  requestLocationPermission(){
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            'title': 'Example App',
-            'message': 'Example App access to your location '
-          }
-        )
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        } else {
-          alert("Location permission denied");
-        }
-      } catch (err) {
-      }
-    }
-    async  componentDidMount(){
-      await this.requestLocationPermission().then(
+
+   async componentDidMount() {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      )
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        this.setState({granted: true})
         geolocation.getCurrentPosition(position => {
           const {latitude, longitude} = position.coords;
           const lat = latitude
@@ -56,45 +46,50 @@ export default class MapScreen extends Component {
               longitudeDelta: LONGITUDEDELTA
           }
           this.setState({initialRegion: initialRegion})
-      },
-          error => alert("Please Turn on your GPS"),
-          {timeout: 6000, maximumAge: 6000}
-      ),
+          },
+              error => alert("Please Turn on your GPS"),
+              {timeout: 2000, maximumAge: 1000}
+          )
         this.WatchId = geolocation.watchPosition(position => {
-        const {latitude, longitude} = position.coords;
-        const lat = latitude
-        const long = longitude
-        var lastRegion = {
-            latitude: lat,
-            longitude: long,
-            latitudeDelta: LATITUDEDELTA,
-            longitudeDelta: LONGITUDEDELTA
-        }
-        this.setState({initialRegion: lastRegion})
-    })
-        )
+            const {latitude, longitude} = position.coords;
+            const lat = latitude
+            const long = longitude
+            var lastRegion = {
+                latitude: lat,
+                longitude: long,
+                latitudeDelta: LATITUDEDELTA,
+                longitudeDelta: LONGITUDEDELTA
+            }
+            this.setState({initialRegion: lastRegion})
+        })
+      } else {
+        alert("Location permission denied");
+      }
+    } catch (err) {
+      this.setState({granted: false})
+    }
+     
     }
     componentWillUnmount(){
         geolocation.clearWatch(this.WatchId)
     }
   render() {
-    const {navigate} = this.props.navigation
-    return (
-    <Container>
-        <View style={styles.MainContainer}>
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={styles.mapStyle}
-          showsUserLocation={true}
-          zoomEnabled={true}
-          zoomControlEnabled={true}
-          initialRegion={(this.state.initialRegion.latitude) ? this.state.initialRegion : null}
-          >
-         </MapView>
-        </View>
-    </Container>
-    );
-  }
+      return (
+        <Container>
+            <View style={styles.MainContainer}>
+                   <MapView
+                   provider={PROVIDER_GOOGLE}
+                   style={styles.mapStyle}
+                   showsUserLocation={true}
+                   zoomEnabled={true}
+                   zoomControlEnabled={true}
+                   initialRegion={(this.state.initialRegion.latitude) ? this.state.initialRegion : null}
+                   >
+                  </MapView>
+            </View>
+        </Container>
+        );
+    }
 }
 
 const styles = StyleSheet.create({

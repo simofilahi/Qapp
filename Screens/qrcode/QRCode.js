@@ -11,6 +11,7 @@ import Axios from "axios";
 import jwtDecode from 'jwt-decode';
 import NetInfo from '@react-native-community/netinfo'
 import Spinner from 'react-native-loading-spinner-overlay';
+import data from './data'
 
 export default class QRCodeScannerScreen extends Component {
   static navigationOptions = {
@@ -74,7 +75,6 @@ export default class QRCodeScannerScreen extends Component {
           if (state.isConnected){
             try {
               var token = jwtDecode(data)
-            
               // Check exp time
               this.setState({loading : true})
               const url = `http://wtr.oulhafiane.me/api/anon/dataset/${token.dataset}/parts`
@@ -98,7 +98,7 @@ export default class QRCodeScannerScreen extends Component {
                 this.setState({
                   loading: false
                 })
-                reject("Something wrong try again")
+                reject(err)
               })
             } catch {
               this.setState({
