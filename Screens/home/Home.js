@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import MyHeader from '../header/Header';
 import MyFooter from '../footer/Footer';
-import HomeBody from '../home/HomeBody';
-import {Container} from 'native-base';
+import HomeBody from './HomeBody';
+import ListOfSurvey from './ListOfSurvey';
+import {Container, Tab, Tabs} from 'native-base';
 import Orientation from 'react-native-orientation';
 import {
   StyleSheet,
@@ -58,39 +59,11 @@ export default class HomeScreen extends Component {
     try {
       const value = await AsyncStorage.getItem('data');
       if (value !== null) {
-        Alert.alert(
-          'Alert Title',
-          'My Alert Msg',
-          [
-            {
-              text: 'Ask me later',
-              onPress: () => console.log('Ask me later pressed'),
-            },
-            {
-              text: 'Cancel',
-              onPress: () => console.log('Cancel Pressed'),
-              style: 'cancel',
-            },
-            {
-              text: 'OK',
-              onPress: () => {
-                this.setState({
-                  boolean: true,
-                  Surveys: [data],
-                });
-                const data = JSON.parse(value);
-
-                // console.log('data in the beging ====>', data);
-                // navigate('SurveyScreen', {
-                //   data: data,
-                //   qrcodeData: data.qrcodeData,
-                //   scanner: false,
-                // });
-              },
-            },
-          ],
-          {cancelable: false},
-        );
+        const data = JSON.parse(value);
+        this.setState({
+          boolean: true,
+          Surveys: data,
+        });
       }
     } catch (error) {
       // Error retrieving data
@@ -124,7 +97,18 @@ export default class HomeScreen extends Component {
         ) : (
           <Container>
             <MyHeader title={'Home'} backarrow={false} />
-            <HomeBody navigate={navigate} boolean={boolean} Surveys={Surveys} />
+            <Tabs tabBarPosition="overlayTop" scrollWithoutAnimation={true}>
+              <Tab heading="Guide">
+                <HomeBody />
+              </Tab>
+              <Tab heading="Survey">
+                <ListOfSurvey
+                  boolean={boolean}
+                  Surveys={Surveys}
+                  navigate={navigate}
+                />
+              </Tab>
+            </Tabs>
             <MyFooter navigate={navigate} OverlayOnCall={this.OverlayOnCall} />
           </Container>
         )}

@@ -461,6 +461,7 @@ export default class SurveyAnswerInput extends Component {
           </View>
         );
       case DROPDROWN_SINGLECHOISE_INPUT:
+        console.log('array ', array);
         return (
           <View>
             <SingleSelect

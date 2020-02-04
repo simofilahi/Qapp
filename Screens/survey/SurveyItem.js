@@ -168,7 +168,7 @@ class SurveyItemScreen extends Component {
     const {navigate} = this.props.navigation;
     const {loading} = this.state;
 
-    // console.log('here variables ===========>', JSON.stringify(variables));
+    console.log('here variables ===========>', JSON.stringify(variables));
     return (
       <Container style={styles.container}>
         <MyHeader

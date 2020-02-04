@@ -109,11 +109,11 @@ export default class SurveyScreen extends Component {
           //     console.log('variables ==> ', elem);
           //   });
           // });
-          console.log('******************************');
-          console.log('******************************');
-          console.log('data in Change ', JSON.stringify(this.state.data.parts));
-          console.log('******************************');
-          console.log('******************************');
+          // console.log('******************************');
+          // console.log('******************************');
+          // console.log('data in Change ', JSON.stringify(this.state.data.parts));
+          // console.log('******************************');
+          // console.log('******************************');
         },
       );
     } catch {}
@@ -140,7 +140,7 @@ export default class SurveyScreen extends Component {
     );
   };
 
-  handleOptions = async data => {
+  AddParamToOptions = async data => {
     let promise = new Promise((resolve, reject) => {
       resolve(
         data.parts.map(elem => {
@@ -183,7 +183,7 @@ export default class SurveyScreen extends Component {
     return parts;
   };
 
-  async componentDidMount() {
+  async UNSAFE_componentWillMount() {
     const data = this.props.navigation.getParam('data', () => false);
     const qrcodeData = this.props.navigation.getParam(
       'qrcodeData',
@@ -191,16 +191,32 @@ export default class SurveyScreen extends Component {
     );
     const scanner = this.props.navigation.getParam('scanner', () => false);
 
-    // console.log('data uuid', data);
-    // console.log('(((((((((((((((((((((((((((((((((((');
-    // console.log('first data is ==> ', JSON.stringify(data));
-    // console.log('(((((((((((((((((((((((((((((((((((');
-    this.setState({
-      qrcodeData: qrcodeData,
-      data: data,
-      uuid: data.uuid,
-      scanner: scanner,
-    });
+    if (data.qrcodeData === undefined) {
+      this.setState(
+        {
+          qrcodeData: qrcodeData,
+          data: data,
+          uuid: data.uuid,
+          scanner: scanner,
+        },
+        () => {
+          this.AddParamToOptions(data).then(res => {
+            this.setState({
+              data: {...data, parts: res, qrcodeData: qrcodeData},
+              uuid: data.uuid,
+              scanner: scanner,
+            });
+          });
+        },
+      );
+    } else if (data.qrcodeData !== undefined) {
+      this.setState({
+        qrcodeData: qrcodeData,
+        data: {...data, qrcodeData: qrcodeData},
+        uuid: data.uuid,
+        scanner: scanner,
+      });
+    }
   }
 
   //
@@ -240,12 +256,26 @@ export default class SurveyScreen extends Component {
     const {data} = this.state;
 
     try {
-      var newdata = JSON.stringify(data);
-      console.log('FINAL DATA ===> ', newdata);
-      await AsyncStorage.setItem('data', newdata);
-      this.retrieveData();
+      let newdata = [];
+      const value = await AsyncStorage.getItem('data');
+      console.log('totototooto');
+      if (value === null) {
+        newdata = [data];
+        newdata = JSON.stringify(newdata);
+        console.log('first FINAL DATA ===> ', newdata);
+        // don't forget this check if local storage is full
+        await AsyncStorage.setItem('data', newdata);
+      } else if (value !== null) {
+        newdata = JSON.parse(value);
+        newdata = [...newdata, data];
+        console.log('second FINAL DATA ===> ', newdata);
+        await AsyncStorage.removeItem('data');
+        newdata = JSON.stringify(newdata);
+        console.log('second FINAL DATA in push ===> ', newdata);
+        await AsyncStorage.setItem('data', newdata);
+      }
     } catch (error) {
-      Error;
+      alert(error);
     }
   };
 

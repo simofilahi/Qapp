@@ -3,12 +3,17 @@ import {
   Card,
   CardItem,
   Text,
-  Button,
   Body,
   Container,
   Content,
+  List,
+  Right,
+  Icon,
+  ListItem,
+  View,
 } from 'native-base';
-import {StyleSheet, SafeAreaView, ScrollView, Image} from 'react-native';
+import {Button} from 'react-native-elements';
+import {StyleSheet, SafeAreaView, ScrollView, Image, Alert} from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -18,47 +23,39 @@ export default class App extends Component {
   render() {
     const {navigate, boolean, Surveys} = this.props;
     return (
-      <Container style={styles.container}>
-        {!boolean ? (
-          <Content padder>
-            <Card>
-              <CardItem header bordered style={styles.header}></CardItem>
-              <CardItem bordered>
-                <Body>
-                  <Image
-                    style={styles.img}
-                    source={require('../../Assests/img/homeimg.png')}
-                  />
-                </Body>
-              </CardItem>
-              <CardItem bordered style={{height: hp('10')}}>
-                <Body>
-                  <Text style={styles.Text}>
-                    NativeBase is a free and open source framework that enable
-                    developers to build high-quality mobile apps using React
-                    Native iOS and Android apps with a fusion of ES6.
-                  </Text>
-                </Body>
-              </CardItem>
-              <CardItem footer bordered style={styles.footer}>
-                <Body>
-                  <Button
+      <Container>
+        <Content padder>
+          <Card>
+            <CardItem header bordered style={styles.header}></CardItem>
+            <CardItem bordered>
+              <Body>
+                <Image
+                  style={styles.img}
+                  source={require('../../Assests/img/homeimg.png')}
+                />
+              </Body>
+            </CardItem>
+            <CardItem bordered style={{height: hp('10')}}>
+              <Body>
+                <Text style={styles.Text}>
+                  NativeBase is a free and open source framework that enable
+                  developers to build high-quality mobile apps using React
+                  Native iOS and Android apps with a fusion of ES6.
+                </Text>
+              </Body>
+            </CardItem>
+            <CardItem footer bordered style={styles.footer}>
+              <Body>
+                {/* <Button
                     primary
                     style={{alignSelf: 'center'}}
                     onPress={() => navigate('Sliders')}>
                     <Text>Get Started</Text>
-                  </Button>
-                </Body>
-              </CardItem>
-            </Card>
-          </Content>
-        ) : (
-          <Container>
-            <Content padder>
-              <Text>This is Content Section</Text>
-            </Content>
-          </Container>
-        )}
+                  </Button> */}
+              </Body>
+            </CardItem>
+          </Card>
+        </Content>
       </Container>
     );
   }
@@ -90,5 +87,11 @@ const styles = StyleSheet.create({
     height: hp('50'),
     width: wp('55'),
     alignSelf: 'center',
+  },
+  iconStyle_1: {
+    color: 'red',
+  },
+  iconStyle_2: {
+    color: 'green',
   },
 });
