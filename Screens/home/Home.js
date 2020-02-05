@@ -3,7 +3,7 @@ import MyHeader from '../header/Header';
 import MyFooter from '../footer/Footer';
 import HomeBody from './HomeBody';
 import ListOfSurvey from './ListOfSurvey';
-import {Container, Tab, Tabs} from 'native-base';
+import {Container, Tab, Tabs, Content} from 'native-base';
 import Orientation from 'react-native-orientation';
 import {
   StyleSheet,
@@ -25,6 +25,7 @@ import {
 import {SafeAreaView} from 'react-navigation';
 import {Button} from 'native-base';
 import AsyncStorage from '@react-native-community/async-storage';
+import BottomNavigator from '../footer/BottomNavigator';
 
 export default class HomeScreen extends Component {
   constructor(props) {
@@ -97,20 +98,23 @@ export default class HomeScreen extends Component {
         ) : (
           <Container>
             <MyHeader title={'Home'} backarrow={false} />
-            <Tabs tabBarPosition="overlayTop" scrollWithoutAnimation={true}>
-              <Tab heading="Guide">
-                <HomeBody />
-              </Tab>
-              <Tab heading="Survey">
-                <ListOfSurvey
-                  boolean={boolean}
-                  Surveys={Surveys}
-                  navigate={navigate}
-                />
-              </Tab>
-            </Tabs>
-            <MyFooter navigate={navigate} OverlayOnCall={this.OverlayOnCall} />
-          </Container>
+     
+              <Tabs tabBarPosition="overlayTop" scrollWithoutAnimation={true}>
+                <Tab heading="Guide">
+                  <HomeBody />
+                </Tab>
+                <Tab heading="Survey">
+                  <ListOfSurvey
+                    boolean={boolean}
+                    Surveys={Surveys}
+                    navigate={navigate}
+                  />
+                </Tab>
+              </Tabs>
+    
+            <BottomNavigator />
+            {/* <MyFooter navigate={navigate} OverlayOnCall={this.OverlayOnCall} /> */}
+            </Container>
         )}
       </Container>
     );

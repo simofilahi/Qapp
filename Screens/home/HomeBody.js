@@ -23,8 +23,7 @@ export default class App extends Component {
   render() {
     const {navigate, boolean, Surveys} = this.props;
     return (
-      <Container>
-        <Content padder>
+      <Content padder>
           <Card>
             <CardItem header bordered style={styles.header}></CardItem>
             <CardItem bordered>
@@ -55,8 +54,7 @@ export default class App extends Component {
               </Body>
             </CardItem>
           </Card>
-        </Content>
-      </Container>
+          </Content>
     );
   }
 }
