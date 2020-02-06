@@ -1,5 +1,5 @@
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
-import { createStackNavigator} from 'react-navigation-stack';
+import { createStackNavigator } from 'react-navigation-stack';
 import HomeScreen from '../screens/home/Home';
 import SurveyScreen from '../screens/survey/Survey';
 import SplashScreen from '../screens/slider_and_splach/SplashScreen';
@@ -29,7 +29,7 @@ const RootNavigator = createSwitchNavigator(
   {
     RootStack: RootStack,
     SplashScreen: SplashScreen
-  }, 
+  },
   {
     initialRouteName: 'SplashScreen',
   }

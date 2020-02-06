@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   Card,
   CardItem,
@@ -10,11 +10,12 @@ import {
   Icon,
   View,
 } from 'native-base';
-import {Button} from 'react-native-elements';
-import {StyleSheet} from 'react-native';
+import { Button } from 'react-native-elements';
+import { StyleSheet } from 'react-native';
 
 export class ListOfSurvey extends Component {
   _renderRow = (survey, index, navigate) => {
+    console.log("yoyoyoyyooyoyoy", survey)
     return (
       <Card>
         <CardItem
@@ -31,9 +32,9 @@ export class ListOfSurvey extends Component {
                 flexDirection: 'row',
                 marginRight: '-25%',
               }}>
-              <View style={{margin: 2}}>
+              <View style={{ margin: 2 }}>
                 <Button
-                  buttonStyle={{backgroundColor: 'white'}}
+                  buttonStyle={{ backgroundColor: 'white' }}
                   onPress={() => alert('hello')}
                   icon={
                     <Icon
@@ -44,9 +45,9 @@ export class ListOfSurvey extends Component {
                   }
                 />
               </View>
-              <View style={{margin: 2}}>
+              <View style={{ margin: 2 }}>
                 <Button
-                  buttonStyle={{backgroundColor: 'white'}}
+                  buttonStyle={{ backgroundColor: 'white' }}
                   onPress={() => alert('hello')}
                   icon={
                     <Icon
@@ -65,7 +66,7 @@ export class ListOfSurvey extends Component {
     );
   };
   render() {
-    const {navigate, boolean, Surveys} = this.props;
+    const { navigate, boolean, Surveys } = this.props;
     console.log('ttttttttttttttttttttt', Surveys);
     return (
       <Container>
