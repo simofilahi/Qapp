@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import MyHeader from '../header/Header';
 import MyFooter from '../footer/BottomNavigator';
 import HomeBody from './HomeBody';
 import ListOfSurvey from './ListOfSurvey';
-import { Container, Tab, Tabs, Content } from 'native-base';
+import {Container, Tab, Tabs, Content} from 'native-base';
 import Orientation from 'react-native-orientation';
 import {
   StyleSheet,
@@ -15,15 +15,15 @@ import {
   Alert,
 } from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
-import { QRreader } from 'react-native-qr-scanner';
+import {QRreader} from 'react-native-qr-scanner';
 import ImagePicker from 'react-native-image-picker';
-import { Overlay } from 'react-native-elements';
+import {Overlay} from 'react-native-elements';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { SafeAreaView } from 'react-navigation';
-import { Button } from 'native-base';
+import {SafeAreaView} from 'react-navigation';
+import {Button} from 'native-base';
 
 import BottomNavigator from '../footer/BottomNavigator';
 
@@ -35,8 +35,8 @@ export default class HomeScreen extends Component {
       boolean: false,
       Surveys: [],
       TabId: 1,
+      template: [],
     };
-
   }
   static navigationOptions = {
     header: null,
@@ -46,31 +46,56 @@ export default class HomeScreen extends Component {
     const data = this.props.navigation.getParam('data', false);
     const TabId = this.props.navigation.getParam('TabId', false);
 
-    console.log("data ====>", data)
-    console.log("tabid ==> ", TabId)
+    console.log('data ====>', data);
+    console.log('tabid ==> ', TabId);
     if (data !== false && TabId !== false) {
       this.setState({
         Surveys: data,
         TabId: TabId,
-        boolean: true
-      })
+        boolean: true,
+      });
     }
   }
 
+  deleteAll = () => {
+    alert('delete all');
+  };
+
+  feedBack = () => {
+    alert('feedback');
+  };
+
+  addNewRow = () => {
+    const {navigate} = this.props.navigation;
+
+    // check exp date of qrcode
+    navigate('SurveyScreen', {
+      data: template.data,
+      qrcodeData: template.qrcodeData,
+    });
+  };
+
   render() {
-    const { navigate } = this.props.navigation;
-    const { boolean, Surveys, TabId } = this.state;
+    const {navigate} = this.props.navigation;
+    const {boolean, Surveys, TabId} = this.state;
 
     return (
       <Container>
-        <MyHeader title={'Home'} backarrow={false} />
+        <MyHeader
+          title={'Home'}
+          backarrow={false}
+          TabId={TabId}
+          deleteAll={this.deleteAll}
+          feedBack={this.feedBack}
+        />
         <Tabs
+          locked={true}
           initialPage={TabId}
           tabBarPosition="overlayTop"
           scrollWithoutAnimation={true}
-          onChangeTab={(e) => this.setState({ TabId: e.i })}>
-          <Tab heading="Guide" >
-            <HomeBody />
+          onChangeTab={e => this.setState({TabId: e.i})}>
+          <Tab heading="Guide">
+            <HomeBody navigate={navigate} />
           </Tab>
           <Tab heading="Survey">
             <ListOfSurvey
@@ -80,8 +105,12 @@ export default class HomeScreen extends Component {
             />
           </Tab>
         </Tabs>
-        <MyFooter navigate={navigate} />
-      </Container >
+        <MyFooter
+          navigate={navigate}
+          TabId={TabId}
+          addNewRow={this.addNewRow}
+        />
+      </Container>
     );
   }
 }

@@ -1,16 +1,8 @@
 import React, {Component} from 'react';
-import {
-  View,
-  StyleSheet,
-  Image,
-  Dimensions,
-  StatusBar,
-  Text,
-} from 'react-native';
+import {View, StyleSheet, Image, Text} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import {Spinner} from 'native-base';
-const TWO_SECONDS = 4000;
-const {width, height} = Dimensions.get('window');
+const TWO_SECONDS = 2000;
 
 export default class SplashScreen extends Component {
   static navigationOptions = {
