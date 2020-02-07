@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {View, StyleSheet, Image, Text} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import {Spinner} from 'native-base';
+var RNFS = require('react-native-fs');
 const TWO_SECONDS = 2000;
 
 export default class SplashScreen extends Component {
@@ -10,16 +11,34 @@ export default class SplashScreen extends Component {
   };
 
   UNSAFE_componentWillMount() {
-    this.retrieveData()
-      .then(data => {
+    let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+
+    RNFS.readFile(path, 'utf8')
+      .then(rowidarray => {
+        // console.log('before ==> ', rowidarray);
+        rowidarray = JSON.parse(rowidarray);
+        // console.log('after ==> ', rowidarray);
+        let Surveys = [];
+        rowidarray.forEach(elem => {
+          let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+          RNFS.readFile(path, 'utf8').then(res => {
+            // console.log('content of file_0.txt', res);
+            res = JSON.parse(res);
+            Surveys.push(res);
+            // console.log('Survey ====> ', Surveys);
+          });
+        });
+
         setTimeout(() => {
           this.props.navigation.navigate('HomeScreen', {
             TabId: 1,
-            data: data,
+            data: Surveys,
           });
         }, TWO_SECONDS);
       })
       .catch(err => {
+        // console.log('error ***********************88');
+        // console.log(err.message);
         setTimeout(() => {
           this.props.navigation.navigate('HomeScreen', {
             TabId: 0,
@@ -27,6 +46,23 @@ export default class SplashScreen extends Component {
           });
         }, TWO_SECONDS);
       });
+    // this.retrieveData()
+    //   .then(data => {
+    //     setTimeout(() => {
+    //       this.props.navigation.navigate('HomeScreen', {
+    //         TabId: 1,
+    //         data: data,
+    //       });
+    //     }, TWO_SECONDS);
+    //   })
+    //   .catch(err => {
+    //     setTimeout(() => {
+    //       this.props.navigation.navigate('HomeScreen', {
+    //         TabId: 0,
+    //         data: [],
+    //       });
+    //     }, TWO_SECONDS);
+    //   });
   }
 
   retrieveData = () => {

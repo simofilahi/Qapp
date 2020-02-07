@@ -24,6 +24,7 @@ import {
 } from 'react-native-responsive-screen';
 import {SafeAreaView} from 'react-navigation';
 import {Button} from 'native-base';
+var RNFS = require('react-native-fs');
 
 import BottomNavigator from '../footer/BottomNavigator';
 
@@ -46,13 +47,13 @@ export default class HomeScreen extends Component {
     const data = this.props.navigation.getParam('data', false);
     const TabId = this.props.navigation.getParam('TabId', false);
 
-    console.log('data ====>', data);
-    console.log('tabid ==> ', TabId);
+    // console.log('data ====>', data);
+    // console.log('tabid ==> ', TabId);
     if (data !== false && TabId !== false) {
       this.setState({
         Surveys: data,
         TabId: TabId,
-        boolean: true,
+        boolean: data.length === 0 ? false : true,
       });
     }
   }
@@ -67,12 +68,39 @@ export default class HomeScreen extends Component {
 
   addNewRow = () => {
     const {navigate} = this.props.navigation;
+    let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
 
-    // check exp date of qrcode
-    navigate('SurveyScreen', {
-      data: template.data,
-      qrcodeData: template.qrcodeData,
-    });
+    RNFS.readFile(path, 'utf8')
+      .then(rowidarray => {
+        rowidarray = JSON.parse(rowidarray);
+        let rowid = rowidarray[rowidarray.length - 1] + 1;
+        rowidarray[rowidarray.length] = rowidarray[rowidarray.length - 1] + 1;
+        console.log('rowidarray', rowidarray);
+        let string = JSON.stringify(rowidarray);
+        RNFS.unlink(path, 'utf8')
+          .then(res => {
+            RNFS.writeFile(path, string, 'utf8')
+              .then(res => {
+                let path = RNFS.DocumentDirectoryPath + '/template.txt';
+                RNFS.readFile(path, 'utf8')
+                  .then(template => {
+                    template = JSON.parse(template);
+                    navigate('SurveyScreen', {
+                      data: {...template, rowid: rowid},
+                      qrcodeData: template.qrcodeData,
+                    });
+                  })
+                  .catch(err => {});
+              })
+              .catch(err => {});
+          })
+          .catch(err => {
+            RNFS.writeFile(path, string, 'utf8')
+              .then(res => {})
+              .catch(err => {});
+          });
+      })
+      .catch(err => {});
   };
 
   render() {

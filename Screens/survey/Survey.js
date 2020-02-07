@@ -15,6 +15,7 @@ import MyHeader from '../header/Header';
 import SubmitFooter from '../footer/SubmitFooter';
 import Spinner from 'react-native-loading-spinner-overlay';
 import AsyncStorage from '@react-native-community/async-storage';
+var RNFS = require('react-native-fs');
 
 export default class SurveyScreen extends Component {
   static navigationOptions = {
@@ -24,7 +25,6 @@ export default class SurveyScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      qrcodeData: null,
       data: [],
       response: null,
       uuid: '',
@@ -185,38 +185,28 @@ export default class SurveyScreen extends Component {
 
   async UNSAFE_componentWillMount() {
     const data = this.props.navigation.getParam('data', () => false);
-    const qrcodeData = this.props.navigation.getParam(
-      'qrcodeData',
-      () => false,
-    );
     const scanner = this.props.navigation.getParam('scanner', () => false);
 
-    if (data.qrcodeData === undefined) {
-      this.setState(
-        {
-          qrcodeData: qrcodeData,
-          data: data,
-          uuid: data.uuid,
-          scanner: scanner,
-        },
-        () => {
-          this.AddParamToOptions(data).then(res => {
-            this.setState({
-              data: {...data, parts: res, qrcodeData: qrcodeData},
-              uuid: data.uuid,
-              scanner: scanner,
-            });
-          });
-        },
-      );
-    } else if (data.qrcodeData !== undefined) {
-      this.setState({
-        qrcodeData: qrcodeData,
-        data: {...data, qrcodeData: qrcodeData},
+    console.log('data ==> ', data);
+    this.setState(
+      {
+        // here it was another code
+        data: data,
         uuid: data.uuid,
         scanner: scanner,
-      });
-    }
+      },
+      () => {
+        this.AddParamToOptions(data).then(res => {
+          this.setState({
+            // here it was another code
+            data: {...data, parts: res},
+            uuid: data.uuid,
+            scanner: scanner,
+          });
+        });
+      },
+    );
+    // here it was another code
   }
 
   //
@@ -233,50 +223,103 @@ export default class SurveyScreen extends Component {
     }
   }
 
-  pushValueToArray_2 = (answers, pageVariable) => {
-    var pageVariableCopy = pageVariable;
-
-    for (const i in answers) {
-      pageVariableCopy = pageVariableCopy.map((elem, index) => {
-        if (answers[i]['id'] === elem.id) {
-          return {
-            ...elem,
-            value: answers[i]['value'],
-          };
-        }
-        return elem;
-      });
-    }
-    return pageVariableCopy;
-  };
-
   // store data into local storage
 
   _storeData = async () => {
     const {data} = this.state;
 
-    try {
-      let newdata = [];
-      const value = await AsyncStorage.getItem('data');
-      console.log('totototooto');
-      if (value === null) {
-        newdata = [data];
-        newdata = JSON.stringify(newdata);
-        console.log('first FINAL DATA ===> ', newdata);
-        // don't forget this check if local storage is full
-        await AsyncStorage.setItem('data', newdata);
-      } else if (value !== null) {
-        newdata = JSON.parse(value);
-        newdata = [...newdata, data];
-        console.log('second FINAL DATA ===> ', newdata);
-        await AsyncStorage.removeItem('data');
-        newdata = JSON.stringify(newdata);
-        console.log('second FINAL DATA in push ===> ', newdata);
-        await AsyncStorage.setItem('data', newdata);
-      }
-    } catch (error) {
-      alert(error);
-    }
+    // try {
+    //   let newdata = [];
+    //   const value = await AsyncStorage.getItem('data');
+    //   console.log('totototooto');
+    //   if (value === null) {
+    //     newdata = [data];
+    //     newdata = JSON.stringify(newdata);
+    //     console.log('first FINAL DATA ===> ', newdata);
+    //     // don't forget this check if local storage is full
+    //     await AsyncStorage.setItem('data', newdata);
+    //   } else if (value !== null) {
+    //     newdata = JSON.parse(value);
+    //     newdata = [...newdata, data];
+    //     console.log('second FINAL DATA ===> ', newdata);
+    //     await AsyncStorage.removeItem('data');
+    //     newdata = JSON.stringify(newdata);
+    //     console.log('second FINAL DATA in push ===> ', newdata);
+    //     await AsyncStorage.setItem('data', newdata);
+    //   }
+    // } catch (error) {
+    //   alert(error);
+    // }
+
+    /*
+      - scan qr code  
+      - display pages
+      - select page
+      - fill fields 
+      - submit
+    */
+
+    // var path = RNFS.DocumentDirectoryPath + '/Surveys.txt';
+
+    // RNFS.readFile(path, 'utf8')
+    //   .then(res => {
+    //     RNFS.unlink(path)
+    //       .then(() => {
+    //         var string = JSON.stringify(data);
+    //         console.log('newstring ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^', string);
+    //         RNFS.writeFile(path, string, 'utf8')
+    //           .then(success => {
+    //             alert('file created 2 after deleted');
+    //           })
+    //           .catch(err => {
+    //             alert('file creation failed 2 after deleted');
+    //             // console.log(err.message);
+    //           });
+    //       })
+    //       .catch(err => {});
+    //   })
+    //   .catch(err => {
+    //     alert('file not found 1');
+    //     var string = JSON.stringify(data);
+    //     console.log('uuuuuuuuuuuuu', string);
+    //     RNFS.writeFile(path, string, 'utf8')
+    //       .then(success => {
+    //         alert('file created 1, and filled with first page');
+    //       })
+    //       .catch(err => {
+    //         alert('err file not created 1');
+    //         // console.log(err.message);
+    //       });
+    //   });
+
+    // dont forget adding variables to survey
+
+    // make a name for file
+
+    var name = '/file_' + data.rowid + '.txt';
+    var path = RNFS.DocumentDirectoryPath + name;
+
+    RNFS.unlink(path)
+      .then(() => {
+        var string = JSON.stringify(data);
+        RNFS.writeFile(path, string, 'utf8')
+          .then(success => {
+            alert('file created  after deleted');
+          })
+          .catch(err => {
+            alert('file creation failed after deleted');
+          });
+      })
+      .catch(err => {
+        var string = JSON.stringify(data);
+        RNFS.writeFile(path, string, 'utf8')
+          .then(success => {
+            alert('success creation 1 ');
+          })
+          .catch(err => {
+            alert('failed creation 1');
+          });
+      });
   };
 
   updateRow = row => {
@@ -351,10 +394,13 @@ export default class SurveyScreen extends Component {
 
   render() {
     const {navigate} = this.props.navigation;
-    const {uuid, row, qrcodeData} = this.state;
+    const {uuid, row} = this.state;
     const data = this.state.data.parts;
 
-    // console.log("after *****", JSON.stringify(this.state.data))
+    // console.log(
+    //   'Data  ********************* => ',
+    //   JSON.stringify(this.state.data),
+    // );
     return (
       <Container style={styles.container}>
         <MyHeader title={'Survey'} backarrow={true} navigate={navigate} />
@@ -363,7 +409,7 @@ export default class SurveyScreen extends Component {
           dataArray={data}
           keyExtractor={(item, index) => index.toString()}
           renderRow={(item, index) =>
-            this._renderRow(item, index, navigate, uuid, row, qrcodeData)
+            this._renderRow(item, index, navigate, uuid, row, data.qrcodeData)
           }></List>
         {/* </Content> */}
         <SubmitFooter _senddata={this._senddata} title={'All Done'} />

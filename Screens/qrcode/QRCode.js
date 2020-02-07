@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
   StyleSheet,
   Dimensions,
@@ -9,17 +9,18 @@ import {
 } from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 
-import { Overlay } from 'react-native-elements';
+import {Overlay} from 'react-native-elements';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { SafeAreaView } from 'react-navigation';
-import { Button } from 'native-base';
+import {SafeAreaView} from 'react-navigation';
+import {Button} from 'native-base';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import NetInfo from '@react-native-community/netinfo';
+var RNFS = require('react-native-fs');
 
 export default class QRCodeScannerScreen extends Component {
   static navigationOptions = {
@@ -39,7 +40,7 @@ export default class QRCodeScannerScreen extends Component {
     };
   }
 
-  onSuccess = (data) => {
+  onSuccess = data => {
     return new Promise((resolve, reject) => {
       if (Platform.OS === 'android') {
         NetInfo.fetch().then(state => {
@@ -47,10 +48,10 @@ export default class QRCodeScannerScreen extends Component {
             try {
               var token = jwtDecode(data);
               // Check exp time
-              this.setState({ loading: true });
+              this.setState({loading: true});
               const url = `http://wtr.oulhafiane.me/api/anon/dataset/${token.dataset}/parts`;
               const config = {
-                headers: { 'X-AUTH-TOKEN': data },
+                headers: {'X-AUTH-TOKEN': data},
               };
               Axios.get(url, config)
                 .then(res => {
@@ -80,18 +81,73 @@ export default class QRCodeScannerScreen extends Component {
     });
   };
 
-  _render = (loading) => {
+  // create array of index to identifie each row
+  createRowIdfile = () => {
+    return new Promise((resolve, reject) => {
+      var path = null;
+      var rowid = [0];
+      var string = '';
+
+      string = JSON.stringify(rowid);
+      path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+      RNFS.writeFile(path, string, 'utf8')
+        .then(success => {
+          // creation of file was succefully
+          resolve('Created');
+        })
+        .catch(err => {
+          reject('error During the creation');
+          // check if there is a space available in disk
+        });
+    });
+  };
+
+  createTemplatefile = data => {
+    // create a path you want to write to
+    // :warning: on iOS, you cannot write into `RNFS.MainBundlePath`,
+    // but `RNFS.DocumentDirectoryPath` exists on both platforms and is writable
+    return new Promise((resolve, reject) => {
+      var path = null;
+      var string = '';
+      string = JSON.stringify(data);
+
+      path = RNFS.DocumentDirectoryPath + '/template.txt';
+      RNFS.writeFile(path, string, 'utf8')
+        .then(success => {
+          resolve('Created');
+        })
+        .catch(err => {
+          reject('error During the creation');
+        });
+    });
+  };
+
+  _render = loading => {
     return (
       <View style={styles.container}>
         <QRCodeScanner
           onRead={e => {
             this.onSuccess(e.data)
               .then(res => {
-                this.props.navigation.navigate('SurveyScreen', {
-                  data: res.data,
+                this.createTemplatefile({
+                  ...res.data,
                   qrcodeData: res.qrcodeData,
-                  scanner: this.scanner,
-                });
+                })
+                  .then(nothing => {
+                    this.createRowIdfile()
+                      .then(nothing => {
+                        this.props.navigation.navigate('SurveyScreen', {
+                          data: {
+                            ...res.data,
+                            rowid: 0,
+                            qrcodeData: res.qrcodeData,
+                          },
+                          scanner: this.scanner,
+                        });
+                      })
+                      .catch();
+                  })
+                  .catch();
               })
               .catch(err => {
                 alert(err);
@@ -111,7 +167,7 @@ export default class QRCodeScannerScreen extends Component {
           textContent={'Loading...'}
           textStyle={styles.spinnerTextStyle}
         />
-        <View style={{ width: wp('80'), marginBottom: hp('0') }}>
+        <View style={{width: wp('80'), marginBottom: hp('0')}}>
           <TouchableOpacity
             style={styles.button}
             onPress={() => this.props.navigation.navigate('HomeScreen')}>
@@ -123,13 +179,9 @@ export default class QRCodeScannerScreen extends Component {
   };
 
   render() {
-    const { loading } = this.state;
+    const {loading} = this.state;
 
-    return (
-      <View style={styles.container}>
-        {this._render(loading)}
-      </View>
-    );
+    return <View style={styles.container}>{this._render(loading)}</View>;
   }
 }
 

@@ -97,7 +97,7 @@ class SurveyItemScreen extends Component {
               // console.log({qrcodeData: qrcodeData});
               Axios.post(url, data, config)
                 .then(res => {
-                  console.log('res ===> ', JSON.stringify(res));
+                  // console.log('res ===> ', JSON.stringify(res));
                   this.setState({
                     loading: false,
                   });
@@ -168,7 +168,7 @@ class SurveyItemScreen extends Component {
     const {navigate} = this.props.navigation;
     const {loading} = this.state;
 
-    console.log('here variables ===========>', JSON.stringify(variables));
+    // console.log('here variables ===========>', JSON.stringify(variables));
     return (
       <Container style={styles.container}>
         <MyHeader

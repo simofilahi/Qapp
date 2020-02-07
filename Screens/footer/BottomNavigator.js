@@ -383,7 +383,9 @@ class MyFooter extends Component {
                 height: 65,
                 borderRadius: 35,
               }}
-              onPress={() => addNewRow()}>
+              onPress={() => {
+                addNewRow();
+              }}>
               <Icon name="add" style={{color: 'black'}} />
             </Fab>
           </View>
