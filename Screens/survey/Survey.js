@@ -15,6 +15,7 @@ import MyHeader from '../header/Header';
 import SubmitFooter from '../footer/SubmitFooter';
 import Spinner from 'react-native-loading-spinner-overlay';
 import AsyncStorage from '@react-native-community/async-storage';
+import {DATETIME_INPUT} from './inputType/InputTypes';
 var RNFS = require('react-native-fs');
 
 export default class SurveyScreen extends Component {
@@ -29,6 +30,8 @@ export default class SurveyScreen extends Component {
       response: null,
       uuid: '',
       row: null,
+      qrcodeData: null,
+      rowid: null,
     };
   }
 
@@ -119,7 +122,7 @@ export default class SurveyScreen extends Component {
     } catch {}
   };
 
-  PartOnSubmit = pageId => {
+  PartOnSubmit = (pageId, partAnswer) => {
     const {parts} = this.state.data;
 
     this.setState(
@@ -130,6 +133,7 @@ export default class SurveyScreen extends Component {
             if (elem.id === pageId) {
               return {
                 ...elem,
+                answers: partAnswer,
                 submited: true,
               };
             } else return elem;
@@ -183,125 +187,72 @@ export default class SurveyScreen extends Component {
     return parts;
   };
 
-  async UNSAFE_componentWillMount() {
-    const data = this.props.navigation.getParam('data', () => false);
+  UNSAFE_componentWillMount() {
+    const template = this.props.navigation.getParam('data', () => false);
     const scanner = this.props.navigation.getParam('scanner', () => false);
+    const flag = this.props.navigation.getParam('flag', () => false);
 
-    console.log('data ==> ', data);
+    console.log('template ======> ', template);
     this.setState(
       {
         // here it was another code
-        data: data,
-        uuid: data.uuid,
+        data: template.data,
+        uuid: template.data.uuid,
         scanner: scanner,
+        qrcodeData: template.qrcodeData,
+        rowid: template.rowid,
+        row:
+          template.answers !== undefined && template.answers.row !== undefined
+            ? template.answers.row
+            : null,
       },
       () => {
-        this.AddParamToOptions(data).then(res => {
-          this.setState({
-            // here it was another code
-            data: {...data, parts: res},
-            uuid: data.uuid,
-            scanner: scanner,
+        if (flag === 1) {
+          this.AddParamToOptions(template.data).then(res => {
+            this.setState({
+              // here it was another code
+              data: {...template.data, parts: res},
+              uuid: template.data.uuid,
+              scanner: scanner,
+              qrcodeData: template.qrcodeData,
+              rowid: template.rowid,
+              row:
+                template.answers !== undefined &&
+                template.answers.row !== undefined
+                  ? template.answers.row
+                  : null,
+            });
           });
-        });
+        }
       },
     );
     // here it was another code
   }
 
   //
-  UNSAFE_componentWillUnmount() {
-    //
-    if (
-      this.scanner !== undefined &&
-      this.scanner !== null &&
-      this.scanner !== false
-    ) {
-      this.scanner.reactivate();
-      this.setState({data: '', scanner: undefined});
-      // this.props.navigation.popToTop()
-    }
-  }
+  // UNSAFE_componentWillUnmount() {
+  //   //
+  //   if (
+  //     this.scanner !== undefined &&
+  //     this.scanner !== null &&
+  //     this.scanner !== false
+  //   ) {
+  //     this.scanner.reactivate();
+  //     this.setState({data: '', scanner: undefined});
+  //     // this.props.navigation.popToTop()
+  //   }
+  // }
 
   // store data into local storage
 
   _storeData = async () => {
-    const {data} = this.state;
-
-    // try {
-    //   let newdata = [];
-    //   const value = await AsyncStorage.getItem('data');
-    //   console.log('totototooto');
-    //   if (value === null) {
-    //     newdata = [data];
-    //     newdata = JSON.stringify(newdata);
-    //     console.log('first FINAL DATA ===> ', newdata);
-    //     // don't forget this check if local storage is full
-    //     await AsyncStorage.setItem('data', newdata);
-    //   } else if (value !== null) {
-    //     newdata = JSON.parse(value);
-    //     newdata = [...newdata, data];
-    //     console.log('second FINAL DATA ===> ', newdata);
-    //     await AsyncStorage.removeItem('data');
-    //     newdata = JSON.stringify(newdata);
-    //     console.log('second FINAL DATA in push ===> ', newdata);
-    //     await AsyncStorage.setItem('data', newdata);
-    //   }
-    // } catch (error) {
-    //   alert(error);
-    // }
-
-    /*
-      - scan qr code  
-      - display pages
-      - select page
-      - fill fields 
-      - submit
-    */
-
-    // var path = RNFS.DocumentDirectoryPath + '/Surveys.txt';
-
-    // RNFS.readFile(path, 'utf8')
-    //   .then(res => {
-    //     RNFS.unlink(path)
-    //       .then(() => {
-    //         var string = JSON.stringify(data);
-    //         console.log('newstring ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^', string);
-    //         RNFS.writeFile(path, string, 'utf8')
-    //           .then(success => {
-    //             alert('file created 2 after deleted');
-    //           })
-    //           .catch(err => {
-    //             alert('file creation failed 2 after deleted');
-    //             // console.log(err.message);
-    //           });
-    //       })
-    //       .catch(err => {});
-    //   })
-    //   .catch(err => {
-    //     alert('file not found 1');
-    //     var string = JSON.stringify(data);
-    //     console.log('uuuuuuuuuuuuu', string);
-    //     RNFS.writeFile(path, string, 'utf8')
-    //       .then(success => {
-    //         alert('file created 1, and filled with first page');
-    //       })
-    //       .catch(err => {
-    //         alert('err file not created 1');
-    //         // console.log(err.message);
-    //       });
-    //   });
-
-    // dont forget adding variables to survey
-
-    // make a name for file
-
-    var name = '/file_' + data.rowid + '.txt';
+    const {rowid, data, qrcodeData} = this.state;
+    var name = '/file_' + rowid + '.txt';
     var path = RNFS.DocumentDirectoryPath + name;
 
     RNFS.unlink(path)
       .then(() => {
-        var string = JSON.stringify(data);
+        var string = JSON.stringify({data, rowid, qrcodeData});
         RNFS.writeFile(path, string, 'utf8')
           .then(success => {
             alert('file created  after deleted');
@@ -311,7 +262,7 @@ export default class SurveyScreen extends Component {
           });
       })
       .catch(err => {
-        var string = JSON.stringify(data);
+        var string = JSON.stringify({data, rowid, qrcodeData});
         RNFS.writeFile(path, string, 'utf8')
           .then(success => {
             alert('success creation 1 ');
@@ -322,6 +273,7 @@ export default class SurveyScreen extends Component {
       });
   };
 
+  // update row with new row value that coming from backend side
   updateRow = row => {
     if (row !== null && row !== undefined) {
       this.setState({
@@ -330,7 +282,58 @@ export default class SurveyScreen extends Component {
     }
   };
 
+  // create answer variable for whole pages this work with offline submit
+  createGlobaAnswerArray = async template => {
+    const {row} = this.state;
+    let promise = new Promise((resolve, reject) => {
+      var answers = [];
+
+      template.data.parts.map(elem => {
+        if (Array.isArray(elem.answers)) {
+          answers = elem.answers;
+          if (elem.answers === answers) resolve(answers);
+        }
+      });
+    });
+    let res = await promise;
+    data = {...template, answers: {row: row, variable: res}};
+    return data;
+  };
+
+  // call this func when Done button pressed
+
+  allDone = () => {
+    const {rowid} = this.state;
+    const {navigate} = this.props.navigation;
+    var name = '/file_' + rowid + '.txt';
+    var path = RNFS.DocumentDirectoryPath + name;
+
+    // dont forget to check if file alerday exist and filled with old data
+    RNFS.readFile(path, 'utf8')
+      .then(res => {
+        res = JSON.parse(res);
+        this.createGlobaAnswerArray(res)
+          .then(res => {
+            let string = JSON.stringify(res);
+            RNFS.writeFile(path, string, 'utf8')
+              .then(success => {
+                navigate('HomeScreen', {
+                  TabId: 1,
+                  flag: 1,
+                });
+              })
+              .catch(err => {});
+          })
+          .catch(err => {});
+      })
+      .catch(err => {
+        // alert('file creation failed after deleted');
+      });
+  };
+
   _renderRow = (item, index, navigate, uuid, row, qrcodeData) => {
+    // alert(qrcodeData);
+    // console.log('each item ===> ', item), console.log('\n');
     return (
       <Card
         key={index}
@@ -394,25 +397,21 @@ export default class SurveyScreen extends Component {
 
   render() {
     const {navigate} = this.props.navigation;
-    const {uuid, row} = this.state;
+    const {uuid, row, qrcodeData} = this.state;
     const data = this.state.data.parts;
 
-    // console.log(
-    //   'Data  ********************* => ',
-    //   JSON.stringify(this.state.data),
-    // );
     return (
       <Container style={styles.container}>
         <MyHeader title={'Survey'} backarrow={true} navigate={navigate} />
-        {/* <Content> */}
-        <List
-          dataArray={data}
-          keyExtractor={(item, index) => index.toString()}
-          renderRow={(item, index) =>
-            this._renderRow(item, index, navigate, uuid, row, data.qrcodeData)
-          }></List>
-        {/* </Content> */}
-        <SubmitFooter _senddata={this._senddata} title={'All Done'} />
+        <Content>
+          <List
+            dataArray={data}
+            keyExtractor={(item, index) => index.toString()}
+            renderRow={(item, index) =>
+              this._renderRow(item, index, navigate, uuid, row, qrcodeData)
+            }></List>
+        </Content>
+        <SubmitFooter allDone={this.allDone} title={'All Done'} flag={1} />
       </Container>
     );
   }
@@ -454,26 +453,3 @@ const styles = StyleSheet.create({
     fontSize: 25,
   },
 });
-
-// {
-//   "creationDate": "2020-01-26",
-//   "description": "survey",
-//   "name": "survey",
-//   "privacy": 0,
-//   "uuid": "30a33c1e-28ec-44f0-877e-a20c82909fa1",
-//   "parts": [
-//     {
-//       "id": 42,
-//       "title": "Page 1",
-//       "variables":[
-//         {"id":112,"name":"newQuestion","question":"newQuestion","type":4,"options":["hello","world"], valu:''},
-//         {"id":114,"name":"textboooox","question":"textbox","type":0,"options":[]}
-//       ]
-//     },
-//     {
-//          "id": 53,
-//           "title": "Page 2",
-//          "variables": [Array]
-//      }
-//   ]
-// }

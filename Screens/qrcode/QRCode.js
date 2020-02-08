@@ -8,14 +8,10 @@ import {
   Alert,
 } from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
-
-import {Overlay} from 'react-native-elements';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {SafeAreaView} from 'react-navigation';
-import {Button} from 'native-base';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Axios from 'axios';
 import jwtDecode from 'jwt-decode';
@@ -85,7 +81,7 @@ export default class QRCodeScannerScreen extends Component {
   createRowIdfile = () => {
     return new Promise((resolve, reject) => {
       var path = null;
-      var rowid = [0];
+      var rowid = [];
       var string = '';
 
       string = JSON.stringify(rowid);
@@ -103,9 +99,6 @@ export default class QRCodeScannerScreen extends Component {
   };
 
   createTemplatefile = data => {
-    // create a path you want to write to
-    // :warning: on iOS, you cannot write into `RNFS.MainBundlePath`,
-    // but `RNFS.DocumentDirectoryPath` exists on both platforms and is writable
     return new Promise((resolve, reject) => {
       var path = null;
       var string = '';
@@ -129,20 +122,13 @@ export default class QRCodeScannerScreen extends Component {
           onRead={e => {
             this.onSuccess(e.data)
               .then(res => {
-                this.createTemplatefile({
-                  ...res.data,
-                  qrcodeData: res.qrcodeData,
-                })
+                this.createTemplatefile(res)
                   .then(nothing => {
                     this.createRowIdfile()
                       .then(nothing => {
-                        this.props.navigation.navigate('SurveyScreen', {
-                          data: {
-                            ...res.data,
-                            rowid: 0,
-                            qrcodeData: res.qrcodeData,
-                          },
-                          scanner: this.scanner,
+                        this.props.navigation.navigate('HomeScreen', {
+                          TabId: 1,
+                          flag: 0,
                         });
                       })
                       .catch();

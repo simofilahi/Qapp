@@ -67,7 +67,7 @@ class SurveyItemScreen extends Component {
     const {pageId, variables} = this.state;
 
     // console.log('submited data', JSON.stringify(variables));
-    PartOnSubmit(pageId);
+    PartOnSubmit(pageId, variables);
     try {
       if (Platform.OS === 'android') {
         NetInfo.fetch().then(state => {
@@ -91,10 +91,10 @@ class SurveyItemScreen extends Component {
               const config = {
                 headers: {'X-AUTH-TOKEN': qrcodeData},
               };
-              // console.log(JSON.stringify(data));
-              // console.log({pageId: pageId});
-              // console.log({url: url});
-              // console.log({qrcodeData: qrcodeData});
+              console.log(JSON.stringify(data));
+              console.log({pageId: pageId});
+              console.log({url: url});
+              console.log({qrcodeData: qrcodeData});
               Axios.post(url, data, config)
                 .then(res => {
                   // console.log('res ===> ', JSON.stringify(res));
@@ -193,7 +193,7 @@ class SurveyItemScreen extends Component {
               })}
           </ScrollView>
         </Content>
-        <SubmitFooter _onSubmit={this._onSubmit} title={'Submit'} />
+        <SubmitFooter _onSubmit={this._onSubmit} title={'Submit'} flag={0} />
       </Container>
     );
   }

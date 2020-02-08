@@ -11,14 +11,24 @@ import {
 } from 'native-base';
 import {Button, Text} from 'react-native-elements';
 import {StyleSheet, Image} from 'react-native';
+import Spinner from 'react-native-loading-spinner-overlay';
+var RNFS = require('react-native-fs');
 
 export class ListOfSurvey extends Component {
   saveRow = () => {
     alert('save a row');
   };
 
-  deleteRow = () => {
-    alert('Delete row');
+  deleteRow = rowid => {
+    let path = RNFS.DocumentDirectoryPath + '/' + 'file_' + rowid + '.txt';
+
+    RNFS.unlink(path, 'utf8')
+      .then(res => {
+        alert('Delete row was succesfull');
+      })
+      .catch(err => {
+        alert(err);
+      });
   };
 
   saveAll = () => {
@@ -29,14 +39,8 @@ export class ListOfSurvey extends Component {
     // console.log('yoyoyoyyooyoyoy', survey);
     return (
       <Card>
-        <CardItem
-          onPress={() => {
-            navigate('SurveyScreen', {
-              data: survey,
-              qrcodeData: survey,
-            });
-          }}>
-          <Text>{`Survey ${index}`}</Text>
+        <CardItem>
+          <Text>{`Survey ${survey.rowid}`}</Text>
           <Right>
             <View
               style={{
@@ -46,7 +50,7 @@ export class ListOfSurvey extends Component {
               <View style={{margin: 2}}>
                 <Button
                   buttonStyle={{backgroundColor: 'white'}}
-                  onPress={() => this.deleteRow()}
+                  onPress={() => this.deleteRow(survey.rowid)}
                   icon={
                     <Icon
                       name="trash"
@@ -59,7 +63,13 @@ export class ListOfSurvey extends Component {
               <View style={{margin: 2}}>
                 <Button
                   buttonStyle={{backgroundColor: 'white'}}
-                  onPress={() => this.saveRow()}
+                  onPress={() => {
+                    navigate('SurveyScreen', {
+                      data: survey,
+                      flag: 0,
+                    });
+                    // this.saveRow();
+                  }}
                   icon={
                     <Icon
                       name="send"
@@ -78,15 +88,20 @@ export class ListOfSurvey extends Component {
   };
 
   render() {
-    const {navigate, boolean, Surveys} = this.props;
+    const {navigate, boolean, Surveys, loading} = this.props;
 
-    console.log(
-      'Data  ********************* => and boolean ==> ',
-      JSON.stringify(Surveys),
-      boolean,
-    );
+    // console.log(
+    //   'Data  ********************* => and boolean ==> ',
+    //   JSON.stringify(Surveys),
+    //   boolean,
+    // );
     return (
       <Container>
+        <Spinner
+          visible={loading}
+          textContent={'Loading...'}
+          textStyle={{color: 'white'}}
+        />
         {boolean ? (
           <Content padder>
             <View
@@ -167,3 +182,31 @@ const styles = StyleSheet.create({
 });
 
 export default ListOfSurvey;
+
+/*
+
+  - scan button :
+          - create rowid file.
+          - create template file.
+          - add rowid to survey.
+          - redirect to survey screen with passing survey to this screen.
+  - add button
+          - read rowid file and get last id .
+          - read template file.
+          - add rowid to template.
+          - redirect to survey screen with passing survey to this screen.
+  - submit button :
+          - online submit :
+                            - send variable array that include answers to backend server that all.
+          - offline submit : 
+                            - add variable answers to the page that realted to this one.
+                            - create file named by file_ + rowid of survey .
+                            
+  - done Button:
+          online submit : 
+                        - redirect to home page and especially Survey tab get the surveys from local storge and display.
+          offline submit : 
+                        - make a loop trough all answer from each page and create one.
+                        - redirect to home page and especially Survey tab get the surveys from local storge and display.
+
+*/

@@ -37,18 +37,70 @@ export default class HomeScreen extends Component {
       Surveys: [],
       TabId: 1,
       template: [],
+      loading: false,
     };
   }
   static navigationOptions = {
     header: null,
   };
 
+  getDataFromLocalStorage = async () => {
+    let promise = new Promise((resolve, reject) => {
+      let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+      var Surveys = [];
+      RNFS.readFile(path, 'utf8')
+        .then(rowidarray => {
+          rowidarray = JSON.parse(rowidarray);
+          rowidarray.map(elem => {
+            let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+            console.log('path 2 is =====> ', path);
+            RNFS.readFile(path, 'utf8').then(res => {
+              res = JSON.parse(res);
+              Surveys.push(res);
+              if (rowidarray[elem + 1] == undefined) resolve(Surveys);
+            });
+          });
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
+    let res = await promise;
+    return res;
+  };
+
+  UNSAFE_componentWillReceiveProps(newProps) {
+    const TabId = newProps.navigation.getParam('TabId', false);
+    const flag = newProps.navigation.getParam('flag', false);
+
+    if (flag === 1) {
+      // this func called when i press on all done button
+      this.setState({loading: true}, () => {
+        this.getDataFromLocalStorage()
+          .then(data => {
+            this.setState({
+              Surveys: data,
+              TabId: TabId,
+              boolean: data.length === 0 ? false : true,
+              loading: false,
+            });
+          })
+          .catch();
+      });
+    } else if (flag === 0) {
+      this.setState({
+        Surveys: [],
+        boolean: false,
+        TabId: TabId,
+      });
+    }
+  }
+
   UNSAFE_componentWillMount() {
     const data = this.props.navigation.getParam('data', false);
     const TabId = this.props.navigation.getParam('TabId', false);
 
-    // console.log('data ====>', data);
-    // console.log('tabid ==> ', TabId);
+    // this called when i get data from splashScreen
     if (data !== false && TabId !== false) {
       this.setState({
         Surveys: data,
@@ -58,6 +110,7 @@ export default class HomeScreen extends Component {
     }
   }
 
+  // delete all stucked survey
   deleteAll = () => {
     alert('delete all');
   };
@@ -66,6 +119,7 @@ export default class HomeScreen extends Component {
     alert('feedback');
   };
 
+  // add new survey
   addNewRow = () => {
     const {navigate} = this.props.navigation;
     let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
@@ -73,9 +127,13 @@ export default class HomeScreen extends Component {
     RNFS.readFile(path, 'utf8')
       .then(rowidarray => {
         rowidarray = JSON.parse(rowidarray);
-        let rowid = rowidarray[rowidarray.length - 1] + 1;
-        rowidarray[rowidarray.length] = rowidarray[rowidarray.length - 1] + 1;
-        console.log('rowidarray', rowidarray);
+        if (rowidarray.length === 0) {
+          var rowid = 0;
+          rowidarray[0] = 0;
+        } else {
+          var rowid = rowidarray[rowidarray.length - 1] + 1;
+          rowidarray[rowidarray.length] = rowidarray[rowidarray.length - 1] + 1;
+        }
         let string = JSON.stringify(rowidarray);
         RNFS.unlink(path, 'utf8')
           .then(res => {
@@ -87,7 +145,7 @@ export default class HomeScreen extends Component {
                     template = JSON.parse(template);
                     navigate('SurveyScreen', {
                       data: {...template, rowid: rowid},
-                      qrcodeData: template.qrcodeData,
+                      flag: 1,
                     });
                   })
                   .catch(err => {});
@@ -105,7 +163,7 @@ export default class HomeScreen extends Component {
 
   render() {
     const {navigate} = this.props.navigation;
-    const {boolean, Surveys, TabId} = this.state;
+    const {boolean, Surveys, TabId, loading} = this.state;
 
     return (
       <Container>
@@ -119,6 +177,7 @@ export default class HomeScreen extends Component {
         <Tabs
           locked={true}
           initialPage={TabId}
+          page={TabId}
           tabBarPosition="overlayTop"
           scrollWithoutAnimation={true}
           onChangeTab={e => this.setState({TabId: e.i})}>
@@ -130,6 +189,7 @@ export default class HomeScreen extends Component {
               boolean={boolean}
               Surveys={Surveys}
               navigate={navigate}
+              loading={loading}
             />
           </Tab>
         </Tabs>

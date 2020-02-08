@@ -8,6 +8,7 @@ import Axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import NetInfo from '@react-native-community/netinfo';
 import Spinner from 'react-native-loading-spinner-overlay';
+var RNFS = require('react-native-fs');
 
 class MyFooter extends Component {
   state = {
@@ -78,6 +79,43 @@ class MyFooter extends Component {
     });
   };
 
+  createRowIdfile = () => {
+    return new Promise((resolve, reject) => {
+      var path = null;
+      var rowid = [];
+      var string = '';
+
+      string = JSON.stringify(rowid);
+      path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+      RNFS.writeFile(path, string, 'utf8')
+        .then(success => {
+          // creation of file was succefully
+          resolve('Created');
+        })
+        .catch(err => {
+          reject('error During the creation');
+          // check if there is a space available in disk
+        });
+    });
+  };
+
+  createTemplatefile = data => {
+    return new Promise((resolve, reject) => {
+      var path = null;
+      var string = '';
+      string = JSON.stringify(data);
+
+      path = RNFS.DocumentDirectoryPath + '/template.txt';
+      RNFS.writeFile(path, string, 'utf8')
+        .then(success => {
+          resolve('Created');
+        })
+        .catch(err => {
+          reject('error During the creation');
+        });
+    });
+  };
+
   openPhoto = navigate => {
     if (Platform.OS === 'android') {
       NetInfo.fetch().then(state => {
@@ -102,13 +140,21 @@ class MyFooter extends Component {
                   this.setState({isVisible: false, open: false, loading: true});
                   this.onSuccess(data)
                     .then(res => {
-                      navigate('SurveyScreen', {
-                        data: res.data,
-                        qrcodeData: res.qrcodeData,
-                      });
+                      this.createTemplatefile(res)
+                        .then(nothing => {
+                          this.createRowIdfile()
+                            .then(nothing => {
+                              navigate('HomeScreen', {
+                                TabId: 1,
+                                flag: 0,
+                              });
+                            })
+                            .catch();
+                        })
+                        .catch();
                     })
                     .catch(err => {
-                      alert('Invalid qrcode try again');
+                      alert(err);
                     });
                 });
               }
@@ -127,7 +173,11 @@ class MyFooter extends Component {
     if (TabId === 0) {
       return (
         <View>
-          <Spinner visible={loading} textContent={'Loading...'} />
+          <Spinner
+            visible={loading}
+            textContent={'Loading...'}
+            textStyle={{color: 'white'}}
+          />
           <Overlay
             overlayStyle={{
               left: 0,
