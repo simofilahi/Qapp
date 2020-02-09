@@ -402,7 +402,12 @@ export default class SurveyScreen extends Component {
 
     return (
       <Container style={styles.container}>
-        <MyHeader title={'Survey'} backarrow={true} navigate={navigate} />
+        <MyHeader
+          title={'Survey'}
+          backarrow={true}
+          navigate={navigate}
+          flag={0}
+        />
         <Content>
           <List
             dataArray={data}

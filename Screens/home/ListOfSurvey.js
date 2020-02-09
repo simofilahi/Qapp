@@ -15,27 +15,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 var RNFS = require('react-native-fs');
 
 export class ListOfSurvey extends Component {
-  saveRow = () => {
-    alert('save a row');
-  };
-
-  deleteRow = rowid => {
-    let path = RNFS.DocumentDirectoryPath + '/' + 'file_' + rowid + '.txt';
-
-    RNFS.unlink(path, 'utf8')
-      .then(res => {
-        alert('Delete row was succesfull');
-      })
-      .catch(err => {
-        alert(err);
-      });
-  };
-
-  saveAll = () => {
-    alert('save all');
-  };
-
-  _renderRow = (survey, index, navigate) => {
+  _renderRow = (survey, index, sendRow, deleteRow, navigate) => {
     // console.log('yoyoyoyyooyoyoy', survey);
     return (
       <Card>
@@ -50,7 +30,7 @@ export class ListOfSurvey extends Component {
               <View style={{margin: 2}}>
                 <Button
                   buttonStyle={{backgroundColor: 'white'}}
-                  onPress={() => this.deleteRow(survey.rowid)}
+                  onPress={() => deleteRow(survey.rowid)}
                   icon={
                     <Icon
                       name="trash"
@@ -64,11 +44,7 @@ export class ListOfSurvey extends Component {
                 <Button
                   buttonStyle={{backgroundColor: 'white'}}
                   onPress={() => {
-                    navigate('SurveyScreen', {
-                      data: survey,
-                      flag: 0,
-                    });
-                    // this.saveRow();
+                    sendRow(survey, survey.rowid);
                   }}
                   icon={
                     <Icon
@@ -88,7 +64,15 @@ export class ListOfSurvey extends Component {
   };
 
   render() {
-    const {navigate, boolean, Surveys, loading} = this.props;
+    const {
+      navigate,
+      boolean,
+      Surveys,
+      loading,
+      sendRow,
+      deleteRow,
+      sendAllRows,
+    } = this.props;
 
     // console.log(
     //   'Data  ********************* => and boolean ==> ',
@@ -119,7 +103,7 @@ export class ListOfSurvey extends Component {
                   alignSelf: 'center',
                 }}>
                 <Button
-                  onPress={() => this.saveAll()}
+                  onPress={() => sendAllRows()}
                   title="Submit All"
                   // loading
                   buttonStyle={{
@@ -134,7 +118,7 @@ export class ListOfSurvey extends Component {
               dataArray={Surveys}
               keyExtractor={(item, index) => index.toString()}
               renderRow={(item, index) =>
-                this._renderRow(item, index, navigate)
+                this._renderRow(item, index, sendRow, deleteRow, navigate)
               }></List>
           </Content>
         ) : (

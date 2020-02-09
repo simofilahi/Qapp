@@ -173,6 +173,7 @@ class SurveyItemScreen extends Component {
       <Container style={styles.container}>
         <MyHeader
           title={'SurveyAnswers'}
+          flag={0}
           backarrow={true}
           navigate={navigate}
         />

@@ -167,7 +167,7 @@ class MyFooter extends Component {
   };
 
   render() {
-    const {navigate, TabId, addNewRow} = this.props;
+    const {navigate, TabId, addNewRow, OfflineSurveyBoolean} = this.props;
     const {loading} = this.state;
 
     if (TabId === 0) {
@@ -278,13 +278,31 @@ class MyFooter extends Component {
                 height: 65,
                 borderRadius: 35,
               }}
-              onPress={() =>
-                this.setState({
-                  isVisible: !this.state.isVisible,
-                  open: !this.state.open,
-                })
-              }>
-              <Icon name="qrcode" style={{color: 'black'}} type="FontAwesome" />
+              onPress={() => {
+                if (OfflineSurveyBoolean === false) {
+                  this.setState({
+                    isVisible: !this.state.isVisible,
+                    open: !this.state.open,
+                  });
+                } else {
+                  Alert.alert('Submit the alerday survey and try again');
+                }
+              }}>
+              <Icon
+                name="qrcode"
+                style={{color: 'black'}}
+                type="FontAwesome"
+                onPress={() => {
+                  if (OfflineSurveyBoolean === false) {
+                    this.setState({
+                      isVisible: !this.state.isVisible,
+                      open: !this.state.open,
+                    });
+                  } else {
+                    Alert.alert('Submit the alerday survey and try again');
+                  }
+                }}
+              />
             </Fab>
           </View>
           <View

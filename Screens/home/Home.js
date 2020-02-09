@@ -5,28 +5,16 @@ import HomeBody from './HomeBody';
 import ListOfSurvey from './ListOfSurvey';
 import {Container, Tab, Tabs, Content} from 'native-base';
 import Orientation from 'react-native-orientation';
-import {
-  StyleSheet,
-  Dimensions,
-  View,
-  StatusBar,
-  TouchableOpacity,
-  Text,
-  Alert,
-} from 'react-native';
-import QRCodeScanner from 'react-native-qrcode-scanner';
-import {QRreader} from 'react-native-qr-scanner';
-import ImagePicker from 'react-native-image-picker';
-import {Overlay} from 'react-native-elements';
+import Axios from 'axios';
+import {PermissionsAndroid} from 'react-native';
+import RNExitApp from 'react-native-exit-app';
+import NetInfo from '@react-native-community/netinfo';
+import {StyleSheet, Dimensions, Alert} from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {SafeAreaView} from 'react-navigation';
-import {Button} from 'native-base';
 var RNFS = require('react-native-fs');
-
-import BottomNavigator from '../footer/BottomNavigator';
 
 export default class HomeScreen extends Component {
   constructor(props) {
@@ -40,6 +28,7 @@ export default class HomeScreen extends Component {
       loading: false,
     };
   }
+
   static navigationOptions = {
     header: null,
   };
@@ -53,7 +42,6 @@ export default class HomeScreen extends Component {
           rowidarray = JSON.parse(rowidarray);
           rowidarray.map(elem => {
             let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
-            console.log('path 2 is =====> ', path);
             RNFS.readFile(path, 'utf8').then(res => {
               res = JSON.parse(res);
               Surveys.push(res);
@@ -110,13 +98,209 @@ export default class HomeScreen extends Component {
     }
   }
 
+  requestPermission = () => {
+    try {
+      PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      ]).then(result => {
+        if (
+          result['android.permission.ACCESS_COARSE_LOCATION'] &&
+          result['android.permission.CAMERA'] &&
+          result['android.permission.ACCESS_FINE_LOCATION'] &&
+          result['android.permission.READ_EXTERNAL_STORAGE'] &&
+          result['android.permission.WRITE_EXTERNAL_STORAGE'] === 'granted'
+        ) {
+        } else {
+          RNExitApp.exitApp();
+        }
+      });
+      // console.log('blablablabalba');
+      // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      //   console.log('no');
+      // } else {
+      //   console.log('yes');
+      //
+      // }
+    } catch (err) {
+      // console.warn(err);
+    }
+  };
+
+  componentDidMount() {
+    this.requestPermission();
+  }
   // delete all stucked survey
-  deleteAll = () => {
-    alert('delete all');
+  deleteAllRows = async () => {
+    let promise = new Promise((resolve, reject) => {
+      let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+
+      RNFS.readFile(path, 'utf8')
+        .then(rowidarray => {
+          rowidarray = JSON.parse(rowidarray);
+          rowidarray.forEach(elem => {
+            let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+            RNFS.unlink(path, 'utf8')
+              .then(res => {})
+              .catch(err => {});
+            if (rowidarray[elem + 1] === undefined) resolve('finished');
+          });
+        })
+        .catch(err => {});
+    });
+
+    let res = await promise;
+    let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+    RNFS.unlink(path, 'utf8')
+      .then(res => {})
+      .catch(err => {});
+    this.setState({
+      Surveys: [],
+    });
   };
 
   feedBack = () => {
     alert('feedback');
+  };
+
+  deleteRow = rowid => {
+    let path = RNFS.DocumentDirectoryPath + '/file_' + rowid + '.txt';
+
+    RNFS.unlink(path, 'utf8')
+      .then(res => {
+        this.setState({
+          Surveys: this.state.Surveys.filter(elem => {
+            if (elem.rowid !== rowid) return elem;
+          }),
+        });
+      })
+      .catch(err => {});
+  };
+
+  sendRow = (surveyrow, rowid) => {
+    console.log('row ==> ', JSON.stringify(surveyrow.data.parts[0].id));
+
+    try {
+      if (Platform.OS === 'android') {
+        NetInfo.fetch().then(state => {
+          if (state.isConnected) {
+            {
+              const uuid = surveyrow.data.uuid;
+              const qrcodeData = surveyrow.qrcodeData;
+              const variables = surveyrow.answers.variable;
+              const row = surveyrow.answers.row;
+              // this line above is tmp
+              const pageId = surveyrow.data.parts[0].id;
+
+              this.setState({loading: true});
+              const url = `http://wtr.oulhafiane.me/api/anon/dataset/${uuid}/part/${pageId}`;
+              const data = {
+                row: row,
+                variables: variables,
+              };
+              const config = {
+                headers: {'X-AUTH-TOKEN': qrcodeData},
+              };
+              console.log(JSON.stringify(data));
+              console.log({pageId: pageId});
+              console.log({url: url});
+              console.log({qrcodeData: qrcodeData});
+              Axios.post(url, data, config)
+                .then(res => {
+                  this.setState({
+                    loading: false,
+                  });
+                  this.deleteRow(rowid);
+                })
+                .catch(error => {
+                  this.setState({
+                    loading: false,
+                  });
+                  alert(error);
+                });
+            }
+          } else Alert.alert('Please check your Internet connection');
+        });
+      }
+    } catch {
+      this.setState({
+        loading: false,
+      });
+      alert('Try Again');
+    }
+  };
+
+  sendAllRows = async () => {
+    var promise = (surveyrow, rowid) => {
+      return new Promise((resolve, reject) => {
+        if (Platform.OS === 'android') {
+          NetInfo.fetch().then(state => {
+            if (state.isConnected) {
+              {
+                const uuid = surveyrow.data.uuid;
+                const qrcodeData = surveyrow.qrcodeData;
+                const variables = surveyrow.answers.variable;
+                const row = surveyrow.answers.row;
+                // this line above is tmp
+                const pageId = surveyrow.data.parts[0].id;
+
+                this.setState({loading: true});
+                const url = `http://wtr.oulhafiane.me/api/anon/dataset/${uuid}/part/${pageId}`;
+                const data = {
+                  row: row,
+                  variables: variables,
+                };
+                const config = {
+                  headers: {'X-AUTH-TOKEN': qrcodeData},
+                };
+                console.log(JSON.stringify(data));
+                console.log({pageId: pageId});
+                console.log({url: url});
+                console.log({qrcodeData: qrcodeData});
+                Axios.post(url, data, config)
+                  .then(res => {
+                    this.setState({
+                      loading: false,
+                    });
+                    this.deleteRow(rowid);
+                    resolve('succes');
+                  })
+                  .catch(error => {
+                    this.setState({
+                      loading: false,
+                    });
+                    alert(error);
+                    reject('failed');
+                  });
+              }
+            } else Alert.alert('Please check your Internet connection');
+          });
+        }
+      });
+    };
+
+    let loop = () => {
+      return new Promise((resolve, reject) => {
+        const {Surveys} = this.state;
+
+        Surveys.map(async (elem, index) => {
+          await promise(elem, elem.rowid)
+            .then(res => {
+              console.log(res);
+            })
+            .catch(err => {
+              console.log(err);
+            });
+          if (elem[index + 1] === undefined) resolve('loop finished');
+        });
+      });
+    };
+    console.log('after');
+    await loop();
+    console.log('finished');
   };
 
   // add new survey
@@ -164,14 +348,16 @@ export default class HomeScreen extends Component {
   render() {
     const {navigate} = this.props.navigation;
     const {boolean, Surveys, TabId, loading} = this.state;
-
+    var OfflineSurveyBoolean = false;
+    if (Surveys.length > 0) OfflineSurveyBoolean = true;
     return (
       <Container>
         <MyHeader
           title={'Home'}
           backarrow={false}
+          flag={1}
           TabId={TabId}
-          deleteAll={this.deleteAll}
+          deleteAllRows={this.deleteAllRows}
           feedBack={this.feedBack}
         />
         <Tabs
@@ -189,6 +375,10 @@ export default class HomeScreen extends Component {
               boolean={boolean}
               Surveys={Surveys}
               navigate={navigate}
+              sendOneSurvey={this.sendOneSurvey}
+              sendRow={this.sendRow}
+              sendAllRows={this.sendAllRows}
+              deleteRow={this.deleteRow}
               loading={loading}
             />
           </Tab>
@@ -197,6 +387,7 @@ export default class HomeScreen extends Component {
           navigate={navigate}
           TabId={TabId}
           addNewRow={this.addNewRow}
+          OfflineSurveyBoolean={OfflineSurveyBoolean}
         />
       </Container>
     );

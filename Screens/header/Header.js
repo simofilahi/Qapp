@@ -5,22 +5,19 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import {withNavigation} from 'react-navigation';
-import Orientation from 'react-native-orientation';
-import {Picker} from 'react-native';
 import {
   Menu,
   MenuOptions,
   MenuOption,
   MenuTrigger,
 } from 'react-native-popup-menu';
-
 import {Icon} from 'react-native-elements';
 
 class MyHeader extends Component {
   render() {
-    const {title, backarrow, TabId, deleteAll, feedBack} = this.props;
+    const {title, backarrow, TabId, deleteAllRows, feedBack, flag} = this.props;
     let marginValue;
-    if (backarrow) marginValue = wp('2%');
+    if (backarrow) marginValue = wp('-15%');
     else marginValue = wp('1%');
     return (
       <Header>
@@ -31,29 +28,31 @@ class MyHeader extends Component {
             </Button>
           </Left>
         ) : null}
-        <Body>
-          <Title style={{marginLeft: marginValue}}>{title}</Title>
+        <Body style={{marginLeft: marginValue}}>
+          <Title>{title}</Title>
         </Body>
-        <Right>
-          <Menu>
-            <MenuTrigger>
-              <Icon name="more" type="fontAwesome5" color="white" />
-            </MenuTrigger>
-            <MenuOptions>
-              <MenuOption
-                onSelect={() => {
-                  if (TabId === 0) feedBack();
-                  else deleteAll();
-                }}>
-                {TabId === 0 ? (
-                  <Text style={{color: 'black'}}>Feedback</Text>
-                ) : (
-                  <Text style={{color: 'red'}}>Discard All</Text>
-                )}
-              </MenuOption>
-            </MenuOptions>
-          </Menu>
-        </Right>
+        {flag ? (
+          <Right>
+            <Menu>
+              <MenuTrigger>
+                <Icon name="more" type="fontAwesome5" color="white" />
+              </MenuTrigger>
+              <MenuOptions>
+                <MenuOption
+                  onSelect={() => {
+                    if (TabId === 0) feedBack();
+                    else deleteAllRows();
+                  }}>
+                  {TabId === 0 ? (
+                    <Text style={{color: 'black'}}>Feedback</Text>
+                  ) : (
+                    <Text style={{color: 'red'}}>Discard All</Text>
+                  )}
+                </MenuOption>
+              </MenuOptions>
+            </Menu>
+          </Right>
+        ) : null}
       </Header>
     );
   }
