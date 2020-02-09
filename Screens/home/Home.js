@@ -4,7 +4,6 @@ import MyFooter from '../footer/BottomNavigator';
 import HomeBody from './HomeBody';
 import ListOfSurvey from './ListOfSurvey';
 import {Container, Tab, Tabs, Content} from 'native-base';
-import Orientation from 'react-native-orientation';
 import Axios from 'axios';
 import {PermissionsAndroid} from 'react-native';
 import RNExitApp from 'react-native-exit-app';
@@ -102,10 +101,10 @@ export default class HomeScreen extends Component {
     try {
       PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.CAMERA,
-        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       ]).then(result => {
         if (
           result['android.permission.ACCESS_COARSE_LOCATION'] &&
@@ -118,13 +117,6 @@ export default class HomeScreen extends Component {
           RNExitApp.exitApp();
         }
       });
-      // console.log('blablablabalba');
-      // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      //   console.log('no');
-      // } else {
-      //   console.log('yes');
-      //
-      // }
     } catch (err) {
       // console.warn(err);
     }

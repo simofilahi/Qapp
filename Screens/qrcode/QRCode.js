@@ -7,6 +7,7 @@ import {
   Text,
   Alert,
 } from 'react-native';
+import {Content} from 'native-base';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import {
   widthPercentageToDP as wp,

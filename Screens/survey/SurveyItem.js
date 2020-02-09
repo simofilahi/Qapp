@@ -26,12 +26,29 @@ class SurveyItemScreen extends Component {
       variables: [],
       item: [],
       loading: false,
+      isConnected: false,
+      isInternetReachable: false,
     };
   }
 
   static navigationOptions = {
     header: null,
   };
+
+  componentDidMount() {
+    this.unsubscribe = NetInfo.addEventListener(state => {
+      this.setState({
+        isConnected: state.isConnected,
+        isInternetReachable: state.isInternetReachable,
+      });
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  handleConnectivityChange = state => {};
 
   UNSAFE_componentWillMount() {
     const item = this.props.navigation.getParam('item', () => false);
@@ -117,6 +134,7 @@ class SurveyItemScreen extends Component {
                   this.setState({
                     loading: false,
                   });
+                  // server error
                   alert(error);
                 });
             }
@@ -129,7 +147,6 @@ class SurveyItemScreen extends Component {
       });
       alert('Try Again');
     }
-    goBack();
   };
 
   _renderRow = (item, variables, index) => {
@@ -166,7 +183,7 @@ class SurveyItemScreen extends Component {
   render() {
     const {variables} = this.state.item;
     const {navigate} = this.props.navigation;
-    const {loading} = this.state;
+    const {loading, isConnected, isInternetReachable} = this.state;
 
     // console.log('here variables ===========>', JSON.stringify(variables));
     return (
@@ -194,7 +211,14 @@ class SurveyItemScreen extends Component {
               })}
           </ScrollView>
         </Content>
-        <SubmitFooter _onSubmit={this._onSubmit} title={'Submit'} flag={0} />
+        <SubmitFooter
+          _onSubmit={this._onSubmit}
+          title={
+            isConnected && isInternetReachable ? 'Submit' : 'offline Submit'
+          }
+          flag={0}
+          color={isConnected && isInternetReachable ? '#3F51B5' : '#E5E6E8'}
+        />
       </Container>
     );
   }

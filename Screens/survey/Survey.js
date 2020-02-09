@@ -13,9 +13,9 @@ import {
 } from 'native-base';
 import MyHeader from '../header/Header';
 import SubmitFooter from '../footer/SubmitFooter';
+import NetInfo from '@react-native-community/netinfo';
 import Spinner from 'react-native-loading-spinner-overlay';
 import AsyncStorage from '@react-native-community/async-storage';
-import {DATETIME_INPUT} from './inputType/InputTypes';
 var RNFS = require('react-native-fs');
 
 export default class SurveyScreen extends Component {
@@ -32,7 +32,22 @@ export default class SurveyScreen extends Component {
       row: null,
       qrcodeData: null,
       rowid: null,
+      isConnected: false,
+      isInternetReachable: false,
     };
+  }
+
+  componentDidMount() {
+    this.unsubscribe = NetInfo.addEventListener(state => {
+      this.setState({
+        isConnected: state.isConnected,
+        isInternetReachable: state.isInternetReachable,
+      });
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
   }
 
   updateOptionsInPart = (partId, QuestionId, Answer) => {
@@ -229,20 +244,6 @@ export default class SurveyScreen extends Component {
     // here it was another code
   }
 
-  //
-  // UNSAFE_componentWillUnmount() {
-  //   //
-  //   if (
-  //     this.scanner !== undefined &&
-  //     this.scanner !== null &&
-  //     this.scanner !== false
-  //   ) {
-  //     this.scanner.reactivate();
-  //     this.setState({data: '', scanner: undefined});
-  //     // this.props.navigation.popToTop()
-  //   }
-  // }
-
   // store data into local storage
 
   _storeData = async () => {
@@ -397,7 +398,13 @@ export default class SurveyScreen extends Component {
 
   render() {
     const {navigate} = this.props.navigation;
-    const {uuid, row, qrcodeData} = this.state;
+    const {
+      uuid,
+      row,
+      qrcodeData,
+      isConnected,
+      isInternetReachable,
+    } = this.state;
     const data = this.state.data.parts;
 
     return (
@@ -416,7 +423,12 @@ export default class SurveyScreen extends Component {
               this._renderRow(item, index, navigate, uuid, row, qrcodeData)
             }></List>
         </Content>
-        <SubmitFooter allDone={this.allDone} title={'All Done'} flag={1} />
+        <SubmitFooter
+          allDone={this.allDone}
+          title={isConnected && isInternetReachable ? 'Done' : 'offline Done'}
+          flag={1}
+          color={isConnected && isInternetReachable ? '#3F51B5' : '#E5E6E8'}
+        />
       </Container>
     );
   }
