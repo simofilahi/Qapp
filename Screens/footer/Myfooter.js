@@ -36,6 +36,7 @@ class MyFooter extends Component {
     }
   };
 
+  // read qrcode
   onSuccess = data => {
     return new Promise((resolve, reject) => {
       if (Platform.OS === 'android') {
@@ -45,7 +46,7 @@ class MyFooter extends Component {
               var token = jwtDecode(data);
               // Check exp time
               this.setState({loading: true});
-              const url = `http://wtr.oulhafiane.me/api/anon/dataset/${token.dataset}/parts`;
+              const url = `https://impactree.um6p.ma/api/anon/dataset/${token.dataset}/parts`;
               const config = {
                 headers: {'X-AUTH-TOKEN': data},
               };
@@ -57,6 +58,7 @@ class MyFooter extends Component {
                   resolve({
                     data: res.data,
                     qrcodeData: data,
+                    sent: true,
                   });
                 })
                 .catch(err => {
@@ -79,6 +81,7 @@ class MyFooter extends Component {
     });
   };
 
+  // create rowid file
   createRowIdfile = () => {
     return new Promise((resolve, reject) => {
       var path = null;
@@ -99,6 +102,7 @@ class MyFooter extends Component {
     });
   };
 
+  // create copy file of survey design
   createTemplatefile = data => {
     return new Promise((resolve, reject) => {
       var path = null;
@@ -116,6 +120,7 @@ class MyFooter extends Component {
     });
   };
 
+  // this func called when read qrcode by image
   openPhoto = navigate => {
     if (Platform.OS === 'android') {
       NetInfo.fetch().then(state => {
@@ -154,7 +159,7 @@ class MyFooter extends Component {
                         .catch();
                     })
                     .catch(err => {
-                      alert(err);
+                      // alert(err);
                     });
                 });
               }

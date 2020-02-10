@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {View, StyleSheet, Image, Text} from 'react-native';
-import AsyncStorage from '@react-native-community/async-storage';
 import {Spinner} from 'native-base';
 var RNFS = require('react-native-fs');
 const TWO_SECONDS = 2000;
@@ -19,14 +18,19 @@ export default class SplashScreen extends Component {
         rowidarray = JSON.parse(rowidarray);
         // console.log('after ==> ', rowidarray);
         let Surveys = [];
+
         rowidarray.forEach(elem => {
           let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
-          RNFS.readFile(path, 'utf8').then(res => {
-            // console.log('content of file_0.txt', res);
-            res = JSON.parse(res);
-            Surveys.push(res);
-            // console.log('Survey ====> ', Surveys);
-          });
+          if (RNFS.exists(path)) {
+            RNFS.readFile(path, 'utf8')
+              .then(res => {
+                // console.log('content of file_0.txt', res);
+                res = JSON.parse(res);
+                Surveys.push(res);
+                // console.log('Survey ====> ', Surveys);
+              })
+              .catch({});
+          }
         });
 
         setTimeout(() => {
@@ -46,33 +50,7 @@ export default class SplashScreen extends Component {
           });
         }, TWO_SECONDS);
       });
-    // this.retrieveData()
-    //   .then(data => {
-    //     setTimeout(() => {
-    //       this.props.navigation.navigate('HomeScreen', {
-    //         TabId: 1,
-    //         data: data,
-    //       });
-    //     }, TWO_SECONDS);
-    //   })
-    //   .catch(err => {
-    //     setTimeout(() => {
-    //       this.props.navigation.navigate('HomeScreen', {
-    //         TabId: 0,
-    //         data: [],
-    //       });
-    //     }, TWO_SECONDS);
-    //   });
   }
-
-  retrieveData = () => {
-    return new Promise(async (resolve, reject) => {
-      const value = await AsyncStorage.getItem('data');
-      if (value !== null) {
-        resolve(JSON.parse(value));
-      } else reject('error');
-    });
-  };
 
   render() {
     return (
@@ -84,7 +62,7 @@ export default class SplashScreen extends Component {
           />
         </View>
         <View style={styles.text}>
-          <Text style={{fontSize: 20}}>Qapp</Text>
+          <Text style={{fontSize: 20}}>ImpacTree</Text>
         </View>
         <View style={styles.spinner}>
           <Spinner />
@@ -110,7 +88,7 @@ const styles = StyleSheet.create({
   },
   text: {
     height: 30,
-    width: '20%',
+    width: '30%',
     flexDirection: 'column',
     justifyContent: 'flex-start',
     justifyContent: 'center',

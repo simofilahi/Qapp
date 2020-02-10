@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, TouchableOpacity} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {
   List,
   Container,
@@ -7,7 +7,6 @@ import {
   CardItem,
   Text,
   Icon,
-  Body,
   Right,
   Content,
 } from 'native-base';
@@ -15,7 +14,6 @@ import MyHeader from '../header/Header';
 import SubmitFooter from '../footer/SubmitFooter';
 import NetInfo from '@react-native-community/netinfo';
 import Spinner from 'react-native-loading-spinner-overlay';
-import AsyncStorage from '@react-native-community/async-storage';
 var RNFS = require('react-native-fs');
 
 export default class SurveyScreen extends Component {
@@ -34,6 +32,7 @@ export default class SurveyScreen extends Component {
       rowid: null,
       isConnected: false,
       isInternetReachable: false,
+      loading: false,
     };
   }
 
@@ -178,10 +177,24 @@ export default class SurveyScreen extends Component {
               ) {
                 arr = [];
               } else arr = [''];
+              //  i added above line just to escape front end error
               return {
                 ...elem,
+                // options:
+                //   elem.options.length > 0
+                //     ? elem.options.map((elem, index) => {
+                //         return {
+                //           id: index,
+                //           value: elem,
+                //           checked: false,
+                //         };
+                //       })
+                //     : arr,
                 options:
-                  elem.options.length > 0
+                  elem.type === 0 ||
+                  elem.type === 1 ||
+                  elem.type === 2 ||
+                  elem.type === 3
                     ? elem.options.map((elem, index) => {
                         return {
                           id: index,
@@ -190,7 +203,6 @@ export default class SurveyScreen extends Component {
                         };
                       })
                     : arr,
-                // i put this variable to check if partie submited or not
               };
             }),
             submited: false,
@@ -207,11 +219,11 @@ export default class SurveyScreen extends Component {
     const scanner = this.props.navigation.getParam('scanner', () => false);
     const flag = this.props.navigation.getParam('flag', () => false);
 
-    console.log('template ======> ', template);
+    console.log('template ======> ', JSON.stringify(template.sent));
     this.setState(
       {
         // here it was another code
-        data: template.data,
+        data: {...template.data, sent: template.sent},
         uuid: template.data.uuid,
         scanner: scanner,
         qrcodeData: template.qrcodeData,
@@ -222,11 +234,12 @@ export default class SurveyScreen extends Component {
             : null,
       },
       () => {
+        // console.log('====> this.state.data', this.state.data);
         if (flag === 1) {
           this.AddParamToOptions(template.data).then(res => {
             this.setState({
               // here it was another code
-              data: {...template.data, parts: res},
+              data: {...this.state.data, parts: res},
               uuid: template.data.uuid,
               scanner: scanner,
               qrcodeData: template.qrcodeData,
@@ -244,6 +257,14 @@ export default class SurveyScreen extends Component {
     // here it was another code
   }
 
+  updateSentValue = () => {
+    this.setState(
+      {
+        data: {...this.state.data, sent: false},
+      },
+      () => console.log('after update ==> ', this.state.data),
+    );
+  };
   // store data into local storage
 
   _storeData = async () => {
@@ -256,20 +277,20 @@ export default class SurveyScreen extends Component {
         var string = JSON.stringify({data, rowid, qrcodeData});
         RNFS.writeFile(path, string, 'utf8')
           .then(success => {
-            alert('file created  after deleted');
+            // alert('file created  after deleted');
           })
           .catch(err => {
-            alert('file creation failed after deleted');
+            // alert('file creation failed after deleted');
           });
       })
       .catch(err => {
         var string = JSON.stringify({data, rowid, qrcodeData});
         RNFS.writeFile(path, string, 'utf8')
           .then(success => {
-            alert('success creation 1 ');
+            // alert('success creation 1 ');
           })
           .catch(err => {
-            alert('failed creation 1');
+            // alert('failed creation 1');
           });
       });
   };
@@ -297,42 +318,68 @@ export default class SurveyScreen extends Component {
       });
     });
     let res = await promise;
-    data = {...template, answers: {row: row, variable: res}};
+    const data = {...template, answers: {row: row, variable: res}};
     return data;
   };
 
   // call this func when Done button pressed
 
   allDone = () => {
-    const {rowid} = this.state;
+    const {rowid, data} = this.state;
     const {navigate} = this.props.navigation;
     var name = '/file_' + rowid + '.txt';
     var path = RNFS.DocumentDirectoryPath + name;
 
     // dont forget to check if file alerday exist and filled with old data
-    RNFS.readFile(path, 'utf8')
-      .then(res => {
-        res = JSON.parse(res);
-        this.createGlobaAnswerArray(res)
-          .then(res => {
-            let string = JSON.stringify(res);
-            RNFS.writeFile(path, string, 'utf8')
-              .then(success => {
-                navigate('HomeScreen', {
-                  TabId: 1,
-                  flag: 1,
-                });
-              })
-              .catch(err => {});
-          })
-          .catch(err => {});
-      })
-      .catch(err => {
-        // alert('file creation failed after deleted');
-      });
+
+    if (data.sent === true) {
+      // alert('yes');
+      RNFS.unlink(path, 'utf8')
+        .then(res => {
+          this.setState({loading: false});
+          navigate('HomeScreen', {
+            TabId: 1,
+            flag: 1,
+          });
+        })
+        .catch(err => {
+          navigate('HomeScreen', {
+            TabId: 1,
+            flag: 1,
+          });
+        });
+    } else {
+      RNFS.readFile(path, 'utf8')
+        .then(res => {
+          res = JSON.parse(res);
+          this.setState({loading: true});
+          this.createGlobaAnswerArray(res)
+            .then(res => {
+              this.setState({loading: false});
+              let string = JSON.stringify(res);
+              RNFS.writeFile(path, string, 'utf8')
+                .then(success => {
+                  navigate('HomeScreen', {
+                    TabId: 1,
+                    flag: 1,
+                  });
+                })
+                .catch(err => {});
+            })
+            .catch(err => {});
+        })
+        .catch(err => {
+          // alert('file creation failed after deleted');
+        });
+    }
+  };
+
+  updateLoading = () => {
+    this.setState({loading: false});
   };
 
   _renderRow = (item, index, navigate, uuid, row, qrcodeData) => {
+    const {loading} = this.state;
     // alert(qrcodeData);
     // console.log('each item ===> ', item), console.log('\n');
     return (
@@ -344,10 +391,13 @@ export default class SurveyScreen extends Component {
           bordered
           button
           onPress={() => {
+            this.setState({loading: true});
             navigate('SurveyItemScreen', {
               updateRow: this.updateRow,
               updateOptionsInPart: this.updateOptionsInPart,
               PartOnSubmit: this.PartOnSubmit,
+              updateLoading: this.updateLoading,
+              updateSentValue: this.updateSentValue,
               qrcodeData: qrcodeData,
               uuid: uuid,
               row: row,
@@ -361,33 +411,39 @@ export default class SurveyScreen extends Component {
                 name="check-circle"
                 type="FontAwesome"
                 style={styles.iconStyle}
-                onPress={() =>
+                onPress={() => {
+                  this.setState({loading: true});
                   navigate('SurveyItemScreen', {
                     updateRow: this.updateRow,
                     updateOptionsInPart: this.updateOptionsInPart,
                     PartOnSubmit: this.PartOnSubmit,
+                    updateLoading: this.updateLoading,
+                    updateSentValue: this.updateSentValue,
                     qrcodeData: qrcodeData,
                     uuid: uuid,
                     row: row,
                     item: item,
-                  })
-                }
+                  });
+                }}
               />
             ) : (
               <Icon
                 name="arrow-forward"
                 style={{color: 'black', marginRight: '-25%'}}
-                onPress={() =>
+                onPress={() => {
+                  this.setState({loading: true});
                   navigate('SurveyItemScreen', {
                     updateRow: this.updateRow,
                     updateOptionsInPart: this.updateOptionsInPart,
                     PartOnSubmit: this.PartOnSubmit,
+                    updateLoading: this.updateLoading,
+                    updateSentValue: this.updateSentValue,
                     qrcodeData: qrcodeData,
                     uuid: uuid,
                     row: row,
                     item: item,
-                  })
-                }
+                  });
+                }}
               />
             )}
           </Right>
@@ -404,6 +460,7 @@ export default class SurveyScreen extends Component {
       qrcodeData,
       isConnected,
       isInternetReachable,
+      loading,
     } = this.state;
     const data = this.state.data.parts;
 
@@ -423,6 +480,11 @@ export default class SurveyScreen extends Component {
               this._renderRow(item, index, navigate, uuid, row, qrcodeData)
             }></List>
         </Content>
+        <Spinner
+          visible={loading}
+          textContent={'Loading...'}
+          textStyle={styles.spinnerTextStyle}
+        />
         <SubmitFooter
           allDone={this.allDone}
           title={isConnected && isInternetReachable ? 'Done' : 'offline Done'}
@@ -439,6 +501,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     backgroundColor: 'white',
+  },
+  spinnerTextStyle: {
+    color: '#FFF',
   },
   iconStyle: {
     color: 'green',

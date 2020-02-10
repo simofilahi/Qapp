@@ -5,7 +5,7 @@ import SubmitFooter from '../footer/SubmitFooter';
 import Axios from 'axios';
 import NetInfo from '@react-native-community/netinfo';
 import Spinner from 'react-native-loading-spinner-overlay';
-import {StyleSheet, Alert} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {
   Form,
   Container,
@@ -48,17 +48,21 @@ class SurveyItemScreen extends Component {
     this.unsubscribe();
   }
 
-  handleConnectivityChange = state => {};
-
   UNSAFE_componentWillMount() {
-    const item = this.props.navigation.getParam('item', () => false);
-    const uuid = this.props.navigation.getParam('uuid', () => false);
-
-    this.setState({
-      uuid: uuid,
-      pageId: item.id,
-      item: item,
-    });
+    const item = this.props.navigation.getParam('item', false);
+    const uuid = this.props.navigation.getParam('uuid', false);
+    const updateLoading = this.props.navigation.getParam(
+      'updateLoading',
+      false,
+    );
+    this.setState(
+      {
+        uuid: uuid,
+        pageId: item.id,
+        item: item,
+      },
+      () => updateLoading(),
+    );
   }
 
   _onChange = (id, newvalue) => {
@@ -78,81 +82,90 @@ class SurveyItemScreen extends Component {
     );
   };
 
-  _onSubmit = () => {
-    const {PartOnSubmit} = this.props.navigation.state.params;
+  _onSubmit = async () => {
+    // console.log('submited data', JSON.stringify(variables));
     const {goBack} = this.props.navigation;
     const {pageId, variables} = this.state;
-
-    // console.log('submited data', JSON.stringify(variables));
-    PartOnSubmit(pageId, variables);
-    try {
-      if (Platform.OS === 'android') {
-        NetInfo.fetch().then(state => {
-          if (state.isConnected) {
-            {
-              const {goBack} = this.props.navigation;
-              const {pageId, variables} = this.state;
-              const {
-                uuid,
-                row,
-                qrcodeData,
-                updateRow,
-              } = this.props.navigation.state.params;
-
-              this.setState({loading: true});
-              const url = `http://wtr.oulhafiane.me/api/anon/dataset/${uuid}/part/${pageId}`;
-              const data = {
-                row: row,
-                variables: variables,
-              };
-              const config = {
-                headers: {'X-AUTH-TOKEN': qrcodeData},
-              };
-              console.log(JSON.stringify(data));
-              console.log({pageId: pageId});
-              console.log({url: url});
-              console.log({qrcodeData: qrcodeData});
-              Axios.post(url, data, config)
-                .then(res => {
-                  // console.log('res ===> ', JSON.stringify(res));
-                  this.setState({
-                    loading: false,
-                  });
-                  if (
-                    res.data.extras !== null &&
-                    res.data.extras !== undefined &&
-                    res.data.extras.row != undefined &&
-                    res.data.extras.row != null
-                  ) {
-                    updateRow(res.data.extras.row);
-                    goBack();
-                  } else {
-                    goBack();
-                  }
-                })
-                .catch(error => {
-                  this.setState({
-                    loading: false,
-                  });
-                  // server error
-                  alert(error);
-                });
-            }
-          } else Alert.alert('Please check your Internet connection');
-        });
-      }
-    } catch {
-      this.setState({
-        loading: false,
+    const {
+      uuid,
+      row,
+      qrcodeData,
+      updateRow,
+      updateSentValue,
+      PartOnSubmit,
+    } = this.props.navigation.state.params;
+    promise = () => {
+      return new Promise((resolve, reject) => {
+        try {
+          this.setState({loading: true});
+          const url = `https://impactree.um6p.ma/api/anon/dataset/${uuid}/part/${pageId}`;
+          const data = {
+            row: row,
+            variables: variables,
+          };
+          const config = {
+            headers: {'X-AUTH-TOKEN': qrcodeData},
+          };
+          console.log(JSON.stringify(data));
+          console.log({pageId: pageId});
+          console.log({url: url});
+          console.log({qrcodeData: qrcodeData});
+          Axios.post(url, data, config)
+            .then(res => {
+              this.setState({
+                loading: false,
+              });
+              if (
+                res.data.extras !== null &&
+                res.data.extras !== undefined &&
+                res.data.extras.row != undefined &&
+                res.data.extras.row != null
+              ) {
+                updateRow(res.data.extras.row);
+              }
+              resolve('succes');
+            })
+            .catch(error => {
+              this.setState({
+                loading: false,
+              });
+              console.log('yoyoyoyyooyoyoy');
+              updateSentValue();
+              reject('failed');
+              // server error
+              // alert(error);
+            });
+        } catch {
+          this.setState({
+            loading: false,
+          });
+          alert('Try Again');
+          reject('failed');
+        }
       });
-      alert('Try Again');
-    }
+    };
+    promise()
+      .then(res => {
+        PartOnSubmit(pageId, variables);
+        goBack();
+      })
+      .catch(err => {
+        PartOnSubmit(pageId, variables);
+        goBack();
+      });
+
+    // don't forget this
   };
 
   _renderRow = (item, variables, index) => {
     const {pageId} = this.state;
     const {updateOptionsInPart} = this.props.navigation.state.params;
 
+    console.log('Items ====> ', item);
+    console.log(
+      '********************************************************************************\n',
+    );
+    // console.log('\n\n');
     return (
       <Card key={index} style={styles.cardStyle}>
         <CardItem header bordered>

@@ -1,7 +1,5 @@
 import React, {Component} from 'react';
-import {Footer, Text} from 'native-base';
-import {StyleSheet} from 'react-native';
-// import {Button} from 'galio-framework';
+import {Footer} from 'native-base';
 import {Alert} from 'react-native';
 import {Button} from 'react-native-elements';
 
@@ -40,7 +38,6 @@ class SubmitFooter extends Component {
             );
           }}
           containerStyle={{
-            // backgroundColor: 'yellow',
             width: '70%',
             height: '100%',
             justifyContent: 'center',

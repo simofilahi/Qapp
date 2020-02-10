@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import MyHeader from '../header/Header';
 import AboutUsBody from './AboutUsBody';
-import {Container, View, Button, Icon, Fab, Text} from 'native-base';
+import {Container} from 'native-base';
 
 export default class AboutUs extends Component {
   static navigationOptions = {

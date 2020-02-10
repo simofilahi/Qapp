@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import MyHeader from '../header/Header';
-import MyFooter from '../footer/BottomNavigator';
+import MyFooter from '../footer/Myfooter';
 import HomeBody from './HomeBody';
 import ListOfSurvey from './ListOfSurvey';
-import {Container, Tab, Tabs, Content} from 'native-base';
+import {Container, Tab, Tabs} from 'native-base';
 import Axios from 'axios';
 import {PermissionsAndroid} from 'react-native';
 import RNExitApp from 'react-native-exit-app';
@@ -32,8 +32,9 @@ export default class HomeScreen extends Component {
     header: null,
   };
 
-  getDataFromLocalStorage = async () => {
-    let promise = new Promise((resolve, reject) => {
+  // read data from local storage
+  getDataFromLocalStorage = () => {
+    return new Promise((resolve, reject) => {
       let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
       var Surveys = [];
       RNFS.readFile(path, 'utf8')
@@ -41,20 +42,29 @@ export default class HomeScreen extends Component {
           rowidarray = JSON.parse(rowidarray);
           rowidarray.map(elem => {
             let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
-            RNFS.readFile(path, 'utf8').then(res => {
-              res = JSON.parse(res);
-              Surveys.push(res);
-              if (rowidarray[elem + 1] == undefined) resolve(Surveys);
-            });
+            // if (RNFS.exists(path)) {
+            RNFS.readFile(path, 'utf8')
+              .then(res => {
+                res = JSON.parse(res);
+                Surveys.push(res);
+                if (rowidarray[elem + 1] == undefined) resolve(Surveys);
+              })
+              .catch(err => {
+                if (rowidarray[elem + 1] == undefined) resolve(Surveys);
+              });
+            // } else reject('error');
           });
         })
         .catch(err => {
           reject(err);
         });
     });
-    let res = await promise;
-    return res;
   };
+
+  // console.log('before');
+  // let res = await promise;
+  // console.log('after');
+  // return res;
 
   UNSAFE_componentWillReceiveProps(newProps) {
     const TabId = newProps.navigation.getParam('TabId', false);
@@ -62,9 +72,12 @@ export default class HomeScreen extends Component {
 
     if (flag === 1) {
       // this func called when i press on all done button
+      console.log('Im here');
       this.setState({loading: true}, () => {
+        console.log('holla');
         this.getDataFromLocalStorage()
           .then(data => {
+            console.log('data yoyooyo => ', data);
             this.setState({
               Surveys: data,
               TabId: TabId,
@@ -72,7 +85,12 @@ export default class HomeScreen extends Component {
               loading: false,
             });
           })
-          .catch();
+          .catch(err => {
+            console.log('catch');
+            this.setState({
+              loading: false,
+            });
+          });
       });
     } else if (flag === 0) {
       this.setState({
@@ -97,6 +115,7 @@ export default class HomeScreen extends Component {
     }
   }
 
+  //Request for the permissions
   requestPermission = () => {
     try {
       PermissionsAndroid.requestMultiple([
@@ -122,9 +141,11 @@ export default class HomeScreen extends Component {
     }
   };
 
+  // Request for the permissions
   componentDidMount() {
     this.requestPermission();
   }
+
   // delete all stucked survey
   deleteAllRows = async () => {
     let promise = new Promise((resolve, reject) => {
@@ -154,11 +175,14 @@ export default class HomeScreen extends Component {
     });
   };
 
+  // give us your feedback func
   feedBack = () => {
     alert('feedback');
   };
 
+  // delete on row
   deleteRow = rowid => {
+    // alert('yes');
     let path = RNFS.DocumentDirectoryPath + '/file_' + rowid + '.txt';
 
     RNFS.unlink(path, 'utf8')
@@ -172,6 +196,7 @@ export default class HomeScreen extends Component {
       .catch(err => {});
   };
 
+  // send one row to backend
   sendRow = (surveyrow, rowid) => {
     console.log('row ==> ', JSON.stringify(surveyrow.data.parts[0].id));
 
@@ -188,7 +213,7 @@ export default class HomeScreen extends Component {
               const pageId = surveyrow.data.parts[0].id;
 
               this.setState({loading: true});
-              const url = `http://wtr.oulhafiane.me/api/anon/dataset/${uuid}/part/${pageId}`;
+              const url = `https://impactree.um6p.ma/api/anon/dataset/${uuid}/part/${pageId}`;
               const data = {
                 row: row,
                 variables: variables,
@@ -211,7 +236,7 @@ export default class HomeScreen extends Component {
                   this.setState({
                     loading: false,
                   });
-                  alert(error);
+                  // alert(error);
                 });
             }
           } else Alert.alert('Please check your Internet connection');
@@ -225,6 +250,7 @@ export default class HomeScreen extends Component {
     }
   };
 
+  // send all rows to backend
   sendAllRows = async () => {
     var promise = (surveyrow, rowid) => {
       return new Promise((resolve, reject) => {
@@ -238,9 +264,8 @@ export default class HomeScreen extends Component {
                 const row = surveyrow.answers.row;
                 // this line above is tmp
                 const pageId = surveyrow.data.parts[0].id;
-
                 this.setState({loading: true});
-                const url = `http://wtr.oulhafiane.me/api/anon/dataset/${uuid}/part/${pageId}`;
+                const url = `https://impactree.um6p.ma/api/anon/dataset/${uuid}/part/${pageId}`;
                 const data = {
                   row: row,
                   variables: variables,
@@ -264,7 +289,7 @@ export default class HomeScreen extends Component {
                     this.setState({
                       loading: false,
                     });
-                    alert(error);
+                    // alert(error);
                     reject('failed');
                   });
               }
@@ -366,7 +391,6 @@ export default class HomeScreen extends Component {
             <ListOfSurvey
               boolean={boolean}
               Surveys={Surveys}
-              navigate={navigate}
               sendOneSurvey={this.sendOneSurvey}
               sendRow={this.sendRow}
               sendAllRows={this.sendAllRows}

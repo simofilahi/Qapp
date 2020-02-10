@@ -7,7 +7,6 @@ import {
   Text,
   Alert,
 } from 'react-native';
-import {Content} from 'native-base';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import {
   widthPercentageToDP as wp,
@@ -46,7 +45,8 @@ export default class QRCodeScannerScreen extends Component {
               var token = jwtDecode(data);
               // Check exp time
               this.setState({loading: true});
-              const url = `http://wtr.oulhafiane.me/api/anon/dataset/${token.dataset}/parts`;
+              const url = `https://impactree.um6p.ma/api/anon/dataset/${token.dataset}/parts`;
+              // const url = `http://wtr.oulhafiane.me/api/anon/dataset/${token.dataset}/parts`;
               const config = {
                 headers: {'X-AUTH-TOKEN': data},
               };
@@ -58,6 +58,7 @@ export default class QRCodeScannerScreen extends Component {
                   resolve({
                     data: res.data,
                     qrcodeData: data,
+                    sent: true,
                   });
                 })
                 .catch(err => {
@@ -137,7 +138,7 @@ export default class QRCodeScannerScreen extends Component {
                   .catch();
               })
               .catch(err => {
-                alert(err);
+                // alert(err);
               });
           }}
           fadeIn={true}

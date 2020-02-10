@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
-import RangeSlider from 'rn-range-slider';
 import Spinner from 'react-native-loading-spinner-overlay';
 import {View} from 'native-base';
-
 import {
   STRING_INPUT,
   TEXTAREA_INPUT,
@@ -19,7 +17,6 @@ import {
   SLIDER_FROMZERO_INPUT,
   SLIDER_RANGE_INPUT,
 } from './inputType/InputTypes';
-
 import CheckBoxComponent from './inputType/CheckBoxComponent';
 import MultiSelectComp from './inputType/MultiSelect';
 import SingleSelect from './inputType/SingleSelect';

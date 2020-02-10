@@ -12,11 +12,9 @@ import {
 import {Button, Text} from 'react-native-elements';
 import {StyleSheet, Image} from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
-var RNFS = require('react-native-fs');
 
 export class ListOfSurvey extends Component {
-  _renderRow = (survey, index, sendRow, deleteRow, navigate) => {
-    // console.log('yoyoyoyyooyoyoy', survey);
+  _renderRow = (survey, sendRow, deleteRow) => {
     return (
       <Card>
         <CardItem>
@@ -65,7 +63,6 @@ export class ListOfSurvey extends Component {
 
   render() {
     const {
-      navigate,
       boolean,
       Surveys,
       loading,
@@ -105,7 +102,6 @@ export class ListOfSurvey extends Component {
                 <Button
                   onPress={() => sendAllRows()}
                   title="Submit All"
-                  // loading
                   buttonStyle={{
                     width: '80%',
                     alignSelf: 'center',
@@ -118,13 +114,12 @@ export class ListOfSurvey extends Component {
               dataArray={Surveys}
               keyExtractor={(item, index) => index.toString()}
               renderRow={(item, index) =>
-                this._renderRow(item, index, sendRow, deleteRow, navigate)
+                this._renderRow(item, sendRow, deleteRow)
               }></List>
           </Content>
         ) : (
           <View
             style={{
-              // flex: 1,
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
