@@ -10,7 +10,7 @@ import {
   View,
 } from 'native-base';
 import {Button, Text} from 'react-native-elements';
-import {StyleSheet, Image} from 'react-native';
+import {StyleSheet, Image, Alert} from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 export class ListOfSurvey extends Component {
@@ -28,7 +28,24 @@ export class ListOfSurvey extends Component {
               <View style={{margin: 2}}>
                 <Button
                   buttonStyle={{backgroundColor: 'white'}}
-                  onPress={() => deleteRow(survey.rowid)}
+                  onPress={() => {
+                    Alert.alert(
+                      'Confirmation',
+                      'Are sure you want to confirm',
+                      [
+                        {
+                          text: 'No',
+                          onPress: () => null,
+                        },
+                        {
+                          text: 'Yes',
+                          //
+                          onPress: () => deleteRow(survey.rowid),
+                        },
+                      ],
+                      {cancelable: false},
+                    );
+                  }}
                   icon={
                     <Icon
                       name="trash"

@@ -147,32 +147,41 @@ export default class HomeScreen extends Component {
   }
 
   // delete all stucked survey
-  deleteAllRows = async () => {
-    let promise = new Promise((resolve, reject) => {
-      let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+  deleteAllRows = () => {
+    promise = () => {
+      return new Promise(async (resolve, reject) => {
+        let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
 
-      RNFS.readFile(path, 'utf8')
-        .then(rowidarray => {
-          rowidarray = JSON.parse(rowidarray);
-          rowidarray.forEach(elem => {
-            let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
-            RNFS.unlink(path, 'utf8')
-              .then(res => {})
-              .catch(err => {});
-            if (rowidarray[elem + 1] === undefined) resolve('finished');
-          });
-        })
-        .catch(err => {});
-    });
+        if (await RNFS.exists(path)) {
+          RNFS.readFile(path, 'utf8')
+            .then(rowidarray => {
+              rowidarray = JSON.parse(rowidarray);
+              rowidarray.forEach(async elem => {
+                let path =
+                  RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+                if (await RNFS.exists(path)) {
+                  RNFS.unlink(path, 'utf8');
+                  if (rowidarray[elem + 1] === undefined) resolve('succes');
+                } else {
+                  if (rowidarray[elem + 1] === undefined) reject('failed');
+                }
+              });
+            })
+            .catch(err => {});
+        } else {
+          reject('failed');
+        }
+      });
+    };
 
-    let res = await promise;
-    let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
-    RNFS.unlink(path, 'utf8')
-      .then(res => {})
+    promise()
+      .then(res => {
+        this.setState({
+          Surveys: [],
+          boolean: false,
+        });
+      })
       .catch(err => {});
-    this.setState({
-      Surveys: [],
-    });
   };
 
   // give us your feedback func
@@ -187,11 +196,18 @@ export default class HomeScreen extends Component {
 
     RNFS.unlink(path, 'utf8')
       .then(res => {
-        this.setState({
-          Surveys: this.state.Surveys.filter(elem => {
-            if (elem.rowid !== rowid) return elem;
-          }),
-        });
+        this.setState(
+          {
+            Surveys: this.state.Surveys.filter(elem => {
+              if (elem.rowid !== rowid) return elem;
+            }),
+          },
+          () => {
+            this.setState({
+              boolean: this.state.Surveys.length === 0 ? false : true,
+            });
+          },
+        );
       })
       .catch(err => {});
   };
@@ -248,6 +264,9 @@ export default class HomeScreen extends Component {
       });
       alert('Try Again');
     }
+    this.setState({
+      boolean: this.state.Surveys.length === 0 ? false : true,
+    });
   };
 
   // send all rows to backend
@@ -315,6 +334,7 @@ export default class HomeScreen extends Component {
         });
       });
     };
+
     console.log('after');
     await loop();
     console.log('finished');

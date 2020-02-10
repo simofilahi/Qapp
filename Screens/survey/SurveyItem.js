@@ -94,67 +94,57 @@ class SurveyItemScreen extends Component {
       updateSentValue,
       PartOnSubmit,
     } = this.props.navigation.state.params;
+
     promise = () => {
       return new Promise((resolve, reject) => {
-        try {
-          this.setState({loading: true});
-          const url = `https://impactree.um6p.ma/api/anon/dataset/${uuid}/part/${pageId}`;
-          const data = {
-            row: row,
-            variables: variables,
-          };
-          const config = {
-            headers: {'X-AUTH-TOKEN': qrcodeData},
-          };
-          console.log(JSON.stringify(data));
-          console.log({pageId: pageId});
-          console.log({url: url});
-          console.log({qrcodeData: qrcodeData});
-          Axios.post(url, data, config)
-            .then(res => {
-              this.setState({
-                loading: false,
-              });
-              if (
-                res.data.extras !== null &&
-                res.data.extras !== undefined &&
-                res.data.extras.row != undefined &&
-                res.data.extras.row != null
-              ) {
-                updateRow(res.data.extras.row);
-              }
-              resolve('succes');
-            })
-            .catch(error => {
-              this.setState({
-                loading: false,
-              });
-              console.log('yoyoyoyyooyoyoy');
-              updateSentValue();
-              reject('failed');
-              // server error
-              // alert(error);
+        this.setState({loading: true});
+        const url = `https://impactree.um6p.ma/api/anon/dataset/${uuid}/part/${pageId}`;
+        const data = {
+          row: row,
+          variables: variables,
+        };
+        const config = {
+          headers: {'X-AUTH-TOKEN': qrcodeData},
+        };
+        console.log(JSON.stringify(data));
+        console.log({pageId: pageId});
+        console.log({url: url});
+        console.log({qrcodeData: qrcodeData});
+        Axios.post(url, data, config)
+          .then(res => {
+            this.setState({
+              loading: false,
             });
-        } catch {
-          this.setState({
-            loading: false,
+            if (
+              res.data.extras !== null &&
+              res.data.extras !== undefined &&
+              res.data.extras.row != undefined &&
+              res.data.extras.row != null
+            ) {
+              updateRow(res.data.extras.row);
+            }
+            resolve('succes');
+          })
+          .catch(error => {
+            this.setState({
+              loading: false,
+            });
+            updateSentValue();
+            reject('failed');
           });
-          alert('Try Again');
-          reject('failed');
-        }
       });
     };
     promise()
       .then(res => {
-        PartOnSubmit(pageId, variables);
-        goBack();
+        PartOnSubmit(pageId, variables)
+          .then(res => goBack())
+          .catch(err => alert(err));
       })
       .catch(err => {
-        PartOnSubmit(pageId, variables);
-        goBack();
+        PartOnSubmit(pageId, variables)
+          .then(res => goBack())
+          .catch(err => alert(err));
       });
-
-    // don't forget this
   };
 
   _renderRow = (item, variables, index) => {

@@ -136,26 +136,31 @@ export default class SurveyScreen extends Component {
     } catch {}
   };
 
-  PartOnSubmit = (pageId, partAnswer) => {
+  PartOnSubmit = async (pageId, partAnswer) => {
     const {parts} = this.state.data;
-
-    this.setState(
-      {
-        data: {
-          ...this.state.data,
-          parts: parts.map(elem => {
-            if (elem.id === pageId) {
-              return {
-                ...elem,
-                answers: partAnswer,
-                submited: true,
-              };
-            } else return elem;
-          }),
+    return new Promise((resolve, reject) => {
+      this.setState(
+        {
+          data: {
+            ...this.state.data,
+            parts: parts.map(elem => {
+              if (elem.id === pageId) {
+                return {
+                  ...elem,
+                  answers: partAnswer,
+                  submited: true,
+                };
+              } else return elem;
+            }),
+          },
         },
-      },
-      () => this._storeData(),
-    );
+        () => {
+          this._storeData()
+            .then(res => resolve('okay'))
+            .catch(err => reject('error'));
+        },
+      );
+    });
   };
 
   AddParamToOptions = async data => {
@@ -271,28 +276,50 @@ export default class SurveyScreen extends Component {
     const {rowid, data, qrcodeData} = this.state;
     var name = '/file_' + rowid + '.txt';
     var path = RNFS.DocumentDirectoryPath + name;
-
-    RNFS.unlink(path)
-      .then(() => {
-        var string = JSON.stringify({data, rowid, qrcodeData});
-        RNFS.writeFile(path, string, 'utf8')
-          .then(success => {
-            // alert('file created  after deleted');
-          })
-          .catch(err => {
-            // alert('file creation failed after deleted');
-          });
-      })
-      .catch(err => {
-        var string = JSON.stringify({data, rowid, qrcodeData});
-        RNFS.writeFile(path, string, 'utf8')
-          .then(success => {
-            // alert('success creation 1 ');
-          })
-          .catch(err => {
-            // alert('failed creation 1');
-          });
-      });
+    return new Promise((resolve, reject) => {
+      // RNFS.unlink(path)
+      //   .then(() => {
+      //     var string = JSON.stringify({data, rowid, qrcodeData});
+      //     RNFS.writeFile(path, string, 'utf8')
+      //       .then(success => {
+      //         // alert('file created  after deleted');
+      //       })
+      //       .catch(err => {
+      //         // alert('file creation failed after deleted');
+      //       });
+      //   })
+      //   .catch(err => {
+      //     var string = JSON.stringify({data, rowid, qrcodeData});
+      //     RNFS.writeFile(path, string, 'utf8')
+      //       .then(success => {
+      //         // alert('success creation 1 ');
+      //       })
+      //       .catch(err => {
+      //         // alert('failed creation 1');
+      //       });
+      //   });
+      var string = JSON.stringify({data, rowid, qrcodeData});
+      RNFS.writeFile(path, string, 'utf8')
+        .then(success => {
+          resolve('Succes');
+          // alert('file created  after deleted');
+        })
+        .catch(err => {
+          reject('Error');
+          // alert('file creation failed after deleted');
+        });
+      // if (RNFS.exists(path)) {
+      //   var string = JSON.stringify({data, rowid, qrcodeData});
+      //   RNFS.writeFile(path, string, 'utf8')
+      //     .then(success => {
+      //       // alert('file created  after deleted');
+      //     })
+      //     .catch(err => {
+      //       // alert('file creation failed after deleted');
+      //     });
+      // } else {
+      // }
+    });
   };
 
   // update row with new row value that coming from backend side

@@ -2,53 +2,58 @@ import React, {Component} from 'react';
 import {View, StyleSheet, Image, Text} from 'react-native';
 import {Spinner} from 'native-base';
 var RNFS = require('react-native-fs');
-const TWO_SECONDS = 2000;
 
 export default class SplashScreen extends Component {
   static navigationOptions = {
     header: null,
   };
 
-  UNSAFE_componentWillMount() {
-    let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
-
-    RNFS.readFile(path, 'utf8')
-      .then(rowidarray => {
-        // console.log('before ==> ', rowidarray);
-        rowidarray = JSON.parse(rowidarray);
-        // console.log('after ==> ', rowidarray);
-        let Surveys = [];
-
-        rowidarray.forEach(elem => {
-          let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
-          if (RNFS.exists(path)) {
-            RNFS.readFile(path, 'utf8')
-              .then(res => {
-                // console.log('content of file_0.txt', res);
-                res = JSON.parse(res);
-                Surveys.push(res);
-                // console.log('Survey ====> ', Surveys);
-              })
-              .catch({});
-          }
-        });
-
+  async UNSAFE_componentWillMount() {
+    let promise = () => {
+      return new Promise((resolve, reject) => {
+        let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+        RNFS.readFile(path, 'utf8')
+          .then(rowidarray => {
+            rowidarray = JSON.parse(rowidarray);
+            let Surveys = [];
+            rowidarray.forEach(async elem => {
+              let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+              if (await RNFS.exists(path)) {
+                RNFS.readFile(path, 'utf8').then(async res => {
+                  res = JSON.parse(res);
+                  Surveys.push(res);
+                });
+                if (rowidarray[elem + 1] == undefined) {
+                  resolve(Surveys);
+                }
+              } else {
+                if (rowidarray[elem + 1] == undefined) {
+                  resolve(Surveys);
+                }
+              }
+            });
+          })
+          .catch(err => {
+            reject(err);
+          });
+      });
+    };
+    promise()
+      .then(Surveys => {
         setTimeout(() => {
           this.props.navigation.navigate('HomeScreen', {
             TabId: 1,
             data: Surveys,
           });
-        }, TWO_SECONDS);
+        }, 6000);
       })
       .catch(err => {
-        // console.log('error ***********************88');
-        // console.log(err.message);
         setTimeout(() => {
           this.props.navigation.navigate('HomeScreen', {
-            TabId: 0,
-            data: [],
+            TabId: 1,
+            data: Surveys,
           });
-        }, TWO_SECONDS);
+        }, 6000);
       });
   }
 
