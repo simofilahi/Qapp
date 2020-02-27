@@ -1,13 +1,14 @@
-import React, {Component} from 'react';
-import {View, Alert} from 'react-native';
-import {Fab, Icon} from 'native-base';
-import {Overlay, Text, Button} from 'react-native-elements';
-import {QRreader} from 'react-native-qr-scanner';
+import React, { Component } from 'react';
+import { View, Alert } from 'react-native';
+import { Fab, Icon } from 'native-base';
+import { Overlay, Text, Button } from 'react-native-elements';
+import { QRreader } from 'react-native-qr-scanner';
 import ImagePicker from 'react-native-image-picker';
 import Axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import NetInfo from '@react-native-community/netinfo';
 import Spinner from 'react-native-loading-spinner-overlay';
+import rooturl from '../../config';
 var RNFS = require('react-native-fs');
 
 class MyFooter extends Component {
@@ -45,10 +46,11 @@ class MyFooter extends Component {
             try {
               var token = jwtDecode(data);
               // Check exp time
-              this.setState({loading: true});
-              const url = `https://impactree.um6p.ma/api/anon/dataset/${token.dataset}/parts`;
+              this.setState({ loading: true });
+              // https://impactree.um6p.ma
+              const url = `${rooturl}/api/anon/dataset/${token.dataset}/parts`;
               const config = {
-                headers: {'X-AUTH-TOKEN': data},
+                headers: { 'X-AUTH-TOKEN': data },
               };
               Axios.get(url, config)
                 .then(res => {
@@ -108,15 +110,25 @@ class MyFooter extends Component {
       var path = null;
       var string = '';
       string = JSON.stringify(data);
+      RNFS.getFSInfo().then(info => {
+        const infospace = info.freeSpace / 1024 / 1024;
 
-      path = RNFS.DocumentDirectoryPath + '/template.txt';
-      RNFS.writeFile(path, string, 'utf8')
-        .then(success => {
-          resolve('Created');
-        })
-        .catch(err => {
-          reject('error During the creation');
-        });
+        if (infospace < 100) {
+          Alert.alert(
+            'Storage space',
+            "You Don't have enough space please free up your storage and try again",
+          );
+        } else {
+          path = RNFS.DocumentDirectoryPath + '/template.txt';
+          RNFS.writeFile(path, string, 'utf8')
+            .then(success => {
+              resolve('Created');
+            })
+            .catch(err => {
+              reject('error During the creation');
+            });
+        }
+      });
     });
   };
 
@@ -127,13 +139,13 @@ class MyFooter extends Component {
         if (state.isConnected) {
           ImagePicker.launchImageLibrary({}, response => {
             if (response.didCancel) {
-              this.setState({isVisible: false, open: false});
+              this.setState({ isVisible: false, open: false });
               // Alert.alert('User cancelled image picker');
             } else if (response.error) {
-              this.setState({isVisible: false, open: false});
+              this.setState({ isVisible: false, open: false });
               // Alert.alert('ImagePicker Error: ', response.error);
             } else if (response.customButton) {
-              this.setState({isVisible: false, open: false});
+              this.setState({ isVisible: false, open: false });
               // Alert.alert('User tapped custom button: ', response.customButton);
             } else {
               if (response.uri) {
@@ -142,7 +154,7 @@ class MyFooter extends Component {
                   path = response.uri;
                 }
                 QRreader(path).then(data => {
-                  this.setState({isVisible: false, open: false, loading: true});
+                  this.setState({ isVisible: false, open: false, loading: true });
                   this.onSuccess(data)
                     .then(res => {
                       this.createTemplatefile(res)
@@ -159,7 +171,7 @@ class MyFooter extends Component {
                         .catch();
                     })
                     .catch(err => {
-                      // alert(err);
+                      alert('Try again');
                     });
                 });
               }
@@ -172,8 +184,8 @@ class MyFooter extends Component {
   };
 
   render() {
-    const {navigate, TabId, addNewRow, OfflineSurveyBoolean} = this.props;
-    const {loading} = this.state;
+    const { navigate, TabId, addNewRow, OfflineSurveyBoolean } = this.props;
+    const { loading } = this.state;
 
     if (TabId === 0) {
       return (
@@ -181,7 +193,7 @@ class MyFooter extends Component {
           <Spinner
             visible={loading}
             textContent={'Loading...'}
-            textStyle={{color: 'white'}}
+            textStyle={{ color: 'white' }}
           />
           <Overlay
             overlayStyle={{
@@ -223,7 +235,7 @@ class MyFooter extends Component {
                     open: !this.state.open,
                   })
                 }>
-                <Icon name="remove" style={{color: 'black'}} />
+                <Icon name="remove" style={{ color: 'black' }} />
                 <Button
                   style={{
                     backgroundColor: '#E0E0E0',
@@ -295,7 +307,7 @@ class MyFooter extends Component {
               }}>
               <Icon
                 name="qrcode"
-                style={{color: 'black'}}
+                style={{ color: 'black' }}
                 type="FontAwesome"
                 onPress={() => {
                   if (OfflineSurveyBoolean === false) {
@@ -339,7 +351,6 @@ class MyFooter extends Component {
                 <Button
                   buttonStyle={{
                     backgroundColor: '#3F51B5',
-                    width: '50%',
                     alignSelf: 'center',
                     height: '100%',
                   }}
@@ -348,7 +359,7 @@ class MyFooter extends Component {
                     <Icon
                       name="map"
                       type="FontAwesome5"
-                      style={{color: 'white'}}
+                      style={{ color: 'white' }}
                     />
                   }
                 />
@@ -392,7 +403,7 @@ class MyFooter extends Component {
                     <Icon
                       name="users"
                       type="FontAwesome"
-                      style={{color: 'white'}}
+                      style={{ color: 'white' }}
                     />
                   }
                 />
@@ -459,7 +470,7 @@ class MyFooter extends Component {
               onPress={() => {
                 addNewRow();
               }}>
-              <Icon name="add" style={{color: 'black'}} />
+              <Icon name="add" style={{ color: 'black' }} />
             </Fab>
           </View>
           <View
@@ -500,7 +511,7 @@ class MyFooter extends Component {
                     <Icon
                       name="map"
                       type="FontAwesome5"
-                      style={{color: 'white'}}
+                      style={{ color: 'white' }}
                     />
                   }
                 />
@@ -544,7 +555,7 @@ class MyFooter extends Component {
                     <Icon
                       name="users"
                       type="FontAwesome"
-                      style={{color: 'white'}}
+                      style={{ color: 'white' }}
                     />
                   }
                 />

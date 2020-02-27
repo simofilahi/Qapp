@@ -157,7 +157,7 @@ export class ListOfSurvey extends Component {
                   alignSelf: 'center',
                   marginRight: '5%',
                 }}
-                source={require('../../Assests/img/empty.png')}
+                source={require('../../../Assests/img/empty.png')}
               />
               <Text>List is empty</Text>
             </View>
@@ -178,31 +178,3 @@ const styles = StyleSheet.create({
 });
 
 export default ListOfSurvey;
-
-/*
-
-  - scan button :
-          - create rowid file.
-          - create template file.
-          - add rowid to survey.
-          - redirect to survey screen with passing survey to this screen.
-  - add button
-          - read rowid file and get last id .
-          - read template file.
-          - add rowid to template.
-          - redirect to survey screen with passing survey to this screen.
-  - submit button :
-          - online submit :
-                            - send variable array that include answers to backend server that all.
-          - offline submit : 
-                            - add variable answers to the page that realted to this one.
-                            - create file named by file_ + rowid of survey .
-                            
-  - done Button:
-          online submit : 
-                        - redirect to home page and especially Survey tab get the surveys from local storge and display.
-          offline submit : 
-                        - make a loop trough all answer from each page and create one.
-                        - redirect to home page and especially Survey tab get the surveys from local storge and display.
-
-*/

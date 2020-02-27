@@ -8,14 +8,14 @@ export default class SplashScreen extends Component {
     header: null,
   };
 
-  async UNSAFE_componentWillMount() {
+  UNSAFE_componentWillMount() {
     let promise = () => {
       return new Promise((resolve, reject) => {
         let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
         RNFS.readFile(path, 'utf8')
           .then(rowidarray => {
             rowidarray = JSON.parse(rowidarray);
-            let Surveys = [];
+            var Surveys = [];
             rowidarray.forEach(async elem => {
               let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
               if (await RNFS.exists(path)) {
@@ -50,8 +50,8 @@ export default class SplashScreen extends Component {
       .catch(err => {
         setTimeout(() => {
           this.props.navigation.navigate('HomeScreen', {
-            TabId: 1,
-            data: Surveys,
+            TabId: 0,
+            data: [],
           });
         }, 6000);
       });
@@ -63,14 +63,14 @@ export default class SplashScreen extends Component {
         <View style={styles.img}>
           <Image
             style={{marginLeft: '14%'}}
-            source={require('../../Assests/img/survey.png')}
+            source={require('../../../Assests/img/survey.png')}
           />
         </View>
         <View style={styles.text}>
           <Text style={{fontSize: 20}}>ImpacTree</Text>
         </View>
         <View style={styles.spinner}>
-          <Spinner />
+          <Spinner color="#3F51B5" />
         </View>
       </View>
     );

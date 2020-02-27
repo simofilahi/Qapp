@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   StyleSheet,
   Dimensions,
@@ -16,6 +16,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import Axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import NetInfo from '@react-native-community/netinfo';
+import rooturl from '../../config'
 var RNFS = require('react-native-fs');
 
 export default class QRCodeScannerScreen extends Component {
@@ -44,11 +45,12 @@ export default class QRCodeScannerScreen extends Component {
             try {
               var token = jwtDecode(data);
               // Check exp time
-              this.setState({loading: true});
-              const url = `https://impactree.um6p.ma/api/anon/dataset/${token.dataset}/parts`;
+              this.setState({ loading: true });
+              const url = `${rooturl}/api/anon/dataset/${token.dataset}/parts`;
+              console.log({ url: url })
               // const url = `http://wtr.oulhafiane.me/api/anon/dataset/${token.dataset}/parts`;
               const config = {
-                headers: {'X-AUTH-TOKEN': data},
+                headers: { 'X-AUTH-TOKEN': data },
               };
               Axios.get(url, config)
                 .then(res => {
@@ -65,6 +67,7 @@ export default class QRCodeScannerScreen extends Component {
                   this.setState({
                     loading: false,
                   });
+                  console.log({ error: err })
                   reject(err);
                 });
             } catch {
@@ -105,15 +108,25 @@ export default class QRCodeScannerScreen extends Component {
       var path = null;
       var string = '';
       string = JSON.stringify(data);
+      RNFS.getFSInfo().then(info => {
+        const infospace = info.freeSpace / 1024 / 1024;
 
-      path = RNFS.DocumentDirectoryPath + '/template.txt';
-      RNFS.writeFile(path, string, 'utf8')
-        .then(success => {
-          resolve('Created');
-        })
-        .catch(err => {
-          reject('error During the creation');
-        });
+        if (infospace < 100) {
+          Alert.alert(
+            'Storage space',
+            "You Don't have enough space please free up your storage and try again",
+          );
+        } else {
+          path = RNFS.DocumentDirectoryPath + '/template.txt';
+          RNFS.writeFile(path, string, 'utf8')
+            .then(success => {
+              resolve('Created');
+            })
+            .catch(err => {
+              reject('error During the creation');
+            });
+        }
+      });
     });
   };
 
@@ -138,7 +151,7 @@ export default class QRCodeScannerScreen extends Component {
                   .catch();
               })
               .catch(err => {
-                // alert(err);
+                alert('Try again');
               });
           }}
           fadeIn={true}
@@ -155,7 +168,7 @@ export default class QRCodeScannerScreen extends Component {
           textContent={'Loading...'}
           textStyle={styles.spinnerTextStyle}
         />
-        <View style={{width: wp('80'), marginBottom: hp('0')}}>
+        <View style={{ width: wp('80'), marginBottom: hp('0') }}>
           <TouchableOpacity
             style={styles.button}
             onPress={() => this.props.navigation.navigate('HomeScreen')}>
@@ -167,7 +180,7 @@ export default class QRCodeScannerScreen extends Component {
   };
 
   render() {
-    const {loading} = this.state;
+    const { loading } = this.state;
 
     return <View style={styles.container}>{this._render(loading)}</View>;
   }

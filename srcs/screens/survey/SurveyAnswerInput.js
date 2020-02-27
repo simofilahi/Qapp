@@ -240,35 +240,44 @@ export default class SurveyAnswerInput extends Component {
         number: item.options[0],
       });
     } else if (item.type === 9 && item.options.length > 0) {
-      this.dateTimeConverter(item.options[0])
-        .then(res => {
-          this.setState({
-            datetime: res,
-          });
-        })
-        .catch(err => {
-          //
-        });
+      this.setState({
+        datetime: item.options[0],
+      });
+      // this.dateTimeConverter(item.options[0])
+      //   .then(res => {
+      //     this.setState({
+      //       datetime: res,
+      //     });
+      //   })
+      //   .catch(err => {
+      //     //
+      //   });
     } else if (item.type === 10 && item.options.length > 0) {
-      this.dateConveter(item.options[0])
-        .then(res => {
-          this.setState({
-            date: res,
-          });
-        })
-        .catch(err => {
-          //
-        });
+      this.setState({
+        date: item.options[0],
+      });
+      // this.dateConveter(item.options[0])
+      //   .then(res => {
+      //     this.setState({
+      //       date: res,
+      //     });
+      //   })
+      //   .catch(err => {
+      //     //
+      //   });
     } else if (item.type === 11 && item.options.length > 0) {
-      this.timeConverter(item.options[0])
-        .then(res => {
-          this.setState({
-            time: res,
-          });
-        })
-        .catch(err => {
-          //
-        });
+      this.setState({
+        time: item.options[0],
+      });
+      // this.timeConverter(item.options[0])
+      //   .then(res => {
+      //     this.setState({
+      //       time: res,
+      //     });
+      //   })
+      //   .catch(err => {
+      //     //
+      //   });
     }
   }
 
@@ -375,10 +384,13 @@ export default class SurveyAnswerInput extends Component {
       () => {
         const {_onChange, updateOptionsInPart, pageId} = this.props;
 
-        var date_ob = new Date(date.replace(/-/g, '/'));
-        var value = new Date(date_ob).getTime();
-        _onChange(id, value);
-        updateOptionsInPart(pageId, id, value);
+        // var date_ob = new Date(date.replace(/-/g, '/'));
+        // var value = new Date(date_ob).getTime();
+        // _onChange(id, value);
+        // updateOptionsInPart(pageId, id, value);
+
+        _onChange(id, date);
+        updateOptionsInPart(pageId, id, date);
       },
     );
   };
@@ -390,11 +402,14 @@ export default class SurveyAnswerInput extends Component {
       },
       () => {
         const {_onChange, updateOptionsInPart, pageId} = this.props;
-        var date_ob = new Date(date);
+        // var date_ob = new Date(date);
 
-        var value = new Date(date_ob).getTime();
-        _onChange(id, value);
-        updateOptionsInPart(pageId, id, value);
+        // var value = new Date(date_ob).getTime();
+        // _onChange(id, value);
+        // updateOptionsInPart(pageId, id, value);
+
+        _onChange(id, date);
+        updateOptionsInPart(pageId, id, date);
       },
     );
   };
@@ -407,11 +422,14 @@ export default class SurveyAnswerInput extends Component {
       () => {
         const {_onChange, updateOptionsInPart, pageId} = this.props;
 
-        var timestamp = '1995-10-17, ' + time;
-        var date_ob = new Date(timestamp.replace(/-/g, '/'));
-        var value = new Date(date_ob).getTime();
-        _onChange(id, value);
-        updateOptionsInPart(pageId, id, value);
+        // var timestamp = '1995-10-17, ' + time;
+        // var date_ob = new Date(timestamp.replace(/-/g, '/'));
+        // var value = new Date(date_ob).getTime();
+        // _onChange(id, value);
+        // updateOptionsInPart(pageId, id, value);
+
+        _onChange(id, time);
+        updateOptionsInPart(pageId, id, time);
       },
     );
   };

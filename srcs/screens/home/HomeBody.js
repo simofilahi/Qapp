@@ -18,16 +18,15 @@ export default class App extends Component {
             <Body>
               <Image
                 style={styles.img}
-                source={require('../../Assests/img/homeimg.png')}
+                source={require('../../../Assests/img/homeimg.png')}
               />
             </Body>
           </CardItem>
           <CardItem bordered style={{height: hp('10')}}>
             <Body>
               <Text style={styles.Text}>
-                NativeBase is a free and open source framework that enable
-                developers to build high-quality mobile apps using React Native
-                iOS and Android apps with a fusion of ES6.
+                In this guide, you will find a demo to use the app. Use the
+                shared surveys to collect data online and offline.
               </Text>
             </Body>
           </CardItem>

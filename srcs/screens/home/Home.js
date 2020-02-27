@@ -1,18 +1,20 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import MyHeader from '../header/Header';
 import MyFooter from '../footer/Myfooter';
 import HomeBody from './HomeBody';
 import ListOfSurvey from './ListOfSurvey';
-import {Container, Tab, Tabs} from 'native-base';
+import { Container, Tab, Tabs } from 'native-base';
 import Axios from 'axios';
-import {PermissionsAndroid} from 'react-native';
+import { PermissionsAndroid } from 'react-native';
 import RNExitApp from 'react-native-exit-app';
 import NetInfo from '@react-native-community/netinfo';
-import {StyleSheet, Dimensions, Alert} from 'react-native';
+import { StyleSheet, Dimensions, Alert } from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import PushNotification from 'react-native-push-notification';
+import rooturl from '../../config'
 var RNFS = require('react-native-fs');
 
 export default class HomeScreen extends Component {
@@ -24,6 +26,11 @@ export default class HomeScreen extends Component {
       Surveys: [],
       TabId: 1,
       template: [],
+      loading: false,
+      //
+      isInternetReachable: false,
+      isConnected: false,
+      flagForNoti: false,
       loading: false,
     };
   }
@@ -61,11 +68,6 @@ export default class HomeScreen extends Component {
     });
   };
 
-  // console.log('before');
-  // let res = await promise;
-  // console.log('after');
-  // return res;
-
   UNSAFE_componentWillReceiveProps(newProps) {
     const TabId = newProps.navigation.getParam('TabId', false);
     const flag = newProps.navigation.getParam('flag', false);
@@ -73,7 +75,7 @@ export default class HomeScreen extends Component {
     if (flag === 1) {
       // this func called when i press on all done button
       console.log('Im here');
-      this.setState({loading: true}, () => {
+      this.setState({ loading: true }, () => {
         console.log('holla');
         this.getDataFromLocalStorage()
           .then(data => {
@@ -144,6 +146,49 @@ export default class HomeScreen extends Component {
   // Request for the permissions
   componentDidMount() {
     this.requestPermission();
+    this.unsubscribe = NetInfo.addEventListener(state => {
+      this.setState(
+        {
+          flag:
+            this.state.isConnected === true &&
+              this.state.isInternetReachable === true
+              ? false
+              : true,
+          isConnected: state.isConnected,
+          isInternetReachable: state.isInternetReachable,
+        },
+        () => {
+          const { isInternetReachable, isConnected, Surveys, flag } = this.state;
+
+          if (
+            isConnected === true &&
+            isInternetReachable === true &&
+            Surveys.length > 0 &&
+            flag === true
+          ) {
+            PushNotification.localNotification({
+              autoCancel: true,
+              largeIcon: 'ic_launcher',
+              smallIcon: 'ic_notification',
+              bigText: "Please Submit your survey those doesn't sent yet",
+              subText: 'This is a subText',
+              color: '#3F51B5',
+              vibrate: true,
+              vibration: 300,
+              title: 'Offline surveys',
+              message: 'Your are now connected to the internet',
+              playSound: true,
+              soundName: 'default',
+              actions: '["Accept", "Reject"]',
+            });
+          }
+        },
+      );
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
   }
 
   // delete all stucked survey
@@ -167,7 +212,7 @@ export default class HomeScreen extends Component {
                 }
               });
             })
-            .catch(err => {});
+            .catch(err => { });
         } else {
           reject('failed');
         }
@@ -181,7 +226,7 @@ export default class HomeScreen extends Component {
           boolean: false,
         });
       })
-      .catch(err => {});
+      .catch(err => { });
   };
 
   // give us your feedback func
@@ -209,182 +254,136 @@ export default class HomeScreen extends Component {
           },
         );
       })
-      .catch(err => {});
+      .catch(err => { });
   };
+
 
   // send one row to backend
   sendRow = (surveyrow, rowid) => {
-    console.log('row ==> ', JSON.stringify(surveyrow.data.parts[0].id));
+    console.log("surveyrow ==> ", surveyrow.data);
+    console.log("surveyid ==> ", rowid)
+    // console.log('row ==> ', JSON.stringify(surveyrow.data.parts[0].id));
 
-    try {
-      if (Platform.OS === 'android') {
-        NetInfo.fetch().then(state => {
-          if (state.isConnected) {
-            {
-              const uuid = surveyrow.data.uuid;
-              const qrcodeData = surveyrow.qrcodeData;
-              const variables = surveyrow.answers.variable;
-              const row = surveyrow.answers.row;
-              // this line above is tmp
-              const pageId = surveyrow.data.parts[0].id;
+    // try {
+    //   if (Platform.OS === 'android') {
+    //     NetInfo.fetch().then(state => {
+    //       if (state.isConnected) {
+    //         {
+    //           const uuid = surveyrow.data.uuid;
+    //           const qrcodeData = surveyrow.qrcodeData;
+    //           const variables = surveyrow.answers.variable;
+    //           const row = surveyrow.answers.row;
+    //           // this line above is tmp
+    //           const pageId = surveyrow.data.parts[0].id;
 
-              this.setState({loading: true});
-              const url = `https://impactree.um6p.ma/api/anon/dataset/${uuid}/part/${pageId}`;
-              const data = {
-                row: row,
-                variables: variables,
-              };
-              const config = {
-                headers: {'X-AUTH-TOKEN': qrcodeData},
-              };
-              console.log(JSON.stringify(data));
-              console.log({pageId: pageId});
-              console.log({url: url});
-              console.log({qrcodeData: qrcodeData});
-              Axios.post(url, data, config)
-                .then(res => {
-                  this.setState({
-                    loading: false,
-                  });
-                  this.deleteRow(rowid);
-                })
-                .catch(error => {
-                  this.setState({
-                    loading: false,
-                  });
-                  // alert(error);
-                });
-            }
-          } else Alert.alert('Please check your Internet connection');
-        });
-      }
-    } catch {
-      this.setState({
-        loading: false,
-      });
-      alert('Try Again');
-    }
-    this.setState({
-      boolean: this.state.Surveys.length === 0 ? false : true,
-    });
+    //           this.setState({ loading: true });
+    //           const url = `${rooturl}/api/anon/dataset/${uuid}/part/${pageId}`;
+    //           const data = {
+    //             row: row,
+    //             variables: variables,
+    //           };
+    //           const config = {
+    //             headers: { 'X-AUTH-TOKEN': qrcodeData },
+    //           };
+    //           console.log(JSON.stringify(data));
+    //           console.log({ pageId: pageId });
+    //           console.log({ url: url });
+    //           console.log({ qrcodeData: qrcodeData });
+    //           Axios.post(url, data, config)
+    //             .then(res => {
+    //               this.setState({
+    //                 loading: false,
+    //               });
+    //               this.deleteRow(rowid);
+    //             })
+    //             .catch(error => {
+    //               this.setState({
+    //                 loading: false,
+    //               });
+    //               // alert(error);
+    //             });
+    //         }
+    //       } else Alert.alert('Please check your Internet connection');
+    //     });
+    //   }
+    // } catch {
+    //   this.setState({
+    //     loading: false,
+    //   });
+    //   alert('Try Again');
+    // }
+    // this.setState({
+    //   boolean: this.state.Surveys.length === 0 ? false : true,
+    // });
   };
 
   // send all rows to backend
-  sendAllRows = async () => {
-    var promise = (surveyrow, rowid) => {
-      return new Promise((resolve, reject) => {
-        if (Platform.OS === 'android') {
-          NetInfo.fetch().then(state => {
-            if (state.isConnected) {
-              {
-                const uuid = surveyrow.data.uuid;
-                const qrcodeData = surveyrow.qrcodeData;
-                const variables = surveyrow.answers.variable;
-                const row = surveyrow.answers.row;
-                // this line above is tmp
-                const pageId = surveyrow.data.parts[0].id;
-                this.setState({loading: true});
-                const url = `https://impactree.um6p.ma/api/anon/dataset/${uuid}/part/${pageId}`;
-                const data = {
-                  row: row,
-                  variables: variables,
-                };
-                const config = {
-                  headers: {'X-AUTH-TOKEN': qrcodeData},
-                };
-                console.log(JSON.stringify(data));
-                console.log({pageId: pageId});
-                console.log({url: url});
-                console.log({qrcodeData: qrcodeData});
-                Axios.post(url, data, config)
-                  .then(res => {
-                    this.setState({
-                      loading: false,
-                    });
-                    this.deleteRow(rowid);
-                    resolve('succes');
-                  })
-                  .catch(error => {
-                    this.setState({
-                      loading: false,
-                    });
-                    // alert(error);
-                    reject('failed');
-                  });
-              }
-            } else Alert.alert('Please check your Internet connection');
-          });
-        }
-      });
-    };
-
-    let loop = () => {
-      return new Promise((resolve, reject) => {
-        const {Surveys} = this.state;
-
-        Surveys.map(async (elem, index) => {
-          await promise(elem, elem.rowid)
-            .then(res => {
-              console.log(res);
-            })
-            .catch(err => {
-              console.log(err);
-            });
-          if (elem[index + 1] === undefined) resolve('loop finished');
-        });
-      });
-    };
-
-    console.log('after');
-    await loop();
-    console.log('finished');
+  sendAllRows = () => {
   };
 
   // add new survey
   addNewRow = () => {
-    const {navigate} = this.props.navigation;
+    const { navigate } = this.props.navigation;
     let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
 
-    RNFS.readFile(path, 'utf8')
-      .then(rowidarray => {
-        rowidarray = JSON.parse(rowidarray);
-        if (rowidarray.length === 0) {
-          var rowid = 0;
-          rowidarray[0] = 0;
-        } else {
-          var rowid = rowidarray[rowidarray.length - 1] + 1;
-          rowidarray[rowidarray.length] = rowidarray[rowidarray.length - 1] + 1;
-        }
-        let string = JSON.stringify(rowidarray);
-        RNFS.unlink(path, 'utf8')
-          .then(res => {
-            RNFS.writeFile(path, string, 'utf8')
+    RNFS.getFSInfo().then(info => {
+      const infospace = info.freeSpace / 1024 / 1024;
+
+      if (infospace < 100) {
+        Alert.alert(
+          'Storage space',
+          "You Don't have enough space please free up your storage and try again",
+        );
+      } else {
+        RNFS.readFile(path, 'utf8')
+          .then(rowidarray => {
+            rowidarray = JSON.parse(rowidarray);
+            if (rowidarray.length === 0) {
+              var rowid = 0;
+              rowidarray[0] = 0;
+            } else {
+              var rowid = rowidarray[rowidarray.length - 1] + 1;
+              rowidarray[rowidarray.length] =
+                rowidarray[rowidarray.length - 1] + 1;
+            }
+            let string = JSON.stringify(rowidarray);
+            RNFS.unlink(path, 'utf8')
               .then(res => {
-                let path = RNFS.DocumentDirectoryPath + '/template.txt';
-                RNFS.readFile(path, 'utf8')
-                  .then(template => {
-                    template = JSON.parse(template);
-                    navigate('SurveyScreen', {
-                      data: {...template, rowid: rowid},
-                      flag: 1,
-                    });
+                RNFS.writeFile(path, string, 'utf8')
+                  .then(res => {
+                    let path = RNFS.DocumentDirectoryPath + '/template.txt';
+                    RNFS.readFile(path, 'utf8')
+                      .then(template => {
+                        template = JSON.parse(template);
+                        navigate('SurveyScreen', {
+                          data: { ...template, rowid: rowid },
+                          flag: 1,
+                        });
+                      })
+                      .catch(err => { });
                   })
-                  .catch(err => {});
+                  .catch(err => { });
               })
-              .catch(err => {});
+              .catch(err => {
+                RNFS.writeFile(path, string, 'utf8')
+                  .then(res => { })
+                  .catch(err => { });
+              });
           })
-          .catch(err => {
-            RNFS.writeFile(path, string, 'utf8')
-              .then(res => {})
-              .catch(err => {});
-          });
-      })
-      .catch(err => {});
+          .catch(err => { });
+      }
+    });
   };
 
   render() {
-    const {navigate} = this.props.navigation;
-    const {boolean, Surveys, TabId, loading} = this.state;
+    const { navigate } = this.props.navigation;
+    const { boolean, Surveys, TabId, loading } = this.state;
+
+    if (Surveys.length > 0 && Surveys !== undefined) {
+      console.log("\n\n")
+      console.log("here surveys ===> ", JSON.stringify(Surveys))
+      console.log("\n\n")
+    }
     var OfflineSurveyBoolean = false;
     if (Surveys.length > 0) OfflineSurveyBoolean = true;
     return (
@@ -403,7 +402,7 @@ export default class HomeScreen extends Component {
           page={TabId}
           tabBarPosition="overlayTop"
           scrollWithoutAnimation={true}
-          onChangeTab={e => this.setState({TabId: e.i})}>
+          onChangeTab={e => this.setState({ TabId: e.i })}>
           <Tab heading="Guide">
             <HomeBody navigate={navigate} />
           </Tab>

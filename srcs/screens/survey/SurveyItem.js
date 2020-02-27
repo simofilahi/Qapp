@@ -1,11 +1,11 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import MyHeader from '../header/Header';
 import SurveyAnswerInput from './SurveyAnswerInput';
 import SubmitFooter from '../footer/SubmitFooter';
 import Axios from 'axios';
 import NetInfo from '@react-native-community/netinfo';
 import Spinner from 'react-native-loading-spinner-overlay';
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 import {
   Form,
   Container,
@@ -15,7 +15,8 @@ import {
   Body,
   Content,
 } from 'native-base';
-import {ScrollView} from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
+import rooturl from '../../config'
 
 class SurveyItemScreen extends Component {
   constructor(props) {
@@ -66,14 +67,13 @@ class SurveyItemScreen extends Component {
   }
 
   _onChange = (id, newvalue) => {
-    // console.log('newvalue ====> ', newvalue);
     this.setState(
       {
         variables: [
           ...this.state.variables.filter(elem => {
             if (elem.id !== id) return true;
           }),
-          {id: id, value: newvalue},
+          { id: id, value: newvalue },
         ],
       },
       () => {
@@ -84,8 +84,8 @@ class SurveyItemScreen extends Component {
 
   _onSubmit = async () => {
     // console.log('submited data', JSON.stringify(variables));
-    const {goBack} = this.props.navigation;
-    const {pageId, variables} = this.state;
+    const { goBack } = this.props.navigation;
+    const { pageId, variables } = this.state;
     const {
       uuid,
       row,
@@ -97,19 +97,19 @@ class SurveyItemScreen extends Component {
 
     promise = () => {
       return new Promise((resolve, reject) => {
-        this.setState({loading: true});
-        const url = `https://impactree.um6p.ma/api/anon/dataset/${uuid}/part/${pageId}`;
+        this.setState({ loading: true });
+        const url = `${rooturl}/api/anon/dataset/${uuid}/part/${pageId}`;
         const data = {
           row: row,
           variables: variables,
         };
         const config = {
-          headers: {'X-AUTH-TOKEN': qrcodeData},
+          headers: { 'X-AUTH-TOKEN': qrcodeData },
         };
         console.log(JSON.stringify(data));
-        console.log({pageId: pageId});
-        console.log({url: url});
-        console.log({qrcodeData: qrcodeData});
+        console.log({ pageId: pageId });
+        console.log({ url: url });
+        console.log({ qrcodeData: qrcodeData });
         Axios.post(url, data, config)
           .then(res => {
             this.setState({
@@ -148,13 +148,13 @@ class SurveyItemScreen extends Component {
   };
 
   _renderRow = (item, variables, index) => {
-    const {pageId} = this.state;
-    const {updateOptionsInPart} = this.props.navigation.state.params;
+    const { pageId } = this.state;
+    const { updateOptionsInPart } = this.props.navigation.state.params;
 
-    console.log('Items ====> ', item);
-    console.log(
-      '********************************************************************************\n',
-    );
+    // console.log('Items ====> ', item);
+    // console.log(
+    //   '********************************************************************************\n',
+    // );
     // console.log('\n\n');
     return (
       <Card key={index} style={styles.cardStyle}>
@@ -184,9 +184,9 @@ class SurveyItemScreen extends Component {
   };
 
   render() {
-    const {variables} = this.state.item;
-    const {navigate} = this.props.navigation;
-    const {loading, isConnected, isInternetReachable} = this.state;
+    const { variables } = this.state.item;
+    const { navigate } = this.props.navigation;
+    const { loading, isConnected, isInternetReachable } = this.state;
 
     // console.log('here variables ===========>', JSON.stringify(variables));
     return (
@@ -220,7 +220,7 @@ class SurveyItemScreen extends Component {
             isConnected && isInternetReachable ? 'Submit' : 'offline Submit'
           }
           flag={0}
-          color={isConnected && isInternetReachable ? '#3F51B5' : '#E5E6E8'}
+          color={isConnected && isInternetReachable ? '#3F51B5' : '#a9a9a9'}
         />
       </Container>
     );

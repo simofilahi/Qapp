@@ -1,5 +1,5 @@
-import React, {Component} from 'react';
-import {StyleSheet} from 'react-native';
+import React, { Component } from 'react';
+import { StyleSheet } from 'react-native';
 import {
   List,
   Container,
@@ -49,6 +49,7 @@ export default class SurveyScreen extends Component {
     this.unsubscribe();
   }
 
+  // update checked flag to each options of question in all parts;
   updateOptionsInPart = (partId, QuestionId, Answer) => {
     try {
       this.setState(
@@ -133,36 +134,10 @@ export default class SurveyScreen extends Component {
           // console.log('******************************');
         },
       );
-    } catch {}
+    } catch { }
   };
 
-  PartOnSubmit = async (pageId, partAnswer) => {
-    const {parts} = this.state.data;
-    return new Promise((resolve, reject) => {
-      this.setState(
-        {
-          data: {
-            ...this.state.data,
-            parts: parts.map(elem => {
-              if (elem.id === pageId) {
-                return {
-                  ...elem,
-                  answers: partAnswer,
-                  submited: true,
-                };
-              } else return elem;
-            }),
-          },
-        },
-        () => {
-          this._storeData()
-            .then(res => resolve('okay'))
-            .catch(err => reject('error'));
-        },
-      );
-    });
-  };
-
+  // add checked flag to each options of question in all parts;
   AddParamToOptions = async data => {
     let promise = new Promise((resolve, reject) => {
       resolve(
@@ -197,16 +172,16 @@ export default class SurveyScreen extends Component {
                 //     : arr,
                 options:
                   elem.type === 0 ||
-                  elem.type === 1 ||
-                  elem.type === 2 ||
-                  elem.type === 3
+                    elem.type === 1 ||
+                    elem.type === 2 ||
+                    elem.type === 3
                     ? elem.options.map((elem, index) => {
-                        return {
-                          id: index,
-                          value: elem,
-                          checked: false,
-                        };
-                      })
+                      return {
+                        id: index,
+                        value: elem,
+                        checked: false,
+                      };
+                    })
                     : arr,
               };
             }),
@@ -219,6 +194,38 @@ export default class SurveyScreen extends Component {
     return parts;
   };
 
+  // add answer and row_id each time when botton of submited pressed
+  PartOnSubmit = async (pageId, partAnswer) => {
+    const { row } = this.state;
+    const { parts } = this.state.data;
+    return new Promise((resolve, reject) => {
+      this.setState(
+        {
+          data: {
+            ...this.state.data,
+            parts: parts.map(elem => {
+              if (elem.id === pageId) {
+                return {
+                  ...elem,
+                  // adding part_id and variables to each page submited
+                  answers: { id_part: pageId, variables: partAnswer },
+                  submited: true,
+                };
+              } else return elem;
+            }),
+            row: row
+          },
+        },
+        () => {
+          console.log("all data ==> ", JSON.stringify(this.state.data))
+          this._storeData()
+            .then(res => resolve('success'))
+            .catch(err => reject('failed'));
+        },
+      );
+    });
+  };
+
   UNSAFE_componentWillMount() {
     const template = this.props.navigation.getParam('data', () => false);
     const scanner = this.props.navigation.getParam('scanner', () => false);
@@ -228,7 +235,7 @@ export default class SurveyScreen extends Component {
     this.setState(
       {
         // here it was another code
-        data: {...template.data, sent: template.sent},
+        data: { ...template.data, sent: template.sent },
         uuid: template.data.uuid,
         scanner: scanner,
         qrcodeData: template.qrcodeData,
@@ -244,14 +251,14 @@ export default class SurveyScreen extends Component {
           this.AddParamToOptions(template.data).then(res => {
             this.setState({
               // here it was another code
-              data: {...this.state.data, parts: res},
+              data: { ...this.state.data, parts: res },
               uuid: template.data.uuid,
               scanner: scanner,
               qrcodeData: template.qrcodeData,
               rowid: template.rowid,
               row:
                 template.answers !== undefined &&
-                template.answers.row !== undefined
+                  template.answers.row !== undefined
                   ? template.answers.row
                   : null,
             });
@@ -265,40 +272,18 @@ export default class SurveyScreen extends Component {
   updateSentValue = () => {
     this.setState(
       {
-        data: {...this.state.data, sent: false},
-      },
-      () => console.log('after update ==> ', this.state.data),
+        data: { ...this.state.data, sent: false },
+      }
     );
   };
-  // store data into local storage
 
+  // store data into local storage
   _storeData = async () => {
-    const {rowid, data, qrcodeData} = this.state;
-    var name = '/file_' + rowid + '.txt';
-    var path = RNFS.DocumentDirectoryPath + name;
     return new Promise((resolve, reject) => {
-      // RNFS.unlink(path)
-      //   .then(() => {
-      //     var string = JSON.stringify({data, rowid, qrcodeData});
-      //     RNFS.writeFile(path, string, 'utf8')
-      //       .then(success => {
-      //         // alert('file created  after deleted');
-      //       })
-      //       .catch(err => {
-      //         // alert('file creation failed after deleted');
-      //       });
-      //   })
-      //   .catch(err => {
-      //     var string = JSON.stringify({data, rowid, qrcodeData});
-      //     RNFS.writeFile(path, string, 'utf8')
-      //       .then(success => {
-      //         // alert('success creation 1 ');
-      //       })
-      //       .catch(err => {
-      //         // alert('failed creation 1');
-      //       });
-      //   });
-      var string = JSON.stringify({data, rowid, qrcodeData});
+      const { rowid, data, qrcodeData } = this.state;
+      var name = '/file_' + rowid + '.txt';
+      var path = RNFS.DocumentDirectoryPath + name;
+      var string = JSON.stringify({ data, rowid, qrcodeData });
       RNFS.writeFile(path, string, 'utf8')
         .then(success => {
           resolve('Succes');
@@ -308,17 +293,6 @@ export default class SurveyScreen extends Component {
           reject('Error');
           // alert('file creation failed after deleted');
         });
-      // if (RNFS.exists(path)) {
-      //   var string = JSON.stringify({data, rowid, qrcodeData});
-      //   RNFS.writeFile(path, string, 'utf8')
-      //     .then(success => {
-      //       // alert('file created  after deleted');
-      //     })
-      //     .catch(err => {
-      //       // alert('file creation failed after deleted');
-      //     });
-      // } else {
-      // }
     });
   };
 
@@ -333,37 +307,35 @@ export default class SurveyScreen extends Component {
 
   // create answer variable for whole pages this work with offline submit
   createGlobaAnswerArray = async template => {
-    const {row} = this.state;
+    const { row } = this.state
     let promise = new Promise((resolve, reject) => {
-      var answers = [];
+      let answers = []
 
-      template.data.parts.map(elem => {
-        if (Array.isArray(elem.answers)) {
-          answers = elem.answers;
-          if (elem.answers === answers) resolve(answers);
-        }
-      });
-    });
+      template.data.parts.map((elem, index) => {
+        if (answers.length > 0)
+          answers = [...answers, elem.answers]
+        else if (answers.length == 0)
+          answers = [elem.answers]
+      })
+      resolve(answers)
+    })
     let res = await promise;
-    const data = {...template, answers: {row: row, variable: res}};
-    return data;
+    const data = { ...template, answers: { row: row, variable: res } };
+    return data
   };
 
   // call this func when Done button pressed
-
   allDone = () => {
-    const {rowid, data} = this.state;
-    const {navigate} = this.props.navigation;
+    const { rowid, data } = this.state;
+    const { navigate } = this.props.navigation;
     var name = '/file_' + rowid + '.txt';
     var path = RNFS.DocumentDirectoryPath + name;
 
     // dont forget to check if file alerday exist and filled with old data
-
     if (data.sent === true) {
-      // alert('yes');
       RNFS.unlink(path, 'utf8')
         .then(res => {
-          this.setState({loading: false});
+          this.setState({ loading: false });
           navigate('HomeScreen', {
             TabId: 1,
             flag: 1,
@@ -379,10 +351,12 @@ export default class SurveyScreen extends Component {
       RNFS.readFile(path, 'utf8')
         .then(res => {
           res = JSON.parse(res);
-          this.setState({loading: true});
+          this.setState({ loading: true });
+          // console.log("before")
           this.createGlobaAnswerArray(res)
             .then(res => {
-              this.setState({loading: false});
+              // console.log("after")
+              this.setState({ loading: false });
               let string = JSON.stringify(res);
               RNFS.writeFile(path, string, 'utf8')
                 .then(success => {
@@ -391,9 +365,9 @@ export default class SurveyScreen extends Component {
                     flag: 1,
                   });
                 })
-                .catch(err => {});
+                .catch(err => { });
             })
-            .catch(err => {});
+            .catch(err => { alert(err) });
         })
         .catch(err => {
           // alert('file creation failed after deleted');
@@ -402,23 +376,23 @@ export default class SurveyScreen extends Component {
   };
 
   updateLoading = () => {
-    this.setState({loading: false});
+    this.setState({ loading: false });
   };
 
   _renderRow = (item, index, navigate, uuid, row, qrcodeData) => {
-    const {loading} = this.state;
+    const { loading } = this.state;
     // alert(qrcodeData);
     // console.log('each item ===> ', item), console.log('\n');
     return (
       <Card
         key={index}
-        style={{marginLeft: 15, marginRight: 15, marginTop: '1%'}}>
+        style={{ marginLeft: 15, marginRight: 15, marginTop: '1%' }}>
         <CardItem
           header
           bordered
           button
           onPress={() => {
-            this.setState({loading: true});
+            this.setState({ loading: true });
             navigate('SurveyItemScreen', {
               updateRow: this.updateRow,
               updateOptionsInPart: this.updateOptionsInPart,
@@ -439,7 +413,7 @@ export default class SurveyScreen extends Component {
                 type="FontAwesome"
                 style={styles.iconStyle}
                 onPress={() => {
-                  this.setState({loading: true});
+                  this.setState({ loading: true });
                   navigate('SurveyItemScreen', {
                     updateRow: this.updateRow,
                     updateOptionsInPart: this.updateOptionsInPart,
@@ -454,25 +428,25 @@ export default class SurveyScreen extends Component {
                 }}
               />
             ) : (
-              <Icon
-                name="arrow-forward"
-                style={{color: 'black', marginRight: '-25%'}}
-                onPress={() => {
-                  this.setState({loading: true});
-                  navigate('SurveyItemScreen', {
-                    updateRow: this.updateRow,
-                    updateOptionsInPart: this.updateOptionsInPart,
-                    PartOnSubmit: this.PartOnSubmit,
-                    updateLoading: this.updateLoading,
-                    updateSentValue: this.updateSentValue,
-                    qrcodeData: qrcodeData,
-                    uuid: uuid,
-                    row: row,
-                    item: item,
-                  });
-                }}
-              />
-            )}
+                <Icon
+                  name="arrow-forward"
+                  style={{ color: 'black', marginRight: '-25%' }}
+                  onPress={() => {
+                    this.setState({ loading: true });
+                    navigate('SurveyItemScreen', {
+                      updateRow: this.updateRow,
+                      updateOptionsInPart: this.updateOptionsInPart,
+                      PartOnSubmit: this.PartOnSubmit,
+                      updateLoading: this.updateLoading,
+                      updateSentValue: this.updateSentValue,
+                      qrcodeData: qrcodeData,
+                      uuid: uuid,
+                      row: row,
+                      item: item,
+                    });
+                  }}
+                />
+              )}
           </Right>
         </CardItem>
       </Card>
@@ -480,7 +454,7 @@ export default class SurveyScreen extends Component {
   };
 
   render() {
-    const {navigate} = this.props.navigation;
+    const { navigate } = this.props.navigation;
     const {
       uuid,
       row,
@@ -516,7 +490,7 @@ export default class SurveyScreen extends Component {
           allDone={this.allDone}
           title={isConnected && isInternetReachable ? 'Done' : 'offline Done'}
           flag={1}
-          color={isConnected && isInternetReachable ? '#3F51B5' : '#E5E6E8'}
+          color={isConnected && isInternetReachable ? '#3F51B5' : '#a9a9a9'}
         />
       </Container>
     );
