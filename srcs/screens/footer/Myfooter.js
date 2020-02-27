@@ -302,7 +302,25 @@ class MyFooter extends Component {
                     open: !this.state.open,
                   });
                 } else {
-                  Alert.alert('Submit the alerday survey and try again');
+                  Alert.alert(
+                    'Help',
+                    'Submit the alerday survey and try to scan new Qr code',
+                    [
+                      {
+                        text: 'No',
+                        onPress: () => null,
+                      },
+                      {
+                        text: 'Go to survey',
+                        // NOTE FOR FLAG = 1
+                        onPress: () => navigate('HomeScreen', {
+                          TabId: 1,
+                          flag: 1,
+                        }),
+                      },
+                    ],
+                    { cancelable: false },
+                  );
                 }
               }}>
               <Icon
@@ -316,7 +334,25 @@ class MyFooter extends Component {
                       open: !this.state.open,
                     });
                   } else {
-                    Alert.alert('Submit the alerday survey and try again');
+                    Alert.alert(
+                      'Help',
+                      'Submit the alerday survey and try to scan new Qr code',
+                      [
+                        {
+                          text: 'No',
+                          onPress: () => null,
+                        },
+                        {
+                          text: 'Go to survey',
+                          // NOTE FOR FLAG = 1
+                          onPress: () => navigate('HomeScreen', {
+                            TabId: 1,
+                            flag: 1,
+                          }),
+                        },
+                      ],
+                      { cancelable: false },
+                    );
                   }
                 }}
               />
@@ -424,7 +460,7 @@ class MyFooter extends Component {
               </View>
             </View>
           </View>
-        </View>
+        </View >
       );
     }
     if (TabId === 1) {

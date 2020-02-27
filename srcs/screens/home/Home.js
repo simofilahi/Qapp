@@ -74,12 +74,9 @@ export default class HomeScreen extends Component {
 
     if (flag === 1) {
       // this func called when i press on all done button
-      console.log('Im here');
       this.setState({ loading: true }, () => {
-        console.log('holla');
         this.getDataFromLocalStorage()
           .then(data => {
-            console.log('data yoyooyo => ', data);
             this.setState({
               Surveys: data,
               TabId: TabId,
