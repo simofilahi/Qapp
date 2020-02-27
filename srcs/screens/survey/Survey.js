@@ -217,7 +217,7 @@ export default class SurveyScreen extends Component {
           },
         },
         () => {
-          console.log("all data ==> ", JSON.stringify(this.state.data))
+          // console.log("all data ==> ", JSON.stringify(this.state.data))
           this._storeData()
             .then(res => resolve('success'))
             .catch(err => reject('failed'));
@@ -278,22 +278,33 @@ export default class SurveyScreen extends Component {
   };
 
   // store data into local storage
-  _storeData = async () => {
+  _storeData = () => {
     return new Promise((resolve, reject) => {
-      const { rowid, data, qrcodeData } = this.state;
-      var name = '/file_' + rowid + '.txt';
-      var path = RNFS.DocumentDirectoryPath + name;
-      var string = JSON.stringify({ data, rowid, qrcodeData });
+      const { rowid, data, qrcodeData, row } = this.state;
+      const name = '/file_' + rowid + '.txt';
+      const path = RNFS.DocumentDirectoryPath + name;
+      const template = { data, rowid, qrcodeData };
+      let answers = []
+      // create a global answer array and push it to a file
+      template.data.parts.map((elem, index) => {
+        if (elem.answers !== undefined) {
+          if (answers.length > 0)
+            answers = [...answers, elem.answers]
+          else if (answers.length == 0)
+            answers = [elem.answers]
+        }
+      })
+      const res = {
+        ...template, answers: { row: row, allpartanswers: answers }
+      }
+      const string = JSON.stringify(res);
       RNFS.writeFile(path, string, 'utf8')
         .then(success => {
-          resolve('Succes');
-          // alert('file created  after deleted');
+          resolve("succes")
         })
-        .catch(err => {
-          reject('Error');
-          // alert('file creation failed after deleted');
-        });
-    });
+        .catch(err => { reject("failed") });
+      this.setState({ loading: false })
+    })
   };
 
   // update row with new row value that coming from backend side
@@ -303,25 +314,6 @@ export default class SurveyScreen extends Component {
         row: row,
       });
     }
-  };
-
-  // create answer variable for whole pages this work with offline submit
-  createGlobaAnswerArray = async template => {
-    const { row } = this.state
-    let promise = new Promise((resolve, reject) => {
-      let answers = []
-
-      template.data.parts.map((elem, index) => {
-        if (answers.length > 0)
-          answers = [...answers, elem.answers]
-        else if (answers.length == 0)
-          answers = [elem.answers]
-      })
-      resolve(answers)
-    })
-    let res = await promise;
-    const data = { ...template, answers: { row: row, variable: res } };
-    return data
   };
 
   // call this func when Done button pressed
@@ -348,30 +340,10 @@ export default class SurveyScreen extends Component {
           });
         });
     } else {
-      RNFS.readFile(path, 'utf8')
-        .then(res => {
-          res = JSON.parse(res);
-          this.setState({ loading: true });
-          // console.log("before")
-          this.createGlobaAnswerArray(res)
-            .then(res => {
-              // console.log("after")
-              this.setState({ loading: false });
-              let string = JSON.stringify(res);
-              RNFS.writeFile(path, string, 'utf8')
-                .then(success => {
-                  navigate('HomeScreen', {
-                    TabId: 1,
-                    flag: 1,
-                  });
-                })
-                .catch(err => { });
-            })
-            .catch(err => { alert(err) });
-        })
-        .catch(err => {
-          // alert('file creation failed after deleted');
-        });
+      navigate('HomeScreen', {
+        TabId: 1,
+        flag: 1,
+      });
     }
   };
 
@@ -380,9 +352,6 @@ export default class SurveyScreen extends Component {
   };
 
   _renderRow = (item, index, navigate, uuid, row, qrcodeData) => {
-    const { loading } = this.state;
-    // alert(qrcodeData);
-    // console.log('each item ===> ', item), console.log('\n');
     return (
       <Card
         key={index}

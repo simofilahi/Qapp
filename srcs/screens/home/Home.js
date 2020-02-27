@@ -260,65 +260,119 @@ export default class HomeScreen extends Component {
 
   // send one row to backend
   sendRow = (surveyrow, rowid) => {
-    console.log("surveyrow ==> ", surveyrow.data);
+    console.log("surveyrow ==> ", JSON.stringify(surveyrow.answers));
     console.log("surveyid ==> ", rowid)
-    // console.log('row ==> ', JSON.stringify(surveyrow.data.parts[0].id));
 
-    // try {
-    //   if (Platform.OS === 'android') {
-    //     NetInfo.fetch().then(state => {
-    //       if (state.isConnected) {
-    //         {
-    //           const uuid = surveyrow.data.uuid;
-    //           const qrcodeData = surveyrow.qrcodeData;
-    //           const variables = surveyrow.answers.variable;
-    //           const row = surveyrow.answers.row;
-    //           // this line above is tmp
-    //           const pageId = surveyrow.data.parts[0].id;
-
-    //           this.setState({ loading: true });
-    //           const url = `${rooturl}/api/anon/dataset/${uuid}/part/${pageId}`;
-    //           const data = {
-    //             row: row,
-    //             variables: variables,
-    //           };
-    //           const config = {
-    //             headers: { 'X-AUTH-TOKEN': qrcodeData },
-    //           };
-    //           console.log(JSON.stringify(data));
-    //           console.log({ pageId: pageId });
-    //           console.log({ url: url });
-    //           console.log({ qrcodeData: qrcodeData });
-    //           Axios.post(url, data, config)
-    //             .then(res => {
-    //               this.setState({
-    //                 loading: false,
-    //               });
-    //               this.deleteRow(rowid);
-    //             })
-    //             .catch(error => {
-    //               this.setState({
-    //                 loading: false,
-    //               });
-    //               // alert(error);
-    //             });
-    //         }
-    //       } else Alert.alert('Please check your Internet connection');
-    //     });
-    //   }
-    // } catch {
-    //   this.setState({
-    //     loading: false,
-    //   });
-    //   alert('Try Again');
-    // }
-    // this.setState({
-    //   boolean: this.state.Surveys.length === 0 ? false : true,
-    // });
+    if (surveyrow.answers !== undefined) {
+      try {
+        if (Platform.OS === 'android') {
+          NetInfo.fetch().then(state => {
+            if (state.isConnected) {
+              {
+                this.setState({ loading: true });
+                const uuid = surveyrow.data.uuid;
+                const qrcodeData = surveyrow.qrcodeData;
+                let data = [{ row: surveyrow.answers.row, data_row: surveyrow.answers.allpartanswers }]
+                data = { data: data }
+                const url = `${rooturl}/api/anon/dataset/${uuid}/part/`;
+                const config = {
+                  headers: { 'X-AUTH-TOKEN': qrcodeData },
+                };
+                console.log(JSON.stringify(data));
+                console.log({ qrcodeData: qrcodeData });
+                console.log({ uuid: uuid })
+                console.log({ url: url })
+                Axios.post(url, data, config)
+                  .then(res => {
+                    this.setState({
+                      loading: false,
+                    });
+                    this.deleteRow(rowid);
+                  })
+                  .catch(error => {
+                    this.setState({
+                      loading: false,
+                    });
+                    alert("Please Try again");
+                  });
+              }
+            } else Alert.alert('Please check your Internet connection');
+          });
+        }
+      } catch {
+        this.setState({
+          loading: false,
+        });
+        alert('Try Again');
+      }
+      this.setState({
+        boolean: this.state.Surveys.length === 0 ? false : true,
+      });
+    }
   };
 
   // send all rows to backend
   sendAllRows = () => {
+    const { Surveys } = this.state
+    if (Surveys !== undefined) {
+      try {
+        if (Platform.OS === 'android') {
+          NetInfo.fetch().then(state => {
+            if (state.isConnected) {
+              {
+                this.setState({ loading: true });
+                const uuid = Surveys[0].data.uuid;
+                const qrcodeData = Surveys[0].qrcodeData;
+                let data = []
+                Surveys.map((elem, index) => {
+                  if (elem.answers !== undefined) {
+                    if (data.length === 0) {
+                      data = [{ row: elem.answers.row, data_row: elem.answers.allpartanswers }]
+                    }
+                    else if (data.length > 0) {
+                      data = [...data, { row: elem.answers.row, data_row: elem.answers.allpartanswers }]
+                    }
+                  }
+                })
+                data = { data: data }
+                const url = `${rooturl}/api/anon/dataset/${uuid}/part/`;
+                const config = {
+                  headers: { 'X-AUTH-TOKEN': qrcodeData },
+                };
+                // console.log(JSON.stringify(data));
+                // console.log({ qrcodeData: qrcodeData });
+                // console.log({ uuid: uuid })
+                // console.log({ url: url })
+                Axios.post(url, data, config)
+                  .then(res => {
+                    // Surveys.map((elem, index) => {
+                    //   this.deleteRow(elem.rowid);
+                    // })
+                    this.setState({
+                      loading: false,
+                    });
+                  })
+                  .catch(error => {
+                    this.setState({
+                      loading: false,
+                    });
+                    alert("Please Try again");
+                  });
+
+              }
+            } else Alert.alert('Please check your Internet connection');
+          });
+        }
+      } catch {
+        this.setState({
+          loading: false,
+        });
+        alert('Try Again');
+      }
+      this.setState({
+        boolean: this.state.Surveys.length === 0 ? false : true,
+      });
+    }
   };
 
   // add new survey
@@ -428,32 +482,3 @@ export default class HomeScreen extends Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  zeroContainer: {
-    height: 0,
-    flex: 0,
-  },
-  cameraContainer: {
-    height: Dimensions.get('window').height,
-    backfaceVisibility: 'hidden',
-  },
-  marker: {
-    borderColor: 'white',
-  },
-  button: {
-    alignItems: 'center',
-    padding: hp('10'),
-    marginTop: hp('10'),
-    alignContent: 'center',
-  },
-  Text: {
-    color: 'white',
-    fontSize: 20,
-  },
-});

@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   Card,
   CardItem,
@@ -9,8 +9,8 @@ import {
   Icon,
   View,
 } from 'native-base';
-import {Button, Text} from 'react-native-elements';
-import {StyleSheet, Image, Alert} from 'react-native';
+import { Button, Text } from 'react-native-elements';
+import { StyleSheet, Image, Alert } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 export class ListOfSurvey extends Component {
@@ -25,9 +25,9 @@ export class ListOfSurvey extends Component {
                 flexDirection: 'row',
                 marginRight: '-25%',
               }}>
-              <View style={{margin: 2}}>
+              <View style={{ margin: 2 }}>
                 <Button
-                  buttonStyle={{backgroundColor: 'white'}}
+                  buttonStyle={{ backgroundColor: 'white' }}
                   onPress={() => {
                     Alert.alert(
                       'Confirmation',
@@ -43,7 +43,7 @@ export class ListOfSurvey extends Component {
                           onPress: () => deleteRow(survey.rowid),
                         },
                       ],
-                      {cancelable: false},
+                      { cancelable: false },
                     );
                   }}
                   icon={
@@ -55,9 +55,9 @@ export class ListOfSurvey extends Component {
                   }
                 />
               </View>
-              <View style={{margin: 2}}>
+              <View style={{ margin: 2 }}>
                 <Button
-                  buttonStyle={{backgroundColor: 'white'}}
+                  buttonStyle={{ backgroundColor: 'white' }}
                   onPress={() => {
                     sendRow(survey, survey.rowid);
                   }}
@@ -88,17 +88,12 @@ export class ListOfSurvey extends Component {
       sendAllRows,
     } = this.props;
 
-    // console.log(
-    //   'Data  ********************* => and boolean ==> ',
-    //   JSON.stringify(Surveys),
-    //   boolean,
-    // );
     return (
       <Container>
         <Spinner
           visible={loading}
           textContent={'Loading...'}
-          textStyle={{color: 'white'}}
+          textStyle={{ color: 'white' }}
         />
         {boolean ? (
           <Content padder>
@@ -135,34 +130,34 @@ export class ListOfSurvey extends Component {
               }></List>
           </Content>
         ) : (
-          <View
-            style={{
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              alignSelf: 'center',
-              height: '100%',
-              width: '100%',
-            }}>
             <View
               style={{
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: '70%',
-                width: '70%',
+                alignSelf: 'center',
+                height: '100%',
+                width: '100%',
               }}>
-              <Image
+              <View
                 style={{
-                  alignSelf: 'center',
-                  marginRight: '5%',
-                }}
-                source={require('../../../Assests/img/empty.png')}
-              />
-              <Text>List is empty</Text>
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '70%',
+                  width: '70%',
+                }}>
+                <Image
+                  style={{
+                    alignSelf: 'center',
+                    marginRight: '5%',
+                  }}
+                  source={require('../../../Assests/img/empty.png')}
+                />
+                <Text>List is empty</Text>
+              </View>
             </View>
-          </View>
-        )}
+          )}
       </Container>
     );
   }

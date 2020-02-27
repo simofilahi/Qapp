@@ -106,10 +106,10 @@ class SurveyItemScreen extends Component {
         const config = {
           headers: { 'X-AUTH-TOKEN': qrcodeData },
         };
-        console.log(JSON.stringify(data));
-        console.log({ pageId: pageId });
-        console.log({ url: url });
-        console.log({ qrcodeData: qrcodeData });
+        // console.log(JSON.stringify(data));
+        // console.log({ pageId: pageId });
+        // console.log({ url: url });
+        // console.log({ qrcodeData: qrcodeData });
         Axios.post(url, data, config)
           .then(res => {
             this.setState({
