@@ -1,20 +1,17 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import MyHeader from '../header/Header';
 import MyFooter from '../footer/Myfooter';
 import HomeBody from './HomeBody';
 import ListOfSurvey from './ListOfSurvey';
-import { Container, Tab, Tabs } from 'native-base';
+import {Container, Tab, Tabs} from 'native-base';
 import Axios from 'axios';
-import { PermissionsAndroid } from 'react-native';
+import {PermissionsAndroid} from 'react-native';
 import RNExitApp from 'react-native-exit-app';
 import NetInfo from '@react-native-community/netinfo';
-import { StyleSheet, Dimensions, Alert } from 'react-native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import {Alert} from 'react-native';
 import PushNotification from 'react-native-push-notification';
-import rooturl from '../../config'
+import rooturl from '../../config';
+import jwtDecode from 'jwt-decode';
 var RNFS = require('react-native-fs');
 
 export default class HomeScreen extends Component {
@@ -32,6 +29,10 @@ export default class HomeScreen extends Component {
       isConnected: false,
       flagForNoti: false,
       loading: false,
+      // visible var work with expiration date of Qr code to pop-up the overlay
+      visible: false,
+      // uuid and date expiration those var work with expired Qr code.
+      uuidex: null,
     };
   }
 
@@ -47,20 +48,22 @@ export default class HomeScreen extends Component {
       RNFS.readFile(path, 'utf8')
         .then(rowidarray => {
           rowidarray = JSON.parse(rowidarray);
-          rowidarray.map(elem => {
-            let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
-            // if (RNFS.exists(path)) {
-            RNFS.readFile(path, 'utf8')
-              .then(res => {
-                res = JSON.parse(res);
-                Surveys.push(res);
-                if (rowidarray[elem + 1] == undefined) resolve(Surveys);
-              })
-              .catch(err => {
-                if (rowidarray[elem + 1] == undefined) resolve(Surveys);
-              });
-            // } else reject('error');
-          });
+          if (rowidarray.length > 0) {
+            rowidarray.map(elem => {
+              let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+              RNFS.readFile(path, 'utf8')
+                .then(res => {
+                  res = JSON.parse(res);
+                  Surveys.push(res);
+                  if (rowidarray[elem + 1] == undefined) resolve(Surveys);
+                })
+                .catch(err => {
+                  if (rowidarray[elem + 1] == undefined) resolve(Surveys);
+                });
+            });
+          } else {
+            resolve(Surveys);
+          }
         })
         .catch(err => {
           reject(err);
@@ -68,29 +71,37 @@ export default class HomeScreen extends Component {
     });
   };
 
+  // this func receive props from other screen;
   UNSAFE_componentWillReceiveProps(newProps) {
     const TabId = newProps.navigation.getParam('TabId', false);
     const flag = newProps.navigation.getParam('flag', false);
 
     if (flag === 1) {
       // this func called when i press on all done button
-      this.setState({ loading: true }, () => {
-        this.getDataFromLocalStorage()
-          .then(data => {
-            this.setState({
-              Surveys: data,
-              TabId: TabId,
-              boolean: data.length === 0 ? false : true,
-              loading: false,
+      this.setState(
+        {
+          loading: true,
+        },
+        () => {
+          this.getDataFromLocalStorage()
+            .then(data => {
+              this.setState({
+                Surveys: data,
+                TabId: TabId,
+                boolean: data.length === 0 ? false : true,
+                loading: false,
+                // those two line above for date expiration
+                visible: false,
+                uuidex: null,
+              });
+            })
+            .catch(err => {
+              this.setState({
+                loading: false,
+              });
             });
-          })
-          .catch(err => {
-            console.log('catch');
-            this.setState({
-              loading: false,
-            });
-          });
-      });
+        },
+      );
     } else if (flag === 0) {
       this.setState({
         Surveys: [],
@@ -148,14 +159,14 @@ export default class HomeScreen extends Component {
         {
           flag:
             this.state.isConnected === true &&
-              this.state.isInternetReachable === true
+            this.state.isInternetReachable === true
               ? false
               : true,
           isConnected: state.isConnected,
           isInternetReachable: state.isInternetReachable,
         },
         () => {
-          const { isInternetReachable, isConnected, Surveys, flag } = this.state;
+          const {isInternetReachable, isConnected, Surveys, flag} = this.state;
 
           if (
             isConnected === true &&
@@ -176,7 +187,6 @@ export default class HomeScreen extends Component {
               message: 'Your are now connected to the internet',
               playSound: true,
               soundName: 'default',
-              actions: '["Accept", "Reject"]',
             });
           }
         },
@@ -188,42 +198,42 @@ export default class HomeScreen extends Component {
     this.unsubscribe();
   }
 
+  // delete all survey
+  DeleteAllRowPromise = () => {
+    return new Promise(async (resolve, reject) => {
+      let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+
+      if (await RNFS.exists(path)) {
+        RNFS.readFile(path, 'utf8')
+          .then(rowidarray => {
+            rowidarray = JSON.parse(rowidarray);
+            rowidarray.forEach(async elem => {
+              let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+              if (await RNFS.exists(path)) {
+                RNFS.unlink(path, 'utf8');
+                if (rowidarray[elem + 1] === undefined) resolve('succes');
+              } else {
+                if (rowidarray[elem + 1] === undefined) reject('failed');
+              }
+            });
+          })
+          .catch(err => {});
+      } else {
+        reject('failed');
+      }
+    });
+  };
+
   // delete all stucked survey
   deleteAllRows = () => {
-    promise = () => {
-      return new Promise(async (resolve, reject) => {
-        let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
-
-        if (await RNFS.exists(path)) {
-          RNFS.readFile(path, 'utf8')
-            .then(rowidarray => {
-              rowidarray = JSON.parse(rowidarray);
-              rowidarray.forEach(async elem => {
-                let path =
-                  RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
-                if (await RNFS.exists(path)) {
-                  RNFS.unlink(path, 'utf8');
-                  if (rowidarray[elem + 1] === undefined) resolve('succes');
-                } else {
-                  if (rowidarray[elem + 1] === undefined) reject('failed');
-                }
-              });
-            })
-            .catch(err => { });
-        } else {
-          reject('failed');
-        }
-      });
-    };
-
-    promise()
+    this.DeleteAllRowPromise()
       .then(res => {
         this.setState({
           Surveys: [],
           boolean: false,
         });
       })
-      .catch(err => { });
+      .catch(err => {});
   };
 
   // give us your feedback func
@@ -231,9 +241,8 @@ export default class HomeScreen extends Component {
     alert('feedback');
   };
 
-  // delete on row
+  // delete one row
   deleteRow = rowid => {
-    // alert('yes');
     let path = RNFS.DocumentDirectoryPath + '/file_' + rowid + '.txt';
 
     RNFS.unlink(path, 'utf8')
@@ -251,190 +260,308 @@ export default class HomeScreen extends Component {
           },
         );
       })
-      .catch(err => { });
+      .catch(err => {});
   };
-
 
   // send one row to backend
   sendRow = (surveyrow, rowid) => {
-    console.log("surveyrow ==> ", JSON.stringify(surveyrow.answers));
-    console.log("surveyid ==> ", rowid)
+    CmpAndCopyQrcodefromTemplateToSurvey()
+      .then(res => {})
+      .catch(err => {});
 
-    if (surveyrow.answers !== undefined) {
-      try {
-        if (Platform.OS === 'android') {
-          NetInfo.fetch().then(state => {
-            if (state.isConnected) {
-              {
-                this.setState({ loading: true });
-                const uuid = surveyrow.data.uuid;
-                const qrcodeData = surveyrow.qrcodeData;
-                let data = [{ row: surveyrow.answers.row, data_row: surveyrow.answers.allpartanswers }]
-                data = { data: data }
-                const url = `${rooturl}/api/anon/dataset/${uuid}/part/`;
-                const config = {
-                  headers: { 'X-AUTH-TOKEN': qrcodeData },
-                };
-                console.log(JSON.stringify(data));
-                console.log({ qrcodeData: qrcodeData });
-                console.log({ uuid: uuid })
-                console.log({ url: url })
-                Axios.post(url, data, config)
-                  .then(res => {
-                    this.setState({
-                      loading: false,
-                    });
-                    this.deleteRow(rowid);
-                  })
-                  .catch(error => {
-                    this.setState({
-                      loading: false,
-                    });
-                    alert("Please Try again");
-                  });
-              }
-            } else Alert.alert('Please check your Internet connection');
+    this.DateExpirationQrCode().then(ret => {
+      if (ret.flag === 1) {
+        if (surveyrow.answers !== undefined) {
+          try {
+            if (Platform.OS === 'android') {
+              NetInfo.fetch().then(state => {
+                if (state.isConnected) {
+                  {
+                    this.setState({loading: true});
+                    const uuid = surveyrow.data.uuid;
+                    const qrcodeData = surveyrow.qrcodeData;
+                    let data = [
+                      {
+                        row: surveyrow.answers.row,
+                        data_row: surveyrow.answers.allpartanswers,
+                      },
+                    ];
+                    data = {data: data};
+                    const url = `${rooturl}/api/anon/dataset/${uuid}/`;
+                    const config = {
+                      headers: {'X-AUTH-TOKEN': qrcodeData},
+                    };
+                    console.log(JSON.stringify(data));
+                    console.log({qrcodeData: qrcodeData});
+                    console.log({uuid: uuid});
+                    console.log({url: url});
+                    Axios.post(url, data, config)
+                      .then(res => {
+                        this.setState({
+                          loading: false,
+                        });
+                        this.deleteRow(rowid);
+                      })
+                      .catch(error => {
+                        this.setState({
+                          loading: false,
+                        });
+                        alert('Please Try again');
+                      });
+                  }
+                } else Alert.alert('Please check your Internet connection');
+              });
+            }
+          } catch {
+            this.setState({
+              loading: false,
+            });
+            alert('Try Again');
+          }
+          this.setState({
+            boolean: this.state.Surveys.length === 0 ? false : true,
           });
         }
-      } catch {
-        this.setState({
-          loading: false,
-        });
-        alert('Try Again');
+      } else if (ret.flag === 0) {
+        Alert.alert(
+          'Help',
+          'Your Qrcode is expired please scan the same Qrcode with new expiration date ask your supervised to send you new Qrcode',
+          [
+            {
+              text: 'No',
+              onPress: () => null,
+            },
+            {
+              text: 'Scan new',
+              //
+              onPress: () =>
+                this.setState({
+                  TabId: 0,
+                  visible: true,
+                }),
+            },
+          ],
+          {cancelable: false},
+        );
       }
-      this.setState({
-        boolean: this.state.Surveys.length === 0 ? false : true,
-      });
-    }
+    });
   };
 
   // send all rows to backend
   sendAllRows = () => {
-    const { Surveys } = this.state
-    if (Surveys !== undefined) {
-      try {
-        if (Platform.OS === 'android') {
-          NetInfo.fetch().then(state => {
-            if (state.isConnected) {
-              {
-                this.setState({ loading: true });
-                const uuid = Surveys[0].data.uuid;
-                const qrcodeData = Surveys[0].qrcodeData;
-                let data = []
-                Surveys.map((elem, index) => {
-                  if (elem.answers !== undefined) {
-                    if (data.length === 0) {
-                      data = [{ row: elem.answers.row, data_row: elem.answers.allpartanswers }]
-                    }
-                    else if (data.length > 0) {
-                      data = [...data, { row: elem.answers.row, data_row: elem.answers.allpartanswers }]
-                    }
+    this.DateExpirationQrCode().then(ret => {
+      if (ret.flag === 1) {
+        const {Surveys} = this.state;
+        if (Surveys !== undefined) {
+          try {
+            if (Platform.OS === 'android') {
+              NetInfo.fetch().then(state => {
+                if (state.isConnected) {
+                  {
+                    this.setState({loading: true});
+                    const uuid = Surveys[0].data.uuid;
+                    const qrcodeData = Surveys[0].qrcodeData;
+                    let data = [];
+                    Surveys.map((elem, index) => {
+                      if (elem.answers !== undefined) {
+                        if (data.length === 0) {
+                          data = [
+                            {
+                              row: elem.answers.row,
+                              data_row: elem.answers.allpartanswers,
+                            },
+                          ];
+                        } else if (data.length > 0) {
+                          data = [
+                            ...data,
+                            {
+                              row: elem.answers.row,
+                              data_row: elem.answers.allpartanswers,
+                            },
+                          ];
+                        }
+                      }
+                    });
+                    data = {data: data};
+                    const url = `${rooturl}/api/anon/dataset/${uuid}/`;
+                    const config = {
+                      headers: {'X-AUTH-TOKEN': qrcodeData},
+                    };
+                    // console.log(JSON.stringify(data));
+                    // console.log({ qrcodeData: qrcodeData });
+                    // console.log({ uuid: uuid })
+                    // console.log({ url: url })
+                    Axios.post(url, data, config)
+                      .then(res => {
+                        Surveys.map((elem, index) => {
+                          this.deleteRow(elem.rowid);
+                        });
+                        this.setState({
+                          loading: false,
+                        });
+                      })
+                      .catch(error => {
+                        this.setState({
+                          loading: false,
+                        });
+                        alert(error);
+                      });
                   }
-                })
-                data = { data: data }
-                const url = `${rooturl}/api/anon/dataset/${uuid}/part/`;
-                const config = {
-                  headers: { 'X-AUTH-TOKEN': qrcodeData },
-                };
-                // console.log(JSON.stringify(data));
-                // console.log({ qrcodeData: qrcodeData });
-                // console.log({ uuid: uuid })
-                // console.log({ url: url })
-                Axios.post(url, data, config)
-                  .then(res => {
-                    // Surveys.map((elem, index) => {
-                    //   this.deleteRow(elem.rowid);
-                    // })
-                    this.setState({
-                      loading: false,
-                    });
-                  })
-                  .catch(error => {
-                    this.setState({
-                      loading: false,
-                    });
-                    alert("Please Try again");
-                  });
-
-              }
-            } else Alert.alert('Please check your Internet connection');
+                } else Alert.alert('Please check your Internet connection');
+              });
+            }
+          } catch {
+            this.setState({
+              loading: false,
+            });
+            alert('Try Again');
+          }
+          this.setState({
+            boolean: this.state.Surveys.length === 0 ? false : true,
           });
         }
-      } catch {
-        this.setState({
-          loading: false,
-        });
-        alert('Try Again');
+      } else if (ret.flag === 0) {
+        Alert.alert(
+          'Help',
+          'Your Qrcode is expired please scan the same Qrcode with new expiration date ask your supervised to send you new Qrcode',
+          [
+            {
+              text: 'No',
+              onPress: () => null,
+            },
+            {
+              text: 'Scan new',
+              //
+              onPress: () =>
+                this.setState({
+                  TabId: 0,
+                  visible: true,
+                }),
+            },
+          ],
+          {cancelable: false},
+        );
       }
-      this.setState({
-        boolean: this.state.Surveys.length === 0 ? false : true,
-      });
-    }
+    });
   };
 
   // add new survey
   addNewRow = () => {
-    const { navigate } = this.props.navigation;
-    let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
-
-    RNFS.getFSInfo().then(info => {
-      const infospace = info.freeSpace / 1024 / 1024;
-
-      if (infospace < 100) {
-        Alert.alert(
-          'Storage space',
-          "You Don't have enough space please free up your storage and try again",
-        );
-      } else {
-        RNFS.readFile(path, 'utf8')
-          .then(rowidarray => {
-            rowidarray = JSON.parse(rowidarray);
-            if (rowidarray.length === 0) {
-              var rowid = 0;
-              rowidarray[0] = 0;
-            } else {
-              var rowid = rowidarray[rowidarray.length - 1] + 1;
-              rowidarray[rowidarray.length] =
-                rowidarray[rowidarray.length - 1] + 1;
-            }
-            let string = JSON.stringify(rowidarray);
-            RNFS.unlink(path, 'utf8')
-              .then(res => {
-                RNFS.writeFile(path, string, 'utf8')
+    this.DateExpirationQrCode().then(ret => {
+      console.log('flag ==> ', ret);
+      if (ret.flag === 1) {
+        const {navigate} = this.props.navigation;
+        let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+        RNFS.getFSInfo().then(info => {
+          const infospace = info.freeSpace / 1024 / 1024;
+          if (infospace < 100) {
+            Alert.alert(
+              'Storage space',
+              "You Don't have enough space please free up your storage and try again",
+            );
+          } else {
+            RNFS.readFile(path, 'utf8')
+              .then(rowidarray => {
+                rowidarray = JSON.parse(rowidarray);
+                if (rowidarray.length === 0) {
+                  var rowid = 0;
+                  rowidarray[0] = 0;
+                } else {
+                  var rowid = rowidarray[rowidarray.length - 1] + 1;
+                  rowidarray[rowidarray.length] =
+                    rowidarray[rowidarray.length - 1] + 1;
+                }
+                let string = JSON.stringify(rowidarray);
+                RNFS.unlink(path, 'utf8')
                   .then(res => {
-                    let path = RNFS.DocumentDirectoryPath + '/template.txt';
-                    RNFS.readFile(path, 'utf8')
-                      .then(template => {
-                        template = JSON.parse(template);
-                        navigate('SurveyScreen', {
-                          data: { ...template, rowid: rowid },
-                          flag: 1,
-                        });
+                    RNFS.writeFile(path, string, 'utf8')
+                      .then(res => {
+                        let path = RNFS.DocumentDirectoryPath + '/template.txt';
+                        RNFS.readFile(path, 'utf8')
+                          .then(template => {
+                            template = JSON.parse(template);
+                            navigate('SurveyScreen', {
+                              data: {...template, rowid: rowid},
+                              flag: 1,
+                            });
+                          })
+                          .catch(err => {});
                       })
-                      .catch(err => { });
+                      .catch(err => {});
                   })
-                  .catch(err => { });
+                  .catch(err => {
+                    RNFS.writeFile(path, string, 'utf8')
+                      .then(res => {})
+                      .catch(err => {});
+                  });
               })
-              .catch(err => {
-                RNFS.writeFile(path, string, 'utf8')
-                  .then(res => { })
-                  .catch(err => { });
-              });
+              .catch(err => {});
+          }
+        });
+      } else if (ret.flag === 0) {
+        Alert.alert(
+          'Help',
+          'Your Qrcode is expired please scan the same Qrcode with new expiration date ask your supervised to send you new Qrcode',
+          [
+            {
+              text: 'No',
+              onPress: () => null,
+            },
+            {
+              text: 'Scan new',
+              //
+              onPress: () =>
+                this.setState({
+                  TabId: 0,
+                  visible: true,
+                }),
+            },
+          ],
+          {cancelable: false},
+        );
+      }
+    });
+  };
+
+  // check date expiration of qrcode
+  DateExpirationQrCode = () => {
+    return new Promise(async (resolve, reject) => {
+      let path = RNFS.DocumentDirectoryPath + '/template.txt';
+
+      if (await RNFS.exists(path)) {
+        RNFS.readFile(path, 'utf8')
+          .then(template => {
+            template = JSON.parse(template);
+            var token = jwtDecode(template.qrcodeData);
+            this.setState({
+              uuidex: token.dataset,
+            });
+            var timestamp = Date.now();
+            if (timestamp < token.exp * 1000) {
+              resolve({flag: 0});
+            } else {
+              resolve({flag: 0});
+            }
           })
-          .catch(err => { });
+          .catch(err => {
+            resolve({flag: 0});
+          });
+      } else {
+        // template not found
+        resolve({flag: 2});
       }
     });
   };
 
   render() {
-    const { navigate } = this.props.navigation;
-    const { boolean, Surveys, TabId, loading } = this.state;
+    const {navigate} = this.props.navigation;
+    const {boolean, Surveys, TabId, loading, visible, uuidex} = this.state;
 
-    if (Surveys.length > 0 && Surveys !== undefined) {
-      console.log("\n\n")
-      console.log("here surveys ===> ", JSON.stringify(Surveys))
-      console.log("\n\n")
-    }
+    // if (Surveys.length > 0 && Surveys !== undefined) {
+    //   console.log('\n\n');
+    //   console.log('here surveys ===> ', JSON.stringify(Surveys));
+    //   console.log('\n\n');
+    // }
     var OfflineSurveyBoolean = false;
     if (Surveys.length > 0) OfflineSurveyBoolean = true;
     return (
@@ -453,7 +580,7 @@ export default class HomeScreen extends Component {
           page={TabId}
           tabBarPosition="overlayTop"
           scrollWithoutAnimation={true}
-          onChangeTab={e => this.setState({ TabId: e.i })}>
+          onChangeTab={e => this.setState({TabId: e.i})}>
           <Tab heading="Guide">
             <HomeBody navigate={navigate} />
           </Tab>
@@ -466,6 +593,8 @@ export default class HomeScreen extends Component {
               sendAllRows={this.sendAllRows}
               deleteRow={this.deleteRow}
               loading={loading}
+              navigate={navigate}
+              // DateExpirationQrCode={this.DateExpirationQrCode}
             />
           </Tab>
         </Tabs>
@@ -474,6 +603,10 @@ export default class HomeScreen extends Component {
           TabId={TabId}
           addNewRow={this.addNewRow}
           OfflineSurveyBoolean={OfflineSurveyBoolean}
+          // this visible var work with expiration date of qr code
+          visible={visible}
+          // this two variable work with expiration date of qr code
+          uuidex={uuidex}
         />
       </Container>
     );

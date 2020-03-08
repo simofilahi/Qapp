@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
-import { View, Alert } from 'react-native';
-import { Fab, Icon } from 'native-base';
-import { Overlay, Text, Button } from 'react-native-elements';
-import { QRreader } from 'react-native-qr-scanner';
+import React, {Component} from 'react';
+import {View, Alert} from 'react-native';
+import {Fab, Icon} from 'native-base';
+import {Overlay, Text, Button} from 'react-native-elements';
+import {QRreader} from 'react-native-qr-scanner';
 import ImagePicker from 'react-native-image-picker';
 import Axios from 'axios';
 import jwtDecode from 'jwt-decode';
@@ -18,7 +18,7 @@ class MyFooter extends Component {
     loading: false,
   };
 
-  _OnPress = (navigate, screen, flag) => {
+  _OnPress = (navigate, screen, flag, uuidex) => {
     if (flag) {
       if (Platform.OS === 'android') {
         NetInfo.fetch().then(state => {
@@ -27,7 +27,9 @@ class MyFooter extends Component {
               isVisible: false,
               open: false,
             });
-            navigate(screen);
+            navigate(screen, {
+              uuidex: uuidex,
+            });
           } else
             Alert.alert('Please check your internet connection and try again');
         });
@@ -45,39 +47,59 @@ class MyFooter extends Component {
           if (state.isConnected) {
             try {
               var token = jwtDecode(data);
+              var timestamp = Date.now();
               // Check exp time
-              this.setState({ loading: true });
-              // https://impactree.um6p.ma
-              const url = `${rooturl}/api/anon/dataset/${token.dataset}/parts`;
-              const config = {
-                headers: { 'X-AUTH-TOKEN': data },
-              };
-              Axios.get(url, config)
-                .then(res => {
-                  this.setState({
-                    loading: false,
+              if (timestamp < token.exp * 1000) {
+                this.setState({loading: true});
+                const url = `${rooturl}/api/anon/dataset/${token.dataset}/parts`;
+                const config = {
+                  headers: {'X-AUTH-TOKEN': data},
+                };
+                Axios.get(url, config)
+                  .then(res => {
+                    this.setState({
+                      loading: false,
+                    });
+                    resolve({
+                      data: res.data,
+                      qrcodeData: data,
+                      sent: true,
+                    });
+                  })
+                  .catch(err => {
+                    this.setState({
+                      loading: false,
+                    });
+                    // console.log({error: err});
+                    reject(err);
                   });
-                  resolve({
-                    data: res.data,
-                    qrcodeData: data,
-                    sent: true,
-                  });
-                })
-                .catch(err => {
-                  this.setState({
-                    loading: false,
-                  });
-                  reject(err);
+              } else {
+                Alert.alert(
+                  'Help',
+                  'This is Qrcode is expired try with new Qrcode',
+                  [
+                    {
+                      text: 'No',
+                      onPress: () => null,
+                    },
+                    {
+                      text: 'Ok',
+                      onPress: () => null,
+                    },
+                  ],
+                  {cancelable: false},
+                );
+                this.setState({
+                  loading: false,
                 });
+              }
             } catch {
               this.setState({
                 loading: false,
               });
               reject('Try Again');
             }
-          } else {
-            Alert.alert('No Internet Connection');
-          }
+          } else Alert.alert('No Internet Connection');
         });
       }
     });
@@ -139,13 +161,13 @@ class MyFooter extends Component {
         if (state.isConnected) {
           ImagePicker.launchImageLibrary({}, response => {
             if (response.didCancel) {
-              this.setState({ isVisible: false, open: false });
+              this.setState({isVisible: false, open: false});
               // Alert.alert('User cancelled image picker');
             } else if (response.error) {
-              this.setState({ isVisible: false, open: false });
+              this.setState({isVisible: false, open: false});
               // Alert.alert('ImagePicker Error: ', response.error);
             } else if (response.customButton) {
-              this.setState({ isVisible: false, open: false });
+              this.setState({isVisible: false, open: false});
               // Alert.alert('User tapped custom button: ', response.customButton);
             } else {
               if (response.uri) {
@@ -154,25 +176,31 @@ class MyFooter extends Component {
                   path = response.uri;
                 }
                 QRreader(path).then(data => {
-                  this.setState({ isVisible: false, open: false, loading: true });
-                  this.onSuccess(data)
-                    .then(res => {
-                      this.createTemplatefile(res)
-                        .then(nothing => {
-                          this.createRowIdfile()
-                            .then(nothing => {
-                              navigate('HomeScreen', {
-                                TabId: 1,
-                                flag: 0,
-                              });
-                            })
-                            .catch();
-                        })
-                        .catch();
-                    })
-                    .catch(err => {
-                      alert('Try again');
-                    });
+                  this.setState({isVisible: false, open: false, loading: true});
+                  const {uuidex} = this.props;
+                  console.log({uuidex: uuidex});
+                  if (uuidex !== null) {
+                    this.readQrcode(data);
+                  } else {
+                    this.onSuccess(data)
+                      .then(res => {
+                        this.createTemplatefile(res)
+                          .then(nothing => {
+                            this.createRowIdfile()
+                              .then(nothing => {
+                                navigate('HomeScreen', {
+                                  TabId: 1,
+                                  flag: 0,
+                                });
+                              })
+                              .catch();
+                          })
+                          .catch();
+                      })
+                      .catch(err => {
+                        alert('Try again');
+                      });
+                  }
                 });
               }
             }
@@ -183,9 +211,152 @@ class MyFooter extends Component {
     }
   };
 
+  // this func work with date expiration of qrcode update the old template of survey by add new qrcode
+  updateTemplatefile = newQrcode => {
+    return new Promise(async (resolve, reject) => {
+      var path = RNFS.DocumentDirectoryPath + '/template.txt';
+      if (await RNFS.exists(path)) {
+        RNFS.getFSInfo().then(info => {
+          const infospace = info.freeSpace / 1024 / 1024;
+          if (infospace < 100) {
+            Alert.alert(
+              'Storage space',
+              "You Don't have enough space please free up your storage and try again",
+            );
+          } else {
+            console.log({path: path});
+            RNFS.readFile(path, 'utf8')
+              .then(res => {
+                data = JSON.parse(res);
+                data.qrcodeData = newQrcode;
+                var string = JSON.stringify(data);
+                RNFS.writeFile(path, string, 'utf8')
+                  .then(success => {
+                    resolve('Created');
+                  })
+                  .catch(err => {
+                    reject({err: 'error During the creation', flag: 1});
+                  });
+              })
+              .catch(err => {
+                reject({err: 'error During the creation', flag: 2});
+              });
+          }
+        });
+      } else {
+        reject({err: 'file template not found', flag: 3});
+      }
+    });
+  };
+
+  // this func work with date expiration of qrcode the role of this is to read qrcode
+  readQrcode = data => {
+    const {uuidex} = this.props;
+    var token = jwtDecode(data);
+    var timestamp = Date.now();
+    if (uuidex === token.dataset) {
+      if (timestamp < token.exp * 1000) {
+        this.updateTemplatefile(data)
+          .then(res => {
+            this.setState({loading: false});
+            Alert.alert(
+              'Success',
+              'Your Qrcode was updated successfully',
+              [
+                {
+                  text: 'No',
+                  onPress: () => null,
+                },
+                {
+                  text: 'Go tO SURVEY',
+                  onPress: () =>
+                    this.props.navigate('HomeScreen', {
+                      TabId: 1,
+                      flag: 1,
+                    }),
+                },
+              ],
+              {cancelable: false},
+            );
+          })
+          .catch(err => {
+            this.setState({loading: false});
+            Alert.alert(
+              'Failed',
+              'Please try again \n Something went wrong during update Qrcode',
+              [
+                {
+                  text: 'No',
+                  onPress: () => null,
+                },
+                {
+                  text: 'Ok',
+                  onPress: () => null,
+                },
+              ],
+              {cancelable: false},
+            );
+          });
+      } else {
+        this.setState({loading: false});
+        Alert.alert(
+          'Failed',
+          'Your are trying to scan expired Qrcode',
+          [
+            {
+              text: 'No',
+              onPress: () => null,
+            },
+            {
+              text: 'Ok',
+              onPress: () => null,
+            },
+          ],
+          {cancelable: false},
+        );
+        // alert expiration date;
+      }
+    } else {
+      this.setState({loading: false});
+      Alert.alert(
+        'Failed',
+        'Please scan the same qrcode of alerday survey that you had on mobile',
+        [
+          {
+            text: 'No',
+            onPress: () => null,
+          },
+          {
+            text: 'Ok',
+            onPress: () => null,
+          },
+        ],
+        {cancelable: false},
+      );
+    }
+  };
+
+  // this lifecycle help to assign true to overlay and button pop-up
+  // and this one work with expiration date of qr code
+  UNSAFE_componentWillReceiveProps() {
+    const {visible} = this.props;
+    if (visible) {
+      this.setState({
+        open: !this.state.open,
+        isVisible: !this.state.isVisible,
+      });
+    }
+  }
+
   render() {
-    const { navigate, TabId, addNewRow, OfflineSurveyBoolean } = this.props;
-    const { loading } = this.state;
+    const {
+      navigate,
+      TabId,
+      addNewRow,
+      OfflineSurveyBoolean,
+      uuidex,
+    } = this.props;
+    const {loading} = this.state;
 
     if (TabId === 0) {
       return (
@@ -193,7 +364,7 @@ class MyFooter extends Component {
           <Spinner
             visible={loading}
             textContent={'Loading...'}
-            textStyle={{ color: 'white' }}
+            textStyle={{color: 'white'}}
           />
           <Overlay
             overlayStyle={{
@@ -235,7 +406,7 @@ class MyFooter extends Component {
                     open: !this.state.open,
                   })
                 }>
-                <Icon name="remove" style={{ color: 'black' }} />
+                <Icon name="remove" style={{color: 'black'}} />
                 <Button
                   style={{
                     backgroundColor: '#E0E0E0',
@@ -245,10 +416,14 @@ class MyFooter extends Component {
                     marginLeft: -6,
                     marginBottom: 20,
                   }}
-                  onPress={() => this._OnPress(navigate, 'QRCodeScreen', 1)}>
+                  onPress={() =>
+                    this._OnPress(navigate, 'QRCodeScreen', 1, uuidex)
+                  }>
                   <Icon
                     name="camera"
-                    onPress={() => this._OnPress(navigate, 'QRCodeScreen', 1)}
+                    onPress={() =>
+                      this._OnPress(navigate, 'QRCodeScreen', 1, uuidex)
+                    }
                   />
                 </Button>
                 <Button
@@ -313,19 +488,20 @@ class MyFooter extends Component {
                       {
                         text: 'Go to survey',
                         // NOTE FOR FLAG = 1
-                        onPress: () => navigate('HomeScreen', {
-                          TabId: 1,
-                          flag: 1,
-                        }),
+                        onPress: () =>
+                          navigate('HomeScreen', {
+                            TabId: 1,
+                            flag: 1,
+                          }),
                       },
                     ],
-                    { cancelable: false },
+                    {cancelable: false},
                   );
                 }
               }}>
               <Icon
                 name="qrcode"
-                style={{ color: 'black' }}
+                style={{color: 'black'}}
                 type="FontAwesome"
                 onPress={() => {
                   if (OfflineSurveyBoolean === false) {
@@ -345,13 +521,14 @@ class MyFooter extends Component {
                         {
                           text: 'Go to survey',
                           // NOTE FOR FLAG = 1
-                          onPress: () => navigate('HomeScreen', {
-                            TabId: 1,
-                            flag: 1,
-                          }),
+                          onPress: () =>
+                            navigate('HomeScreen', {
+                              TabId: 1,
+                              flag: 1,
+                            }),
                         },
                       ],
-                      { cancelable: false },
+                      {cancelable: false},
                     );
                   }
                 }}
@@ -390,12 +567,14 @@ class MyFooter extends Component {
                     alignSelf: 'center',
                     height: '100%',
                   }}
-                  onPress={() => this._OnPress(navigate, 'MapScreen', 1)}
+                  onPress={() =>
+                    this._OnPress(navigate, 'MapScreen', 1, uuidex)
+                  }
                   icon={
                     <Icon
                       name="map"
                       type="FontAwesome5"
-                      style={{ color: 'white' }}
+                      style={{color: 'white'}}
                     />
                   }
                 />
@@ -434,12 +613,12 @@ class MyFooter extends Component {
                     alignSelf: 'center',
                     height: '100%',
                   }}
-                  onPress={() => this._OnPress(navigate, 'AboutUs', 0)}
+                  onPress={() => this._OnPress(navigate, 'AboutUs', 0, uuidex)}
                   icon={
                     <Icon
                       name="users"
                       type="FontAwesome"
-                      style={{ color: 'white' }}
+                      style={{color: 'white'}}
                     />
                   }
                 />
@@ -460,7 +639,7 @@ class MyFooter extends Component {
               </View>
             </View>
           </View>
-        </View >
+        </View>
       );
     }
     if (TabId === 1) {
@@ -506,7 +685,7 @@ class MyFooter extends Component {
               onPress={() => {
                 addNewRow();
               }}>
-              <Icon name="add" style={{ color: 'black' }} />
+              <Icon name="add" style={{color: 'black'}} />
             </Fab>
           </View>
           <View
@@ -542,12 +721,14 @@ class MyFooter extends Component {
                     alignSelf: 'center',
                     height: '100%',
                   }}
-                  onPress={() => this._OnPress(navigate, 'MapScreen', 1)}
+                  onPress={() =>
+                    this._OnPress(navigate, 'MapScreen', 1, uuidex)
+                  }
                   icon={
                     <Icon
                       name="map"
                       type="FontAwesome5"
-                      style={{ color: 'white' }}
+                      style={{color: 'white'}}
                     />
                   }
                 />
@@ -586,12 +767,12 @@ class MyFooter extends Component {
                     alignSelf: 'center',
                     height: '100%',
                   }}
-                  onPress={() => this._OnPress(navigate, 'AboutUs', 0)}
+                  onPress={() => this._OnPress(navigate, 'AboutUs', 0, uuidex)}
                   icon={
                     <Icon
                       name="users"
                       type="FontAwesome"
-                      style={{ color: 'white' }}
+                      style={{color: 'white'}}
                     />
                   }
                 />
