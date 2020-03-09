@@ -263,12 +263,61 @@ export default class HomeScreen extends Component {
       .catch(err => {});
   };
 
+  updateUuidexAndVisible = () => {
+    this.setState({
+      uuidex: null,
+      visible: false,
+    });
+  };
+
+  // this func read the files in local storage in change qrcode;
+  CopyQrcodefromTemplateToSurvey = newQrcode => {
+    return new Promise((resolve, reject) => {
+      try {
+        let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+        var Surveys = [];
+        RNFS.readFile(path, 'utf8')
+          .then(rowidarray => {
+            rowidarray = JSON.parse(rowidarray);
+            if (rowidarray.length > 0) {
+              rowidarray.map(elem => {
+                let path =
+                  RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+                RNFS.readFile(path, 'utf8')
+                  .then(res => {
+                    let path =
+                      RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+                    res = JSON.parse(res);
+                    res.qrcodeData = newQrcode;
+                    var string = JSON.stringify(res);
+                    RNFS.writeFile(path, string, 'utf8')
+                      .then(res => {})
+                      .catch(err => {
+                        reject({
+                          err: 'something wrong happen during write in file',
+                        });
+                      });
+                  })
+                  .catch(err => {
+                    reject({err: 'something wrong happen during read of file'});
+                  });
+              });
+              resolve({res: 'success'});
+            } else {
+              reject({res: 'array is empty'});
+            }
+          })
+          .catch(err => {
+            reject(err);
+          });
+      } catch (err) {
+        reject({err: err});
+      }
+    });
+  };
+
   // send one row to backend
   sendRow = (surveyrow, rowid) => {
-    CmpAndCopyQrcodefromTemplateToSurvey()
-      .then(res => {})
-      .catch(err => {});
-
     this.DateExpirationQrCode().then(ret => {
       if (ret.flag === 1) {
         if (surveyrow.answers !== undefined) {
@@ -387,17 +436,17 @@ export default class HomeScreen extends Component {
                     const config = {
                       headers: {'X-AUTH-TOKEN': qrcodeData},
                     };
-                    // console.log(JSON.stringify(data));
-                    // console.log({ qrcodeData: qrcodeData });
-                    // console.log({ uuid: uuid })
-                    // console.log({ url: url })
+                    console.log(JSON.stringify(data));
+                    console.log({qrcodeData: qrcodeData});
+                    console.log({uuid: uuid});
+                    console.log({url: url});
                     Axios.post(url, data, config)
                       .then(res => {
-                        Surveys.map((elem, index) => {
-                          this.deleteRow(elem.rowid);
-                        });
                         this.setState({
                           loading: false,
+                        });
+                        Surveys.map((elem, index) => {
+                          this.deleteRow(elem.rowid);
                         });
                       })
                       .catch(error => {
@@ -447,78 +496,52 @@ export default class HomeScreen extends Component {
 
   // add new survey
   addNewRow = () => {
-    this.DateExpirationQrCode().then(ret => {
-      console.log('flag ==> ', ret);
-      if (ret.flag === 1) {
-        const {navigate} = this.props.navigation;
-        let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
-        RNFS.getFSInfo().then(info => {
-          const infospace = info.freeSpace / 1024 / 1024;
-          if (infospace < 100) {
-            Alert.alert(
-              'Storage space',
-              "You Don't have enough space please free up your storage and try again",
-            );
-          } else {
-            RNFS.readFile(path, 'utf8')
-              .then(rowidarray => {
-                rowidarray = JSON.parse(rowidarray);
-                if (rowidarray.length === 0) {
-                  var rowid = 0;
-                  rowidarray[0] = 0;
-                } else {
-                  var rowid = rowidarray[rowidarray.length - 1] + 1;
-                  rowidarray[rowidarray.length] =
-                    rowidarray[rowidarray.length - 1] + 1;
-                }
-                let string = JSON.stringify(rowidarray);
-                RNFS.unlink(path, 'utf8')
+    const {navigate} = this.props.navigation;
+    let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+    RNFS.getFSInfo().then(info => {
+      const infospace = info.freeSpace / 1024 / 1024;
+      if (infospace < 100) {
+        Alert.alert(
+          'Storage space',
+          "You Don't have enough space please free up your storage and try again",
+        );
+      } else {
+        RNFS.readFile(path, 'utf8')
+          .then(rowidarray => {
+            rowidarray = JSON.parse(rowidarray);
+            if (rowidarray.length === 0) {
+              var rowid = 0;
+              rowidarray[0] = 0;
+            } else {
+              var rowid = rowidarray[rowidarray.length - 1] + 1;
+              rowidarray[rowidarray.length] =
+                rowidarray[rowidarray.length - 1] + 1;
+            }
+            let string = JSON.stringify(rowidarray);
+            RNFS.unlink(path, 'utf8')
+              .then(res => {
+                RNFS.writeFile(path, string, 'utf8')
                   .then(res => {
-                    RNFS.writeFile(path, string, 'utf8')
-                      .then(res => {
-                        let path = RNFS.DocumentDirectoryPath + '/template.txt';
-                        RNFS.readFile(path, 'utf8')
-                          .then(template => {
-                            template = JSON.parse(template);
-                            navigate('SurveyScreen', {
-                              data: {...template, rowid: rowid},
-                              flag: 1,
-                            });
-                          })
-                          .catch(err => {});
+                    let path = RNFS.DocumentDirectoryPath + '/template.txt';
+                    RNFS.readFile(path, 'utf8')
+                      .then(template => {
+                        template = JSON.parse(template);
+                        navigate('SurveyScreen', {
+                          data: {...template, rowid: rowid},
+                          flag: 1,
+                        });
                       })
                       .catch(err => {});
                   })
-                  .catch(err => {
-                    RNFS.writeFile(path, string, 'utf8')
-                      .then(res => {})
-                      .catch(err => {});
-                  });
+                  .catch(err => {});
               })
-              .catch(err => {});
-          }
-        });
-      } else if (ret.flag === 0) {
-        Alert.alert(
-          'Help',
-          'Your Qrcode is expired please scan the same Qrcode with new expiration date ask your supervised to send you new Qrcode',
-          [
-            {
-              text: 'No',
-              onPress: () => null,
-            },
-            {
-              text: 'Scan new',
-              //
-              onPress: () =>
-                this.setState({
-                  TabId: 0,
-                  visible: true,
-                }),
-            },
-          ],
-          {cancelable: false},
-        );
+              .catch(err => {
+                RNFS.writeFile(path, string, 'utf8')
+                  .then(res => {})
+                  .catch(err => {});
+              });
+          })
+          .catch(err => {});
       }
     });
   };
@@ -538,7 +561,7 @@ export default class HomeScreen extends Component {
             });
             var timestamp = Date.now();
             if (timestamp < token.exp * 1000) {
-              resolve({flag: 0});
+              resolve({flag: 1});
             } else {
               resolve({flag: 0});
             }
@@ -557,11 +580,6 @@ export default class HomeScreen extends Component {
     const {navigate} = this.props.navigation;
     const {boolean, Surveys, TabId, loading, visible, uuidex} = this.state;
 
-    // if (Surveys.length > 0 && Surveys !== undefined) {
-    //   console.log('\n\n');
-    //   console.log('here surveys ===> ', JSON.stringify(Surveys));
-    //   console.log('\n\n');
-    // }
     var OfflineSurveyBoolean = false;
     if (Surveys.length > 0) OfflineSurveyBoolean = true;
     return (
@@ -607,6 +625,8 @@ export default class HomeScreen extends Component {
           visible={visible}
           // this two variable work with expiration date of qr code
           uuidex={uuidex}
+          CopyQrcodefromTemplateToSurvey={this.CopyQrcodefromTemplateToSurvey}
+          updateUuidexAndVisible={this.updateUuidexAndVisible}
         />
       </Container>
     );

@@ -18,6 +18,7 @@ class MyFooter extends Component {
     loading: false,
   };
 
+  // redicret to screen requested
   _OnPress = (navigate, screen, flag, uuidex) => {
     if (flag) {
       if (Platform.OS === 'android') {
@@ -27,9 +28,15 @@ class MyFooter extends Component {
               isVisible: false,
               open: false,
             });
-            navigate(screen, {
-              uuidex: uuidex,
-            });
+            if (screen === 'QRCodeScreen') {
+              const {CopyQrcodefromTemplateToSurvey} = this.props;
+              navigate(screen, {
+                uuidex: uuidex,
+                CopyQrcodefromTemplateToSurvey: CopyQrcodefromTemplateToSurvey,
+              });
+            } else {
+              navigate(screen);
+            }
           } else
             Alert.alert('Please check your internet connection and try again');
         });
@@ -70,7 +77,6 @@ class MyFooter extends Component {
                     this.setState({
                       loading: false,
                     });
-                    // console.log({error: err});
                     reject(err);
                   });
               } else {
@@ -178,7 +184,6 @@ class MyFooter extends Component {
                 QRreader(path).then(data => {
                   this.setState({isVisible: false, open: false, loading: true});
                   const {uuidex} = this.props;
-                  console.log({uuidex: uuidex});
                   if (uuidex !== null) {
                     this.readQrcode(data);
                   } else {
@@ -224,7 +229,6 @@ class MyFooter extends Component {
               "You Don't have enough space please free up your storage and try again",
             );
           } else {
-            console.log({path: path});
             RNFS.readFile(path, 'utf8')
               .then(res => {
                 data = JSON.parse(res);
@@ -232,7 +236,7 @@ class MyFooter extends Component {
                 var string = JSON.stringify(data);
                 RNFS.writeFile(path, string, 'utf8')
                   .then(success => {
-                    resolve('Created');
+                    resolve(newQrcode);
                   })
                   .catch(err => {
                     reject({err: 'error During the creation', flag: 1});
@@ -251,57 +255,93 @@ class MyFooter extends Component {
 
   // this func work with date expiration of qrcode the role of this is to read qrcode
   readQrcode = data => {
-    const {uuidex} = this.props;
-    var token = jwtDecode(data);
-    var timestamp = Date.now();
-    if (uuidex === token.dataset) {
-      if (timestamp < token.exp * 1000) {
-        this.updateTemplatefile(data)
-          .then(res => {
-            this.setState({loading: false});
-            Alert.alert(
-              'Success',
-              'Your Qrcode was updated successfully',
-              [
-                {
-                  text: 'No',
-                  onPress: () => null,
-                },
-                {
-                  text: 'Go tO SURVEY',
-                  onPress: () =>
-                    this.props.navigate('HomeScreen', {
-                      TabId: 1,
-                      flag: 1,
-                    }),
-                },
-              ],
-              {cancelable: false},
-            );
-          })
-          .catch(err => {
-            this.setState({loading: false});
-            Alert.alert(
-              'Failed',
-              'Please try again \n Something went wrong during update Qrcode',
-              [
-                {
-                  text: 'No',
-                  onPress: () => null,
-                },
-                {
-                  text: 'Ok',
-                  onPress: () => null,
-                },
-              ],
-              {cancelable: false},
-            );
+    try {
+      const {uuidex} = this.props;
+      var token = jwtDecode(data);
+      var timestamp = Date.now();
+      if (uuidex === token.dataset) {
+        if (timestamp < token.exp * 1000) {
+          this.setState({
+            loading: true,
           });
+          this.updateTemplatefile(data)
+            .then(res => {
+              const newQrcode = res;
+              this.props
+                .CopyQrcodefromTemplateToSurvey(newQrcode)
+                .then(res => {
+                  this.setState({
+                    loading: false,
+                  });
+                  Alert.alert(
+                    'Success',
+                    'Your Qrcode was updated successfully',
+                    [
+                      {
+                        text: 'No',
+                        onPress: () => null,
+                      },
+                      {
+                        text: 'Go tO SURVEY',
+                        onPress: () => {
+                          this.props.navigate('HomeScreen', {
+                            TabId: 1,
+                            flag: 1,
+                          });
+                        },
+                      },
+                    ],
+                    {cancelable: false},
+                  );
+                })
+                .catch(err => {
+                  this.setState({
+                    loading: false,
+                  });
+                });
+            })
+            .catch(err => {
+              this.setState({
+                loading: false,
+              });
+              Alert.alert(
+                'Failed',
+                'Please try again \n Something went wrong during update Qrcode',
+                [
+                  {
+                    text: 'No',
+                    onPress: () => null,
+                  },
+                  {
+                    text: 'Ok',
+                    onPress: () => null,
+                  },
+                ],
+                {cancelable: false},
+              );
+            });
+        } else {
+          Alert.alert(
+            'Failed',
+            'Your are trying to scan expired Qrcode',
+            [
+              {
+                text: 'No',
+                onPress: () => null,
+              },
+              {
+                text: 'Ok',
+                onPress: () => null,
+              },
+            ],
+            {cancelable: false},
+          );
+          // alert expiration date;
+        }
       } else {
-        this.setState({loading: false});
         Alert.alert(
           'Failed',
-          'Your are trying to scan expired Qrcode',
+          'Please scan the same qrcode of alerday survey that you had on mobile',
           [
             {
               text: 'No',
@@ -314,25 +354,10 @@ class MyFooter extends Component {
           ],
           {cancelable: false},
         );
-        // alert expiration date;
       }
-    } else {
+    } catch (err) {
       this.setState({loading: false});
-      Alert.alert(
-        'Failed',
-        'Please scan the same qrcode of alerday survey that you had on mobile',
-        [
-          {
-            text: 'No',
-            onPress: () => null,
-          },
-          {
-            text: 'Ok',
-            onPress: () => null,
-          },
-        ],
-        {cancelable: false},
-      );
+      alert('Please try again');
     }
   };
 
@@ -355,6 +380,7 @@ class MyFooter extends Component {
       addNewRow,
       OfflineSurveyBoolean,
       uuidex,
+      updateUuidexAndVisible,
     } = this.props;
     const {loading} = this.state;
 
@@ -400,12 +426,15 @@ class MyFooter extends Component {
                   height: 65,
                   borderRadius: 35,
                 }}
-                onPress={() =>
+                onPress={() => {
+                  // this work with expiration date of qr code
+                  updateUuidexAndVisible();
+                  //
                   this.setState({
                     isVisible: !this.state.isVisible,
                     open: !this.state.open,
-                  })
-                }>
+                  });
+                }}>
                 <Icon name="remove" style={{color: 'black'}} />
                 <Button
                   style={{
@@ -472,6 +501,9 @@ class MyFooter extends Component {
               }}
               onPress={() => {
                 if (OfflineSurveyBoolean === false) {
+                  // this work with expiration date of qr code
+                  updateUuidexAndVisible();
+                  //
                   this.setState({
                     isVisible: !this.state.isVisible,
                     open: !this.state.open,

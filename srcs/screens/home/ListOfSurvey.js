@@ -15,7 +15,6 @@ import Spinner from 'react-native-loading-spinner-overlay';
 
 export class ListOfSurvey extends Component {
   _renderRow = (survey, sendRow, deleteRow, navigate) => {
-    // console.log('survey 2222 ======> ', survey);
     return (
       <Card>
         <CardItem>

@@ -8,52 +8,54 @@ export default class SplashScreen extends Component {
     header: null,
   };
 
-  UNSAFE_componentWillMount() {
-    let promise = () => {
-      return new Promise((resolve, reject) => {
-        let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
-        RNFS.readFile(path, 'utf8')
-          .then(rowidarray => {
-            rowidarray = JSON.parse(rowidarray);
-            var Surveys = [];
-            rowidarray.forEach(async elem => {
-              let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
-              if (await RNFS.exists(path)) {
-                RNFS.readFile(path, 'utf8').then(async res => {
-                  res = JSON.parse(res);
-                  Surveys.push(res);
-                });
+  // load data from local storage;
+  GetDataFromStorage = () => {
+    return new Promise((resolve, reject) => {
+      let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
+      RNFS.readFile(path, 'utf8')
+        .then(rowidarray => {
+          rowidarray = JSON.parse(rowidarray);
+          var Surveys = [];
+          rowidarray.forEach(async elem => {
+            let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+            RNFS.readFile(path, 'utf8')
+              .then(res => {
+                res = JSON.parse(res);
+                if (Surveys.length === 0) {
+                  Surveys = [res];
+                } else {
+                  Surveys = [...Surveys, res];
+                }
                 if (rowidarray[elem + 1] == undefined) {
                   resolve(Surveys);
                 }
-              } else {
+              })
+              .catch(err => {
                 if (rowidarray[elem + 1] == undefined) {
                   resolve(Surveys);
                 }
-              }
-            });
-          })
-          .catch(err => {
-            reject(err);
+              });
           });
-      });
-    };
-    promise()
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
+  };
+
+  componentDidMount() {
+    this.GetDataFromStorage()
       .then(Surveys => {
-        setTimeout(() => {
-          this.props.navigation.navigate('HomeScreen', {
-            TabId: 1,
-            data: Surveys,
-          });
-        }, 6000);
+        this.props.navigation.navigate('HomeScreen', {
+          TabId: 1,
+          data: Surveys,
+        });
       })
       .catch(err => {
-        setTimeout(() => {
-          this.props.navigation.navigate('HomeScreen', {
-            TabId: 0,
-            data: [],
-          });
-        }, 6000);
+        this.props.navigation.navigate('HomeScreen', {
+          TabId: 0,
+          data: [],
+        });
       });
   }
 

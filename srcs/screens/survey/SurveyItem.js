@@ -1,11 +1,11 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import MyHeader from '../header/Header';
 import SurveyAnswerInput from './SurveyAnswerInput';
 import SubmitFooter from '../footer/SubmitFooter';
 import Axios from 'axios';
 import NetInfo from '@react-native-community/netinfo';
 import Spinner from 'react-native-loading-spinner-overlay';
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 import {
   Form,
   Container,
@@ -15,7 +15,7 @@ import {
   Body,
   Content,
 } from 'native-base';
-import {ScrollView} from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import rooturl from '../../config';
 
 class SurveyItemScreen extends Component {
@@ -36,6 +36,7 @@ class SurveyItemScreen extends Component {
     header: null,
   };
 
+  // listen to the network change;
   componentDidMount() {
     this.unsubscribe = NetInfo.addEventListener(state => {
       this.setState({
@@ -45,10 +46,12 @@ class SurveyItemScreen extends Component {
     });
   }
 
+  // forget listening to the network ;
   componentWillUnmount() {
     this.unsubscribe();
   }
 
+  // get data item passed by navigation;
   UNSAFE_componentWillMount() {
     const item = this.props.navigation.getParam('item', false);
     const uuid = this.props.navigation.getParam('uuid', false);
@@ -69,8 +72,8 @@ class SurveyItemScreen extends Component {
         item: item,
         variables:
           item !== undefined &&
-          item.answers !== undefined &&
-          item.answers.variables !== undefined
+            item.answers !== undefined &&
+            item.answers.variables !== undefined
             ? item.answers.variables
             : [],
       },
@@ -78,6 +81,7 @@ class SurveyItemScreen extends Component {
     );
   }
 
+  // save data in each change on input;
   _onChange = (id, newvalue) => {
     this.setState(
       {
@@ -85,18 +89,16 @@ class SurveyItemScreen extends Component {
           ...this.state.variables.filter(elem => {
             if (elem.id !== id) return true;
           }),
-          {id: id, value: newvalue},
+          { id: id, value: newvalue },
         ],
       },
-      () => {
-        // console.log('variables ===> ', this.state.variables);
-      },
+      () => { },
     );
   };
 
-  // console.log('variable ==>', variables);
+  // the role of this function is to send part to backend
   sendDataToBackEnd = () => {
-    const {pageId, variables} = this.state;
+    const { pageId, variables } = this.state;
     const {
       uuid,
       row,
@@ -106,19 +108,19 @@ class SurveyItemScreen extends Component {
     } = this.props.navigation.state.params;
 
     return new Promise((resolve, reject) => {
-      this.setState({loading: true});
+      this.setState({ loading: true });
       const url = `${rooturl}/api/anon/dataset/${uuid}/part/${pageId}`;
       const data = {
         row: row,
         variables: variables,
       };
       const config = {
-        headers: {'X-AUTH-TOKEN': qrcodeData},
+        headers: { 'X-AUTH-TOKEN': qrcodeData },
       };
-      // console.log(JSON.stringify(data));
-      // console.log({ pageId: pageId });
-      // console.log({ url: url });
-      // console.log({ qrcodeData: qrcodeData });
+      console.log(JSON.stringify(data));
+      console.log({ pageId: pageId });
+      console.log({ url: url });
+      console.log({ qrcodeData: qrcodeData });
       Axios.post(url, data, config)
         .then(res => {
           this.setState({
@@ -135,6 +137,7 @@ class SurveyItemScreen extends Component {
           resolve('succes');
         })
         .catch(error => {
+          console.log({ error: error });
           this.setState({
             loading: false,
           });
@@ -144,33 +147,36 @@ class SurveyItemScreen extends Component {
     });
   };
 
+  // this func called when Submit button pressed;
   _onSubmit = async () => {
-    const {pageId, variables} = this.state;
-    const {goBack} = this.props.navigation;
-    const {PartOnSubmit} = this.props.navigation.state.params;
+    const { pageId, variables } = this.state;
+    const { goBack } = this.props.navigation;
+    const { PartOnSubmit } = this.props.navigation.state.params;
 
-    this.sendDataToBackEnd()
-      .then(res => {
-        PartOnSubmit(pageId, variables)
-          .then(res => goBack())
-          .catch(err => alert(err));
-      })
-      .catch(err => {
-        PartOnSubmit(pageId, variables)
-          .then(res => goBack())
-          .catch(err => alert(err));
-      });
+    console.log({ variables: variables })
+    // this condition just used tmp for part it's not filled out and submited;
+    if (variables !== undefined && variables.length > 0) {
+      this.sendDataToBackEnd()
+        .then(res => {
+          PartOnSubmit(pageId, variables)
+            .then(res => goBack())
+            .catch(err => alert(err));
+        })
+        .catch(err => {
+          PartOnSubmit(pageId, variables)
+            .then(res => goBack())
+            .catch(err => alert(err));
+        });
+    } else {
+      goBack()
+    }
   };
 
+  // display a row;
   _renderRow = (item, variables, index) => {
-    const {pageId} = this.state;
-    const {updateOptionsInPart} = this.props.navigation.state.params;
+    const { pageId } = this.state;
+    const { updateOptionsInPart } = this.props.navigation.state.params;
 
-    // console.log('Items ====> ', item);
-    // console.log(
-    //   '********************************************************************************\n',
-    // );
-    // console.log('\n\n');
     return (
       <Card key={index} style={styles.cardStyle}>
         <CardItem header bordered>
@@ -199,11 +205,10 @@ class SurveyItemScreen extends Component {
   };
 
   render() {
-    const {variables} = this.state.item;
-    const {navigate} = this.props.navigation;
-    const {loading, isConnected, isInternetReachable} = this.state;
+    const { variables } = this.state.item;
+    const { navigate } = this.props.navigation;
+    const { loading, isConnected, isInternetReachable } = this.state;
 
-    // console.log('here variables ===========>', JSON.stringify(variables));
     return (
       <Container style={styles.container}>
         <MyHeader
@@ -269,16 +274,6 @@ const styles = StyleSheet.create({
     padding: 20,
     fontSize: 20,
     fontWeight: '700',
-  },
-  inputContainer: {
-    paddingTop: 15,
-  },
-  textInput: {
-    borderColor: '#CCCCCC',
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    height: 50,
-    fontSize: 25,
   },
 });
 

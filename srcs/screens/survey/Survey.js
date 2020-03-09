@@ -36,6 +36,7 @@ export default class SurveyScreen extends Component {
     };
   }
 
+  // listning to the network change;
   componentDidMount() {
     this.unsubscribe = NetInfo.addEventListener(state => {
       this.setState({
@@ -121,18 +122,7 @@ export default class SurveyScreen extends Component {
             }),
           },
         },
-        () => {
-          // this.state.data.parts.map(elem => {
-          //   elem.variables.map(elem => {
-          //     console.log('variables ==> ', elem);
-          //   });
-          // });
-          // console.log('******************************');
-          // console.log('******************************');
-          // console.log('data in Change ', JSON.stringify(this.state.data.parts));
-          // console.log('******************************');
-          // console.log('******************************');
-        },
+        () => {},
       );
     } catch {}
   };
@@ -217,7 +207,6 @@ export default class SurveyScreen extends Component {
           },
         },
         () => {
-          // console.log("all data ==> ", JSON.stringify(this.state.data))
           this._storeData()
             .then(res => resolve('success'))
             .catch(err => reject('failed'));
@@ -226,12 +215,12 @@ export default class SurveyScreen extends Component {
     });
   };
 
+  // get data from navigation
   UNSAFE_componentWillMount() {
     const template = this.props.navigation.getParam('data', () => false);
     const scanner = this.props.navigation.getParam('scanner', () => false);
     const flag = this.props.navigation.getParam('flag', () => false);
 
-    console.log('template ======> ', JSON.stringify(template));
     this.setState(
       {
         // here it was another code
@@ -246,7 +235,6 @@ export default class SurveyScreen extends Component {
             : null,
       },
       () => {
-        // console.log('====> this.state.data', this.state.data);
         if (flag === 1) {
           this.AddParamToOptions(template.data).then(res => {
             this.setState({
@@ -275,13 +263,7 @@ export default class SurveyScreen extends Component {
       {
         data: {...this.state.data, sent: false},
       },
-      () => {
-        console.log('sent ==> ', this.state.data.sent);
-        // console.log(
-        //   'all data ==============> ',
-        //   JSON.stringify(this.state.data),
-        // );
-      },
+      () => {},
     );
   };
 
@@ -488,29 +470,13 @@ const styles = StyleSheet.create({
     color: 'green',
     marginRight: '-25%',
   },
-  listItem: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccc',
-  },
   title: {
     textAlign: 'left',
     padding: 20,
     fontSize: 20,
     fontWeight: '700',
   },
-  avatar: {
-    width: '100%',
-    height: 200,
-  },
   inputContainer: {
     paddingTop: 15,
-  },
-  textInput: {
-    borderColor: '#CCCCCC',
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    height: 50,
-    fontSize: 25,
   },
 });

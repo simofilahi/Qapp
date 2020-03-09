@@ -89,6 +89,7 @@ export default class SurveyAnswerInput extends Component {
     );
   };
 
+  // convert date from timestamp to understandable format
   dateConveter = timestamp => {
     return new Promise((resolve, reject) => {
       var date_ob = new Date(timestamp);
@@ -106,6 +107,7 @@ export default class SurveyAnswerInput extends Component {
     });
   };
 
+  // convert time from timestamp to understandable format
   timeConverter = timestamp => {
     return new Promise((resolve, reject) => {
       var date_ob = new Date(timestamp);
@@ -125,6 +127,7 @@ export default class SurveyAnswerInput extends Component {
     });
   };
 
+  // convert date and time from timestamp to understandable format
   dateTimeConverter = timestamp => {
     return new Promise((resolve, reject) => {
       var date_ob = new Date(timestamp);
@@ -281,6 +284,7 @@ export default class SurveyAnswerInput extends Component {
     }
   }
 
+  // handle mutiselect input
   multiSelectHandler = (id, selectedItems) => {
     this.setState(
       {
@@ -311,6 +315,7 @@ export default class SurveyAnswerInput extends Component {
     );
   };
 
+  // handle single select input
   singleSelectHandler = (id, Selected) => {
     this.setState(
       {
@@ -332,6 +337,7 @@ export default class SurveyAnswerInput extends Component {
     );
   };
 
+  // handle button input
   RadioInputHandler = (id, selected) => {
     const {array} = this.state;
     const {_onChange, updateOptionsInPart, pageId} = this.props;
@@ -350,6 +356,7 @@ export default class SurveyAnswerInput extends Component {
     } catch {}
   };
 
+  // handle swither;
   SwitcherOnChange = (id, value) => {
     this.setState(
       {
@@ -363,6 +370,7 @@ export default class SurveyAnswerInput extends Component {
     );
   };
 
+  // handle text input;
   TextOnChange = (id, text) => {
     this.setState(
       {
@@ -376,6 +384,7 @@ export default class SurveyAnswerInput extends Component {
     );
   };
 
+  // handle date and time on change;
   onDateTimeChange = (id, date) => {
     this.setState(
       {
@@ -395,6 +404,7 @@ export default class SurveyAnswerInput extends Component {
     );
   };
 
+  // handle date  on change;
   onDateChange = (id, date) => {
     this.setState(
       {
@@ -414,6 +424,7 @@ export default class SurveyAnswerInput extends Component {
     );
   };
 
+  // handle time on change;
   onTimeChange = (id, time) => {
     this.setState(
       {
@@ -434,6 +445,7 @@ export default class SurveyAnswerInput extends Component {
     );
   };
 
+  // handle number on change;
   onNumberChange = (id, number) => {
     this.setState(
       {
@@ -581,7 +593,6 @@ export default class SurveyAnswerInput extends Component {
   render() {
     const {item, variables, _onChange, loading} = this.props;
 
-    // remember this. spinner
     return (
       <View>
         {loading ? (

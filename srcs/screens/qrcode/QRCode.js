@@ -37,6 +37,7 @@ export default class QRCodeScannerScreen extends Component {
     };
   }
 
+  // read Qrcode
   onSuccess = data => {
     return new Promise((resolve, reject) => {
       if (Platform.OS === 'android') {
@@ -66,7 +67,6 @@ export default class QRCodeScannerScreen extends Component {
                     this.setState({
                       loading: false,
                     });
-                    // console.log({error: err});
                     reject(err);
                   });
               } else {
@@ -164,7 +164,6 @@ export default class QRCodeScannerScreen extends Component {
               "You Don't have enough space please free up your storage and try again",
             );
           } else {
-            console.log({path: path});
             RNFS.readFile(path, 'utf8')
               .then(res => {
                 data = JSON.parse(res);
@@ -172,7 +171,7 @@ export default class QRCodeScannerScreen extends Component {
                 var string = JSON.stringify(data);
                 RNFS.writeFile(path, string, 'utf8')
                   .then(success => {
-                    resolve('Created');
+                    resolve(newQrcode);
                   })
                   .catch(err => {
                     reject({err: 'error During the creation', flag: 1});
@@ -191,54 +190,93 @@ export default class QRCodeScannerScreen extends Component {
 
   // this func work with date expiration of qrcode the role of this is to read qrcode
   readQrcode = data => {
-    const {uuidex} = this.props.navigation.state.params;
-    var token = jwtDecode(data);
-    var timestamp = Date.now();
-    if (uuidex === token.dataset) {
-      if (timestamp < token.exp * 1000) {
-        this.updateTemplatefile(data)
-          .then(res => {
-            Alert.alert(
-              'Success',
-              'Your Qrcode was updated successfully',
-              [
-                {
-                  text: 'No',
-                  onPress: () => null,
-                },
-                {
-                  text: 'Go tO SURVEY',
-                  onPress: () =>
-                    this.props.navigation.navigate('HomeScreen', {
-                      TabId: 1,
-                      flag: 1,
-                    }),
-                },
-              ],
-              {cancelable: false},
-            );
-          })
-          .catch(err => {
-            Alert.alert(
-              'Failed',
-              'Please try again \n Something went wrong during update Qrcode',
-              [
-                {
-                  text: 'No',
-                  onPress: () => null,
-                },
-                {
-                  text: 'Ok',
-                  onPress: () => null,
-                },
-              ],
-              {cancelable: false},
-            );
+    try {
+      const {uuidex} = this.props.navigation.state.params;
+      var token = jwtDecode(data);
+      var timestamp = Date.now();
+      if (uuidex === token.dataset) {
+        if (timestamp < token.exp * 1000) {
+          this.setState({
+            loading: true,
           });
+          this.updateTemplatefile(data)
+            .then(res => {
+              const newQrcode = res;
+              this.props.navigation.state.params
+                .CopyQrcodefromTemplateToSurvey(newQrcode)
+                .then(res => {
+                  this.setState({
+                    loading: false,
+                  });
+                  Alert.alert(
+                    'Success',
+                    'Your Qrcode was updated successfully',
+                    [
+                      {
+                        text: 'No',
+                        onPress: () => null,
+                      },
+                      {
+                        text: 'Go tO SURVEY',
+                        onPress: () => {
+                          this.props.navigation.navigate('HomeScreen', {
+                            TabId: 1,
+                            flag: 1,
+                          });
+                        },
+                      },
+                    ],
+                    {cancelable: false},
+                  );
+                })
+                .catch(err => {
+                  this.setState({
+                    loading: false,
+                  });
+                });
+            })
+            .catch(err => {
+              this.setState({
+                loading: false,
+              });
+              Alert.alert(
+                'Failed',
+                'Please try again \n Something went wrong during update Qrcode',
+                [
+                  {
+                    text: 'No',
+                    onPress: () => null,
+                  },
+                  {
+                    text: 'Ok',
+                    onPress: () => null,
+                  },
+                ],
+                {cancelable: false},
+              );
+            });
+        } else {
+          Alert.alert(
+            'Failed',
+            'Your are trying to scan expired Qrcode',
+            [
+              {
+                text: 'No',
+                onPress: () => null,
+              },
+              {
+                text: 'Ok',
+                onPress: () => null,
+              },
+            ],
+            {cancelable: false},
+          );
+          // alert expiration date;
+        }
       } else {
         Alert.alert(
           'Failed',
-          'Your are trying to scan expired Qrcode',
+          'Please scan the same qrcode of alerday survey that you had on mobile',
           [
             {
               text: 'No',
@@ -251,24 +289,10 @@ export default class QRCodeScannerScreen extends Component {
           ],
           {cancelable: false},
         );
-        // alert expiration date;
       }
-    } else {
-      Alert.alert(
-        'Failed',
-        'Please scan the same qrcode of alerday survey that you had on mobile',
-        [
-          {
-            text: 'No',
-            onPress: () => null,
-          },
-          {
-            text: 'Ok',
-            onPress: () => null,
-          },
-        ],
-        {cancelable: false},
-      );
+    } catch {
+      this.setState({loading: false});
+      alert('Try again');
     }
   };
 
