@@ -340,10 +340,9 @@ export default class HomeScreen extends Component {
                     const config = {
                       headers: {'X-AUTH-TOKEN': qrcodeData},
                     };
-                    // console.log(JSON.stringify(data));
-                    // console.log({ qrcodeData: qrcodeData });
-                    // console.log({ uuid: uuid });
-                    // console.log({ url: url });
+                    console.log({qrcodeData: qrcodeData});
+                    console.log({uuid: uuid});
+                    console.log({url: url});
                     Axios.post(url, data, config)
                       .then(res => {
                         this.setState({
