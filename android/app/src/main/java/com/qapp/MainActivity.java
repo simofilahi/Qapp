@@ -1,4 +1,4 @@
-package com.qapp;
+package com.impactree;
 
 import com.facebook.react.ReactActivity;
 
