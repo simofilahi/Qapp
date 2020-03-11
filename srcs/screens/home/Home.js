@@ -1,14 +1,14 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import MyHeader from '../header/Header';
 import MyFooter from '../footer/Myfooter';
 import HomeBody from './HomeBody';
 import ListOfSurvey from './ListOfSurvey';
-import { Container, Tab, Tabs } from 'native-base';
+import {Container, Tab, Tabs} from 'native-base';
 import Axios from 'axios';
-import { PermissionsAndroid } from 'react-native';
+import {PermissionsAndroid} from 'react-native';
 import RNExitApp from 'react-native-exit-app';
 import NetInfo from '@react-native-community/netinfo';
-import { Alert } from 'react-native';
+import {Alert} from 'react-native';
 import PushNotification from 'react-native-push-notification';
 import rooturl from '../../config';
 import jwtDecode from 'jwt-decode';
@@ -159,14 +159,14 @@ export default class HomeScreen extends Component {
         {
           flag:
             this.state.isConnected === true &&
-              this.state.isInternetReachable === true
+            this.state.isInternetReachable === true
               ? false
               : true,
           isConnected: state.isConnected,
           isInternetReachable: state.isInternetReachable,
         },
         () => {
-          const { isInternetReachable, isConnected, Surveys, flag } = this.state;
+          const {isInternetReachable, isConnected, Surveys, flag} = this.state;
 
           if (
             isConnected === true &&
@@ -217,7 +217,7 @@ export default class HomeScreen extends Component {
               }
             });
           })
-          .catch(err => { });
+          .catch(err => {});
       } else {
         reject('failed');
       }
@@ -233,7 +233,7 @@ export default class HomeScreen extends Component {
           boolean: false,
         });
       })
-      .catch(err => { });
+      .catch(err => {});
   };
 
   // give us your feedback func
@@ -260,7 +260,7 @@ export default class HomeScreen extends Component {
           },
         );
       })
-      .catch(err => { });
+      .catch(err => {});
   };
 
   updateUuidexAndVisible = () => {
@@ -291,7 +291,7 @@ export default class HomeScreen extends Component {
                     res.qrcodeData = newQrcode;
                     var string = JSON.stringify(res);
                     RNFS.writeFile(path, string, 'utf8')
-                      .then(res => { })
+                      .then(res => {})
                       .catch(err => {
                         reject({
                           err: 'something wrong happen during write in file',
@@ -299,19 +299,19 @@ export default class HomeScreen extends Component {
                       });
                   })
                   .catch(err => {
-                    reject({ err: 'something wrong happen during read of file' });
+                    reject({err: 'something wrong happen during read of file'});
                   });
               });
-              resolve({ res: 'success' });
+              resolve({res: 'success'});
             } else {
-              reject({ res: 'array is empty' });
+              reject({res: 'array is empty'});
             }
           })
           .catch(err => {
             reject(err);
           });
       } catch (err) {
-        reject({ err: err });
+        reject({err: err});
       }
     });
   };
@@ -326,7 +326,7 @@ export default class HomeScreen extends Component {
               NetInfo.fetch().then(state => {
                 if (state.isConnected) {
                   {
-                    this.setState({ loading: true });
+                    this.setState({loading: true});
                     const uuid = surveyrow.data.uuid;
                     const qrcodeData = surveyrow.qrcodeData;
                     let data = [
@@ -335,15 +335,15 @@ export default class HomeScreen extends Component {
                         data_row: surveyrow.answers.allpartanswers,
                       },
                     ];
-                    data = { data: data };
+                    data = {data: data};
                     const url = `${rooturl}/api/anon/dataset/${uuid}/`;
                     const config = {
-                      headers: { 'X-AUTH-TOKEN': qrcodeData },
+                      headers: {'X-AUTH-TOKEN': qrcodeData},
                     };
-                    console.log(JSON.stringify(data));
-                    console.log({ qrcodeData: qrcodeData });
-                    console.log({ uuid: uuid });
-                    console.log({ url: url });
+                    // console.log(JSON.stringify(data));
+                    // console.log({ qrcodeData: qrcodeData });
+                    // console.log({ uuid: uuid });
+                    // console.log({ url: url });
                     Axios.post(url, data, config)
                       .then(res => {
                         this.setState({
@@ -390,7 +390,7 @@ export default class HomeScreen extends Component {
                 }),
             },
           ],
-          { cancelable: false },
+          {cancelable: false},
         );
       }
     });
@@ -400,14 +400,14 @@ export default class HomeScreen extends Component {
   sendAllRows = () => {
     this.DateExpirationQrCode().then(ret => {
       if (ret.flag === 1) {
-        const { Surveys } = this.state;
+        const {Surveys} = this.state;
         if (Surveys !== undefined) {
           try {
             if (Platform.OS === 'android') {
               NetInfo.fetch().then(state => {
                 if (state.isConnected) {
                   {
-                    this.setState({ loading: true });
+                    this.setState({loading: true});
                     const uuid = Surveys[0].data.uuid;
                     const qrcodeData = Surveys[0].qrcodeData;
                     let data = [];
@@ -431,15 +431,15 @@ export default class HomeScreen extends Component {
                         }
                       }
                     });
-                    data = { data: data };
+                    data = {data: data};
                     const url = `${rooturl}/api/anon/dataset/${uuid}/`;
                     const config = {
-                      headers: { 'X-AUTH-TOKEN': qrcodeData },
+                      headers: {'X-AUTH-TOKEN': qrcodeData},
                     };
                     console.log(JSON.stringify(data));
-                    console.log({ qrcodeData: qrcodeData });
-                    console.log({ uuid: uuid });
-                    console.log({ url: url });
+                    console.log({qrcodeData: qrcodeData});
+                    console.log({uuid: uuid});
+                    console.log({url: url});
                     Axios.post(url, data, config)
                       .then(res => {
                         this.setState({
@@ -488,7 +488,7 @@ export default class HomeScreen extends Component {
                 }),
             },
           ],
-          { cancelable: false },
+          {cancelable: false},
         );
       }
     });
@@ -498,7 +498,7 @@ export default class HomeScreen extends Component {
   addNewRow = () => {
     this.DateExpirationQrCode().then(ret => {
       if (ret.flag === 1) {
-        const { navigate } = this.props.navigation;
+        const {navigate} = this.props.navigation;
         let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
         RNFS.getFSInfo().then(info => {
           const infospace = info.freeSpace / 1024 / 1024;
@@ -529,21 +529,21 @@ export default class HomeScreen extends Component {
                           .then(template => {
                             template = JSON.parse(template);
                             navigate('SurveyScreen', {
-                              data: { ...template, rowid: rowid },
+                              data: {...template, rowid: rowid},
                               flag: 1,
                             });
                           })
-                          .catch(err => { });
+                          .catch(err => {});
                       })
-                      .catch(err => { });
+                      .catch(err => {});
                   })
                   .catch(err => {
                     RNFS.writeFile(path, string, 'utf8')
-                      .then(res => { })
-                      .catch(err => { });
+                      .then(res => {})
+                      .catch(err => {});
                   });
               })
-              .catch(err => { });
+              .catch(err => {});
           }
         });
       } else {
@@ -565,11 +565,10 @@ export default class HomeScreen extends Component {
                 }),
             },
           ],
-          { cancelable: false },
+          {cancelable: false},
         );
       }
-    })
-
+    });
   };
 
   // check date expiration of qrcode
@@ -587,24 +586,24 @@ export default class HomeScreen extends Component {
             });
             var timestamp = Date.now();
             if (timestamp < token.exp * 1000) {
-              resolve({ flag: 1 });
+              resolve({flag: 1});
             } else {
-              resolve({ flag: 0 });
+              resolve({flag: 0});
             }
           })
           .catch(err => {
-            resolve({ flag: 0 });
+            resolve({flag: 0});
           });
       } else {
         // template not found
-        resolve({ flag: 2 });
+        resolve({flag: 2});
       }
     });
   };
 
   render() {
-    const { navigate } = this.props.navigation;
-    const { boolean, Surveys, TabId, loading, visible, uuidex } = this.state;
+    const {navigate} = this.props.navigation;
+    const {boolean, Surveys, TabId, loading, visible, uuidex} = this.state;
 
     var OfflineSurveyBoolean = false;
     if (Surveys.length > 0) OfflineSurveyBoolean = true;
@@ -624,7 +623,7 @@ export default class HomeScreen extends Component {
           page={TabId}
           tabBarPosition="overlayTop"
           scrollWithoutAnimation={true}
-          onChangeTab={e => this.setState({ TabId: e.i })}>
+          onChangeTab={e => this.setState({TabId: e.i})}>
           <Tab heading="Guide">
             <HomeBody navigate={navigate} />
           </Tab>
@@ -638,7 +637,7 @@ export default class HomeScreen extends Component {
               deleteRow={this.deleteRow}
               loading={loading}
               navigate={navigate}
-            // DateExpirationQrCode={this.DateExpirationQrCode}
+              // DateExpirationQrCode={this.DateExpirationQrCode}
             />
           </Tab>
         </Tabs>
