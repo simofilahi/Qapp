@@ -10,36 +10,48 @@ export default class SplashScreen extends Component {
 
   // load data from local storage;
   GetDataFromStorage = () => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       let path = RNFS.DocumentDirectoryPath + '/rowid.txt';
-      RNFS.readFile(path, 'utf8')
-        .then(rowidarray => {
-          rowidarray = JSON.parse(rowidarray);
-          var Surveys = [];
-          rowidarray.forEach(async elem => {
-            let path = RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
-            RNFS.readFile(path, 'utf8')
-              .then(res => {
-                res = JSON.parse(res);
-                if (Surveys.length === 0) {
-                  Surveys = [res];
-                } else {
-                  Surveys = [...Surveys, res];
-                }
-                if (rowidarray[elem + 1] == undefined) {
-                  resolve(Surveys);
-                }
-              })
-              .catch(err => {
-                if (rowidarray[elem + 1] == undefined) {
-                  resolve(Surveys);
-                }
+      if (await RNFS.exists(path)) {
+        RNFS.readFile(path, 'utf8')
+          .then(async rowidarray => {
+            rowidarray = JSON.parse(rowidarray);
+            var Surveys = [];
+            if (rowidarray.length > 0) {
+              rowidarray.forEach(async elem => {
+                let path =
+                  RNFS.DocumentDirectoryPath + '/file_' + elem + '.txt';
+                RNFS.readFile(path, 'utf8')
+                  .then(res => {
+                    res = JSON.parse(res);
+                    if (Surveys.length === 0) {
+                      Surveys = [res];
+                    } else {
+                      Surveys = [...Surveys, res];
+                    }
+                    if (rowidarray[elem + 1] == undefined) {
+                      resolve(Surveys);
+                    }
+                  })
+                  .catch(err => {
+                    if (rowidarray[elem + 1] == undefined) {
+                      resolve(Surveys);
+                    }
+                  });
               });
+            } else {
+              let path = RNFS.DocumentDirectoryPath + '/template.txt';
+              if (await RNFS.exists(path)) {
+                resolve([]);
+              } else reject('rowid file is empty');
+            }
+          })
+          .catch(err => {
+            reject(err);
           });
-        })
-        .catch(err => {
-          reject(err);
-        });
+      } else {
+        reject('rowid file not found');
+      }
     });
   };
 

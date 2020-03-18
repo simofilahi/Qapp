@@ -321,6 +321,9 @@ class MyFooter extends Component {
               );
             });
         } else {
+          this.setState({
+            loading: false,
+          });
           Alert.alert(
             'Failed',
             'Your are trying to scan expired Qrcode',
@@ -339,6 +342,9 @@ class MyFooter extends Component {
           // alert expiration date;
         }
       } else {
+        this.setState({
+          loading: false,
+        });
         Alert.alert(
           'Failed',
           'Please scan the same qrcode of alerday survey that you had on mobile',

@@ -15,7 +15,15 @@ import {Icon} from 'react-native-elements';
 
 class MyHeader extends Component {
   render() {
-    const {title, backarrow, TabId, deleteAllRows, feedBack, flag} = this.props;
+    const {
+      title,
+      backarrow,
+      TabId,
+      deleteAllRows,
+      feedBack,
+      privacy,
+      flag,
+    } = this.props;
     let marginValue;
     if (backarrow) marginValue = wp('-15%');
     else marginValue = wp('1%');
@@ -38,17 +46,30 @@ class MyHeader extends Component {
                 <Icon name="more" type="fontAwesome5" color="white" />
               </MenuTrigger>
               <MenuOptions>
-                <MenuOption
-                  onSelect={() => {
-                    if (TabId === 0) feedBack();
-                    else deleteAllRows();
-                  }}>
-                  {TabId === 0 ? (
+                {TabId == 0 && (
+                  <MenuOption
+                    onSelect={e => {
+                      feedBack();
+                    }}>
                     <Text style={{color: 'black'}}>Feedback</Text>
-                  ) : (
+                  </MenuOption>
+                )}
+                {TabId == 0 && (
+                  <MenuOption
+                    onSelect={e => {
+                      privacy();
+                    }}>
+                    <Text style={{color: 'black'}}>Privacy Policy</Text>
+                  </MenuOption>
+                )}
+                {TabId == 1 && (
+                  <MenuOption
+                    onSelect={e => {
+                      deleteAllRows();
+                    }}>
                     <Text style={{color: 'red'}}>Discard All</Text>
-                  )}
-                </MenuOption>
+                  </MenuOption>
+                )}
               </MenuOptions>
             </Menu>
           </Right>

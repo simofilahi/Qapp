@@ -15,7 +15,6 @@ import SubmitFooter from '../footer/SubmitFooter';
 import NetInfo from '@react-native-community/netinfo';
 import Spinner from 'react-native-loading-spinner-overlay';
 var RNFS = require('react-native-fs');
-
 export default class SurveyScreen extends Component {
   static navigationOptions = {
     header: null,

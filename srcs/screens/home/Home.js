@@ -5,7 +5,7 @@ import HomeBody from './HomeBody';
 import ListOfSurvey from './ListOfSurvey';
 import {Container, Tab, Tabs} from 'native-base';
 import Axios from 'axios';
-import {PermissionsAndroid} from 'react-native';
+import {PermissionsAndroid, Linking} from 'react-native';
 import RNExitApp from 'react-native-exit-app';
 import NetInfo from '@react-native-community/netinfo';
 import {Alert} from 'react-native';
@@ -238,7 +238,7 @@ export default class HomeScreen extends Component {
 
   // give us your feedback func
   feedBack = () => {
-    alert('feedback');
+    // alert('feedback');
   };
 
   // delete one row
@@ -340,9 +340,9 @@ export default class HomeScreen extends Component {
                     const config = {
                       headers: {'X-AUTH-TOKEN': qrcodeData},
                     };
-                    console.log({qrcodeData: qrcodeData});
-                    console.log({uuid: uuid});
-                    console.log({url: url});
+                    // console.log({qrcodeData: qrcodeData});
+                    // console.log({uuid: uuid});
+                    // console.log({url: url});
                     Axios.post(url, data, config)
                       .then(res => {
                         this.setState({
@@ -435,10 +435,10 @@ export default class HomeScreen extends Component {
                     const config = {
                       headers: {'X-AUTH-TOKEN': qrcodeData},
                     };
-                    console.log(JSON.stringify(data));
-                    console.log({qrcodeData: qrcodeData});
-                    console.log({uuid: uuid});
-                    console.log({url: url});
+                    // console.log(JSON.stringify(data));
+                    // console.log({qrcodeData: qrcodeData});
+                    // console.log({uuid: uuid});
+                    // console.log({url: url});
                     Axios.post(url, data, config)
                       .then(res => {
                         this.setState({
@@ -545,7 +545,7 @@ export default class HomeScreen extends Component {
               .catch(err => {});
           }
         });
-      } else {
+      } else if (ret.flag === 0) {
         Alert.alert(
           'Help',
           'Your Qrcode is expired please scan the same Qrcode with new expiration date ask your supervised to send you new Qrcode',
@@ -561,6 +561,26 @@ export default class HomeScreen extends Component {
                 this.setState({
                   TabId: 0,
                   visible: true,
+                }),
+            },
+          ],
+          {cancelable: false},
+        );
+      } else if (ret.flag === 2) {
+        Alert.alert(
+          'Help',
+          'Please scan a Qrcode first and try again',
+          [
+            {
+              text: 'No',
+              onPress: () => null,
+            },
+            {
+              text: 'Scan Qrcode',
+              //
+              onPress: () =>
+                this.setState({
+                  TabId: 0,
                 }),
             },
           ],
@@ -600,6 +620,15 @@ export default class HomeScreen extends Component {
     });
   };
 
+  privacy = () => {
+    let url = 'https://impactree.um6p.ma/privacy_policy.html';
+    Linking.canOpenURL(url).then(supported => {
+      if (supported) {
+        Linking.openURL(url);
+      }
+    });
+  };
+
   render() {
     const {navigate} = this.props.navigation;
     const {boolean, Surveys, TabId, loading, visible, uuidex} = this.state;
@@ -615,6 +644,7 @@ export default class HomeScreen extends Component {
           TabId={TabId}
           deleteAllRows={this.deleteAllRows}
           feedBack={this.feedBack}
+          privacy={this.privacy}
         />
         <Tabs
           locked={true}
